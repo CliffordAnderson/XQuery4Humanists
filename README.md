@@ -24,8 +24,8 @@ A fundamental construct in XQuery is the FLWOR expression.
 * ```order by```
 * ```return```
 
-
-
+* ```group by```
+* ```count```
 
 ```xquery
 let $books :=
@@ -41,7 +41,7 @@ let $title := $book/text()
 let $class := $book/@class
 order by $title
 group by $class
-return ($class, $title)
+return element {$class} {fn:string-join($title, ", ")}
 ```
 
 ##Word Frequencies in XQuery
