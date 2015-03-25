@@ -218,7 +218,7 @@ The output should look like this:
 
 Hint: You'll probably need to use regular expressions to clean up the strings. If so, this function ```fn:replace($words, "[!?.',/-]", "")``` should do the trick nicely.
 
-Give it a try yourself before checking out [what I came up with](http://try-zorba.28.io/queries/xquery/ZZf2fGYOwtkBvN8sbzI4cX4plYw%3D). I'm sure you can do better, right? If you've found a simpler solution, tweet it out to #prog4humanists.
+Give it a try yourself before checking out what I came up with... [Zorba](http://try-zorba.28.io/queries/xquery/ZZf2fGYOwtkBvN8sbzI4cX4plYw%3D) and [Gist](https://gist.github.com/CliffordAnderson/468e0b6a8ee6143676f9). I'm sure you can do better, right? If you've found a simpler solution, tweet it out to #prog4humanists.
 
 Extra Credit: Add an expression to the query to eliminate common stop-words–i.e. "of," "the," etc.–from your dictionary.
 
@@ -256,7 +256,7 @@ Ready to check your work? Here's how I did it... [Zorba](http://try-zorba.28.io/
 
 ##Exploring Shakespeare
 
-Finally, let's tackle a few more complicted XQuery expressions using the [Folger Digital Texts](http://www.folgerdigitaltexts.org/) of William Shakespeare.
+Finally, let's tackle a few more complicated XQuery expressions using the [Folger Digital Texts](http://www.folgerdigitaltexts.org/) of William Shakespeare.
 
 Our first expression will find all the stage directions associated with characters in a play–in this instance, *Julius Caesar*.
 ```xquery
