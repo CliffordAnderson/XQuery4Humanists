@@ -1,4 +1,4 @@
-# XQuery4Humanists
+#XQuery4Humanists
 
 We're going to explore some fundamental concepts of XQuery and then try out some applications. If you're using the oXygen XML editor, we're assuming that you're using Saxon PE (professional edition) v. 9.5.1.7 and that you've turned on support for XQuery 3.0. Check your settings to make sure we'll all on the same page.
 
@@ -21,6 +21,7 @@ Since all expressions evaluate to some value, you can use a expression in XQuery
 ```xquery
 string-join(fn:reverse(fn:tokenize("1,2,3",",")),",")
 ```
+The great thing about XQuery is that many functions already come built into the language. Check out Priscilla Walmsley's very helpful [list of XQuery functions](http://www.xqueryfunctions.com/). The built-in functions all come prefixed with the ```fn``` namespace. Shall we try a few together?
 
 ###FLWOR Expressions
 
@@ -94,6 +95,33 @@ order by $title
 count $num
 return element {$class} {$num || ". " || $title}
 ```
+###User-Defined Functions
+
+Of course, it's also possible to write your own functions in XQuery. In fact, it's usually *necessary* to write new functions. You can do so in two ways. On the one hand, you can declare functions in the XQuery prologue. Or you can write anonymous functions. Let's take a look at both examples.
+
+Here's a user-defined function to write a friendly hello to someone. Our function will accept a string representing someone's name as an argument and return a greeting in response.
+
+```xquery
+xquery version "3.0";
+
+declare function local:say-hello($name as xs:string) as xs:string
+{
+    "Hello, " || $name || "!"
+};
+
+local:say-hello("Dave")
+```
+
+Another way of writing this function is to use a FLWOR expression. In this case, we'll write an anonymous function, meaning we cannot access it by name, and bind it to a variable with a ```let``` clause. We'll then use the ```return``` clause to call and evaluate the function.
+
+```xquery
+xquery version "3.0";
+
+let $say-hello := function($name as xs:string) as xs:string {"Hello, " || $name || "!" }
+return $say-hello("Dave")
+```
+
+Whether you declare named functions in your prologue or assign anonymous functions to variables in your expression body depends on the purpose you intend to achieve.
 
 ##Word Frequencies in XQuery
 
@@ -159,7 +187,15 @@ Let's start with a TEI edition of the poem:
 </TEI>
 ```
 
-I've also provided [a gist with the poem](https://gist.github.com/CliffordAnderson/2045cefaf2a687e5d078/), in case you'd like to use it.
+I've also provided [a gist with the poem](https://gist.github.com/CliffordAnderson/2045cefaf2a687e5d078/), in case you'd like to use it. Here's an XQuery to retrieve it.
+
+```xquery
+xquery version "3.0";
+
+declare namespace tei = "http://www.tei-c.org/ns/1.0";
+
+fn:doc("https://gist.githubusercontent.com/CliffordAnderson/2045cefaf2a687e5d078/raw/8b79a0ddbfd1dd85c88d478ea76e083a2d6718c8/eldorado.xml")
+```
 
 Obviously, we could simply count the words with such a short poem. But our goal is to write an XQuery expression to do the counting for us. Your mission, should you choose to accept it, is to write an XQuery expression that takes the text nodes from the l elements of the source poem and produces a dictionary of the unique words in the poem along with their frequency.
 
@@ -182,10 +218,9 @@ The output should look like this:
 
 Hint: You'll probably need to use regular expressions to clean up the strings. If so, this function ```fn:replace($words, "[!?.',/-]", "")``` should do the trick nicely.
 
-Give it a try yourself before checking out [what I came up with](http://try-zorba.28.io/queries/xquery/ZZf2fGYOwtkBvN8sbzI4cX4plYw%3D). I'm sure you can do better, right? If you've found a simpler solution, tweet it out to #XQY14.
+Give it a try yourself before checking out [what I came up with](http://try-zorba.28.io/queries/xquery/ZZf2fGYOwtkBvN8sbzI4cX4plYw%3D). I'm sure you can do better, right? If you've found a simpler solution, tweet it out to #prog4humanists.
 
 Extra Credit: Add an expression to the query to eliminate common stop-words–i.e. "of," "the," etc.–from your dictionary.
-
 
 ##Pig Latin in XQuery
 
@@ -195,11 +230,11 @@ The rules for [Pig Latin](https://en.wikipedia.org/wiki/Pig_Latin) are relativel
 
 ###Exercise #1
 
-So, for our first exercise, let's write a basic XQuery expression that takes a word and returns its equivalent in Pig Latin. Since we did not cover [regular expressions](https://en.wikipedia.org/wiki/Regular_expression) during our summer institute, I invite you to attempt the expression without their use.
+So, for our first exercise, let's write a basic XQuery expression that takes a word and returns its equivalent in Pig Latin. Since we did not cover [regular expressions](https://en.wikipedia.org/wiki/Regular_expression), I invite you to attempt the expression without their use.
 
 *Hint: If you need help getting started, try using these functions: [fn:substring](http://www.xqueryfunctions.com/xq/fn_substring.html) and [fn:lower-case](http://www.xqueryfunctions.com/xq/fn_lower-case.html).*
 
-Ready to compare your expression? [Here's what I came up with...](http://try-zorba.28.io/queries/xquery/QK5qu0xXmoe16U2ruUvUJMyf768%3D) [Gist](https://gist.github.com/CliffordAnderson/076b5e82f1d7e22e05ca)
+Ready to compare your expression?[Here's what I came up with...[Zorba](http://try-zorba.28.io/queries/xquery/QK5qu0xXmoe16U2ruUvUJMyf768%3D) and [Gist](https://gist.github.com/CliffordAnderson/076b5e82f1d7e22e05ca)
 
 ###Exercise #2
 
@@ -207,7 +242,7 @@ Now that we can convert individual words to Pig Latin, let's move on to sentence
 
 *Hint: You'll probably want to use the functions [fn:tokenize](http://www.xqueryfunctions.com/xq/fn_tokenize.html) to split up your sentence into words and [fn:string-join](http://www.xqueryfunctions.com/xq/fn_string-join.html) to recompose your words into a sentence.*
 
-Ready to compare your expression? [Here's my go at it.](http://try-zorba.28.io/queries/xquery/viIDlwPueygREld7%2FOCE3n9AYEE%3D) [Gist](https://gist.github.com/CliffordAnderson/e75fd3e4e3e569a661cf)
+Ready to compare your expression? Here's my go at it... [Zorba](http://try-zorba.28.io/queries/xquery/viIDlwPueygREld7%2FOCE3n9AYEE%3D) and [Gist](https://gist.github.com/CliffordAnderson/e75fd3e4e3e569a661cf)
 
 ###Exercise #3
 
@@ -215,11 +250,15 @@ I mentioned that other dialectics of Pig Latin exist. In fact, we speak a differ
 
 *Hint: A good way to approach this problem without relying on regular expressions is to write a recursive function to handle moving the leading consonants to the end of each word.*
 
-Ready to check your work? [Here's how I did it.](http://try-zorba.28.io/queries/xquery/htyppNcHns5R%2BLIHC%2FJz%2BmlQGDU%3D) [Gist](https://gist.github.com/CliffordAnderson/6ed7e1f9a32abf15d9fd)
+Ready to check your work? Here's how I did it... [Zorba](http://try-zorba.28.io/queries/xquery/htyppNcHns5R%2BLIHC%2FJz%2BmlQGDU%3D) and [Gist](https://gist.github.com/CliffordAnderson/6ed7e1f9a32abf15d9fd)
 
 *Bonus Credit: Remember that recursion always requires a base case. In my example, the base case works most of the time but will not always work. Can you create an example where it will fail?*
 
-###Exploring Shakespeare
+##Exploring Shakespeare
+
+Finally, let's tackle a few more complicted XQuery expressions using the [Folger Digital Texts](http://www.folgerdigitaltexts.org/) of William Shakespeare.
+
+Our first expression will find all the stage directions associated with characters in a play–in this instance, *Julius Caesar*.
 ```xquery
 xquery version "3.0";
 
@@ -240,7 +279,7 @@ return
       </directions> 
 ```
 
-
+In this next example, let's list all characters and the scenes during which they appear on stage.
 
 ```xquery
 xquery version "3.0";
@@ -261,6 +300,8 @@ return element appearances
       return <actor id="{$person}"  act-scene=" {$act-scene}" />
   }
 ```
+
+##Wrapping Up
 
 Please feel free to improve on these examples and to share your work with everyone else. The easiest way to do that is to write your expression in [Zorba](try-zorba.28.io) and then tweet out the permalink to [#prog4humanists](https://twitter.com/hashtag/prog4humanists). I look forward to seeing how you improve on my work! :)
 
