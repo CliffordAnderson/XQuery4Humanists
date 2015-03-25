@@ -12,20 +12,52 @@ For example, try out this expression in XQuery:
 ```xquery
 1 + 1
 ```
-This expression evaluates to 2. Pretty simple, right?
+This expression evaluates to 2. Pretty simple, right? You can evaluate any function in XQuery in like manner. For instance, try:
+```xquery
+fn:upper-case("hello, world!")
+```
+Since all expressions evaluate to some value, you can use a expression in XQuery wherever you would use a value. For example, you can pass one expression as the input to another expression. This example takes a string ```"1,2,3"```, converts it into a sequence of three strings, reverse the order, and then joins the sequence of three strings back together.
+
+```xquery
+string-join(fn:reverse(fn:tokenize("1,2,3",",")),",")
+```
 
 ###FLWOR Expressions
 
-A fundamental construct in XQuery is the FLWOR expression. 
+Things are already looking a little messy, aren't they? A fundamental construct in XQuery is the FLWOR expression. While you could write XQuery expressions without FLWOR expressions, you probably wouldn't want to. FLWOR expressions introduce some key concepts, including variable binding, sorting, and filtering. FLWOR stands for "for, let, where, order by, return."
 
-* ```for``` 
-* ```let```
-* ```where```
-* ```order by```
-* ```return```
+* ```for``` iteratives over a sequence (technically, a "tuple stream"), binding a variable to each item in turn.
+* ```let``` binds an variable to an expression.
+* ```where``` filters the items in the sequence using a boolean test
+* ```order by``` orders the items in the sequence.
+* ```return``` gives the result of the FLWOR expression.
+
+If you use a ```for``` or a ```let```, you must also provide a ```return```. ```where``` and ```order by``` are optional.
+
+Let's take a look at an example of an XQuery expression. In this case, we'll iterate over a sequence of book elements and return fiction or nonfiction elements with titles as appropriate.
+
+```xquery
+let $books :=
+  <books>
+    <book class="fiction">Book of Strange New Things</book>
+    <book class="nonfiction">Programming Scala</book>
+    <book class="fiction">Absurdistan</book>
+    <book class="nonfiction">Art of R Programming</book>
+    <book class="fiction">I, Robot</book>
+  </books>
+for $book in $books/book
+let $title := $book/text()
+let $class := $book/@class
+order by $title
+return element {$class} {$title}
+```
+
+XQuery 3.0 introduced a few new clauses to FLWOR expressions.
 
 * ```group by```
 * ```count```
+
+Here's an example of ```group by```
 
 ```xquery
 let $books :=
@@ -42,6 +74,25 @@ let $class := $book/@class
 order by $title
 group by $class
 return element {$class} {fn:string-join($title, ", ")}
+```
+
+Here's an example of ```count```
+
+```xquery
+let $books :=
+  <books>
+    <book class="fiction">Book of Strange New Things</book>
+    <book class="nonfiction">Programming Scala</book>
+    <book class="fiction">Absurdistan</book>
+    <book class="nonfiction">Art of R Programming</book>
+    <book class="fiction">I, Robot</book>
+  </books>
+for $book in $books/book
+let $title := $book/text()
+let $class := $book/@class
+order by $title
+count $num
+return element {$class} {$num || ". " || $title}
 ```
 
 ##Word Frequencies in XQuery
