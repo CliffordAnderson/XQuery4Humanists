@@ -352,6 +352,8 @@ return
       </directions> 
 ```
 
+Ready to try this expression out with [Zorba](http://try-zorba.28.io/queries/xquery/JCBuIC%2Fiq7nR%2FyMzxY%2FMniqdqb8%3D)?
+
 In this next example, let's list all characters and the scenes during which they appear on stage.
 
 ```xquery
