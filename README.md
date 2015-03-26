@@ -123,6 +123,58 @@ return $say-hello("Dave")
 
 Whether you declare named functions in your prologue or assign anonymous functions to variables in your expression body depends on the purpose you intend to achieve.
 
+##Pig Latin in XQuery
+
+My son Theodore loves to speak Pig Latin. He can speak it really fast, making it difficult for my wife and I to follow him. Wouldn't it be helpful to have a Pig Latin interpreter, I thought? So let's write a basic parser for Pig Latin in XQuery this month.
+
+The rules for [Pig Latin](https://en.wikipedia.org/wiki/Pig_Latin) are relatively simple though different dialects exist, as we shall see. Let's take the simplest dialect first. Basically, to turn any English word into an equivalent word in Pig Latin you take the first consonant off the front of the word, add it to the end, and then add "ay." If your word already starts with a vowel, then just add "ay" to the end. Thus, "Hello" becomes "Ellohay." "I" becomes "Iay."
+
+###Exercise #1
+
+So, for our first exercise, let's write a basic XQuery expression that takes a word and returns its equivalent this dialect of Pig Latin. 
+
+*Hint: If you need help getting started, try using this function: [fn:substring](http://www.xqueryfunctions.com/xq/fn_substring.html)*
+
+Ready to compare your expression?Here's what I came up with...[Zorba](http://try-zorba.28.io/queries/xquery/QK5qu0xXmoe16U2ruUvUJMyf768%3D) and [Gist](https://gist.github.com/CliffordAnderson/076b5e82f1d7e22e05ca)
+
+###Exercise #2
+
+Now that we can convert individual words to Pig Latin, let's move on to sentences. Try to write an expression to convert sentences to Pig Latin. It's OK if you strip away punctuation to do so, though you get extra credit if you retain it. Write an expression to convert, e.g., "I speak Pig Latin" to "Iay peaksay igpay atinlay".
+
+*Hint: You'll probably want to use the functions [fn:tokenize](http://www.xqueryfunctions.com/xq/fn_tokenize.html) to split up your sentence into words and [fn:string-join](http://www.xqueryfunctions.com/xq/fn_string-join.html) to recompose your words into a sentence.*
+
+Ready to compare your expression? Here's my go at it... [Zorba](http://try-zorba.28.io/queries/xquery/viIDlwPueygREld7%2FOCE3n9AYEE%3D) and [Gist](https://gist.github.com/CliffordAnderson/e75fd3e4e3e569a661cf)
+
+###Exercise #3
+
+I mentioned that other dialectics of Pig Latin exist. In fact, we speak a different version at home. In this version, all the consonants preceeding the vowel must be moved to the end of the word before adding "ay". So "there" becomes "erethay." If the word starts with a vowel, then the rules remain the same as previously. Your function should turn "I speak Pig Latin" into "Iay eakspay igpay atinlay"
+
+If you know how to use regular expressions, you might write the expression like this.
+
+```xquery
+xquery version "3.0";
+
+let $phrase := "I speak Pig Latin"
+for $word in fn:tokenize($phrase, " ")
+return
+    if (fn:count($word) > 1) then
+        let $first := fn:replace($word, "^(.*?)[a,e,i,o,u].*", "$1")
+        let $last := fn:replace($word, "^.*?([a,e,i,o,u].*)", "$1")
+        return $last || $first || "ay"
+    else
+        $word || "ay"
+```
+
+But we're going to try not to use regular expressions when we don't need to. 
+
+*Hint: A good way to approach this problem without relying on regular expressions is to write a recursive function to handle moving the leading consonants to the end of each word.*
+
+Ready to check your work? Here's how I did it... [Zorba](http://try-zorba.28.io/queries/xquery/htyppNcHns5R%2BLIHC%2FJz%2BmlQGDU%3D) and [Gist](https://gist.github.com/CliffordAnderson/6ed7e1f9a32abf15d9fd)
+
+*Bonus Credit: Remember that recursion always requires a base case. In my example, the base case works most of the time but will not always work. Can you create an example where it will fail? Actually, don't try this in class–recursion is painful to the nth degree when it fails.* 
+
+There are always lots of different ways to accomplish a task in any programming language, though some may have subtle bugs and others may be less straightforwrd. [Here are a few other attempts at a Pig Latin parser in XQuery](https://gist.github.com/CliffordAnderson/a1ac3141828b504ee756/edit). If we have time, we might look at these. Otherwise, please try them out yourself and see if you can spot any bugs.
+
 ##Word Frequencies in XQuery
 
 A good use case for XQuery is developing word frequency lists for digital texts. Among the first poems I learned as a child was "Eldorado" by Edgar Allen Poe. I recall being struck by the repetition of the word "shadow" in the poem. Why did Poe repeat the word so many times in so few lines? While this month's XQuery exercise won't sort out the answer to that question, it will help us find out how many times he used that and other words.
@@ -216,43 +268,21 @@ The output should look like this:
 </dictionary>
 ```
 
-Hint: You'll probably need to use regular expressions to clean up the strings. If so, this function ```fn:replace($words, "[!?.',/-]", "")``` should do the trick nicely.
+To get you started, let's assume the expression body looks something like this
+```xquery
+let $phrases:= fn:doc("https://gist.githubusercontent.com/CliffordAnderson/2045cefaf2a687e5d078/raw/8b79a0ddbfd1dd85c88d478ea76e083a2d6718c8/eldorado.xml")//tei:l/text()
+let $words := local:collect-words($phrases)
+let $word-elements := local:determine-frequency($words)
+return element dictionary {$word-elements}
+```
+
+To get this to work, we just have to write two functions: ```local:collect-words()```, which we will use to clean up the words by getting rid of capitalization, punctuation, and the like, and ```local:determine-frequency()```, which we will use to get the frequency of the various words.
+
+Hint: You'll probably need to use regular expressions in ```local:collect-words()``` to clean up the strings. If so, this function ```fn:replace($words, "[!?.',/-]", "")``` should do the trick nicely.
 
 Give it a try yourself before checking out what I came up with... [Zorba](http://try-zorba.28.io/queries/xquery/ZZf2fGYOwtkBvN8sbzI4cX4plYw%3D) and [Gist](https://gist.github.com/CliffordAnderson/468e0b6a8ee6143676f9). I'm sure you can do better, right? If you've found a simpler solution, tweet it out to #prog4humanists.
 
 Extra Credit: Add an expression to the query to eliminate common stop-words–i.e. "of," "the," etc.–from your dictionary.
-
-##Pig Latin in XQuery
-
-My son Theodore loves to speak Pig Latin. He can speak it really fast, making it difficult for my wife and I to follow him. Wouldn't it be helpful to have a Pig Latin interpreter, I thought? So let's write a basic parser for Pig Latin in XQuery this month.
-
-The rules for [Pig Latin](https://en.wikipedia.org/wiki/Pig_Latin) are relatively simple though different dialects exist, as we shall see. Let's take the simplest dialect first. Basically, to turn any English word into an equivalent word in Pig Latin you take the first consonant off the front of the word, add it to the end, and then add "ay." If your word already starts with a vowel, then just add "ay" to the end. Thus, "Hello" becomes "Ellohay." "I" becomes "Iay."
-
-###Exercise #1
-
-So, for our first exercise, let's write a basic XQuery expression that takes a word and returns its equivalent in Pig Latin. Since we did not cover [regular expressions](https://en.wikipedia.org/wiki/Regular_expression), I invite you to attempt the expression without their use.
-
-*Hint: If you need help getting started, try using these functions: [fn:substring](http://www.xqueryfunctions.com/xq/fn_substring.html) and [fn:lower-case](http://www.xqueryfunctions.com/xq/fn_lower-case.html).*
-
-Ready to compare your expression?[Here's what I came up with...[Zorba](http://try-zorba.28.io/queries/xquery/QK5qu0xXmoe16U2ruUvUJMyf768%3D) and [Gist](https://gist.github.com/CliffordAnderson/076b5e82f1d7e22e05ca)
-
-###Exercise #2
-
-Now that we can convert individual words to Pig Latin, let's move on to sentences. Try to write an expression to convert sentences to Pig Latin. It's OK if you strip away punctuation to do so, though you get extra credit if you retain it. Write an expression to convert, e.g., "I speak Pig Latin" to "Iay peaksay igpay atinlay".
-
-*Hint: You'll probably want to use the functions [fn:tokenize](http://www.xqueryfunctions.com/xq/fn_tokenize.html) to split up your sentence into words and [fn:string-join](http://www.xqueryfunctions.com/xq/fn_string-join.html) to recompose your words into a sentence.*
-
-Ready to compare your expression? Here's my go at it... [Zorba](http://try-zorba.28.io/queries/xquery/viIDlwPueygREld7%2FOCE3n9AYEE%3D) and [Gist](https://gist.github.com/CliffordAnderson/e75fd3e4e3e569a661cf)
-
-###Exercise #3
-
-I mentioned that other dialectics of Pig Latin exist. In fact, we speak a different version at home. In this version, all the consonants preceeding the vowel must be moved to the end of the word before adding "ay". So "there" becomes "erethay." If the word starts with a vowel, then the rules remain the same as previously.Your function should turn "I speak Pig Latin" into "Iay eakspay igpay atinlay"
-
-*Hint: A good way to approach this problem without relying on regular expressions is to write a recursive function to handle moving the leading consonants to the end of each word.*
-
-Ready to check your work? Here's how I did it... [Zorba](http://try-zorba.28.io/queries/xquery/htyppNcHns5R%2BLIHC%2FJz%2BmlQGDU%3D) and [Gist](https://gist.github.com/CliffordAnderson/6ed7e1f9a32abf15d9fd)
-
-*Bonus Credit: Remember that recursion always requires a base case. In my example, the base case works most of the time but will not always work. Can you create an example where it will fail?*
 
 ##Exploring Shakespeare
 
@@ -289,7 +319,7 @@ declare namespace tei = "http://www.tei-c.org/ns/1.0";
 let $doc := fn:doc("https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml")
 return element appearances 
   {
-      let  $persons := $doc//tei:person/@xml:id !  fn:concat("#", .)
+      let $persons := $doc//tei:person/@xml:id ! fn:concat("#", .)
       for $person in $persons
       for $act in $doc//tei:div1[@type="act"]
       for $scene in $act/tei:div2
