@@ -95,6 +95,24 @@ order by $title
 count $num
 return element {$class} {$num || ". " || $title}
 ```
+###Conditional Expressions
+
+Like other programming languages, XQuery permits conditions expressions of the form ```if...then...else```. However, unlike other programming languages, the ```else``` case is always required. This is because an expression must always evaluate to a value. We'll be using ```if...then...else``` in some examples below. To make sure you understand how to use them, let's quickly code the famous (at least in programmers' circles) [fizzbuzz](http://c2.com/cgi/wiki?FizzBuzzTest) exercise in XQuery.
+
+```xquery
+xquery version "3.0";
+ 
+(: Fizz Buzz in XQuery :)
+ 
+for $i in (1 to 100)
+return 
+  if ($i mod 3 = 0 and $i mod 5 = 0) then "fizzbuzz"
+  else if ($i mod 3 = 0) then "fizz"
+  else if ($i mod 5 = 0) then "buzz"
+  else $i
+```
+Ready to try it out on [Zorba](http://try-zorba.28.io/queries/xquery/TUTdQbUrDJ5IehMnHsGlej66A4M%3D)?
+
 ###User-Defined Functions
 
 Of course, it's also possible to write your own functions in XQuery. In fact, it's usually *necessary* to write new functions. You can do so in two ways. On the one hand, you can declare functions in the XQuery prologue. Or you can write anonymous functions. Let's take a look at both examples.
@@ -286,9 +304,32 @@ Extra Credit: Add an expression to the query to eliminate common stop-words–i.
 
 ##Exploring Shakespeare
 
-Finally, let's tackle a few more complicated XQuery expressions using the [Folger Digital Texts](http://www.folgerdigitaltexts.org/) of William Shakespeare.
+Finally, let's tackle a few more complicated XQuery expressions using the [Folger Digital Texts](http://www.folgerdigitaltexts.org/) of William Shakespeare. To understand these expressions, you'll need to acquaint yourself a bit with the TEI markup. Here's a snippet from *Julius Caesar*.
+
+```xml
+<sp xml:id="sp-0006" who="#COMMONERS.Carpenter_JC">
+    <speaker xml:id="spk-0006">
+        <w xml:id="w0001210">CARPENTER</w>
+    </speaker>
+    <ab xml:id="ab-0006">
+        <milestone unit="ftln" xml:id="ftln-0006" n="1.1.6" ana="#prose"
+            corresp="#w0001220 #p0001230 #c0001240 #w0001250 #p0001260 #c0001270 #w0001280 #c0001290 #w0001300 #p0001310"/>
+        <w xml:id="w0001220" n="1.1.6">Why</w>
+        <pc xml:id="p0001230" n="1.1.6">,</pc>
+        <c xml:id="c0001240" n="1.1.6"> </c>
+        <w xml:id="w0001250" n="1.1.6">sir</w>
+        <pc xml:id="p0001260" n="1.1.6">,</pc>
+        <c xml:id="c0001270" n="1.1.6"> </c>
+        <w xml:id="w0001280" n="1.1.6">a</w>
+        <c xml:id="c0001290" n="1.1.6"> </c>
+        <w xml:id="w0001300" n="1.1.6">carpenter</w>
+        <pc xml:id="p0001310" n="1.1.6">.</pc>
+    </ab>
+</sp>
+```
 
 Our first expression will find all the stage directions associated with characters in a play–in this instance, *Julius Caesar*.
+
 ```xquery
 xquery version "3.0";
 
