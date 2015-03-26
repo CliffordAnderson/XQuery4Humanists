@@ -95,6 +95,8 @@ order by $title
 count $num
 return element {$class} {$num || ". " || $title}
 ```
+Try [Zorba](http://try-zorba.28.io/queries/xquery/AGJEUoN%2BXytamwW%2B2CgXzJ6rY74%3D) to see this query.
+
 ###Conditional Expressions
 
 Like other programming languages, XQuery permits conditions expressions of the form ```if...then...else```. However, unlike other programming languages, the ```else``` case is always required. This is because an expression must always evaluate to a value. We'll be using ```if...then...else``` in some examples below. To make sure you understand how to use them, let's quickly code the famous (at least in programmers' circles) [fizzbuzz](http://c2.com/cgi/wiki?FizzBuzzTest) exercise in XQuery.
