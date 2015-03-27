@@ -21,7 +21,8 @@ Since all expressions evaluate to some value, you can use a expression in XQuery
 ```xquery
 string-join(fn:reverse(fn:tokenize("1,2,3",",")),",")
 ```
-The great thing about XQuery is that many functions already come built into the language. Check out Priscilla Walmsley's very helpful [list of XQuery functions](http://www.xqueryfunctions.com/). The built-in functions all come prefixed with the ```fn``` namespace. Shall we try a few together?
+
+This ability to substitute expressions with values is called [referential transparency](https://en.wikipedia.org/wiki/Referential_transparency_(computer_science). In a nutshell, it means that your expression will always evaluate to the same value when given the same input. Programming in XQuery (and XSLT and R) is different from other kinds of programming because you're not producing 'side effects' such as updating the value of your variables.
 
 ###FLWOR Expressions
 
@@ -116,6 +117,8 @@ return
 Ready to try it out on [Zorba](http://try-zorba.28.io/queries/xquery/TUTdQbUrDJ5IehMnHsGlej66A4M%3D)?
 
 ###User-Defined Functions
+
+The great thing about XQuery is that many functions already come built into the language. Check out Priscilla Walmsley's very helpful [list of XQuery functions](http://www.xqueryfunctions.com/). The built-in functions all come prefixed with the ```fn``` namespace. Shall we try a few together?
 
 Of course, it's also possible to write your own functions in XQuery. In fact, it's usually *necessary* to write new functions. You can do so in two ways. On the one hand, you can declare functions in the XQuery prologue. Or you can write anonymous functions. Let's take a look at both examples.
 
@@ -300,13 +303,41 @@ To get this to work, we just have to write two functions: ```local:collect-words
 
 Hint: You'll probably need to use regular expressions in ```local:collect-words()``` to clean up the strings. If so, this function ```fn:replace($words, "[!?.',/-]", "")``` should do the trick nicely.
 
-Give it a try yourself before checking out what I came up with... [Zorba](http://try-zorba.28.io/queries/xquery/ZZf2fGYOwtkBvN8sbzI4cX4plYw%3D) and [Gist](https://gist.github.com/CliffordAnderson/468e0b6a8ee6143676f9). I'm sure you can do better, right? If you've found a simpler solution, tweet it out to #prog4humanists.
+Give it a try yourself before checking out what I came up with... [Zorba](http://try-zorba.28.io/queries/xquery/ZZf2fGYOwtkBvN8sbzI4cX4plYw%3D) and [Gist](https://gist.github.com/CliffordAnderson/468e0b6a8ee6143676f9). 
 
 Extra Credit: Add an expression to the query to eliminate common stop-words–i.e. "of," "the," etc.–from your dictionary.
 
 ##Exploring Shakespeare
 
-Finally, let's tackle a few more complicated XQuery expressions using the [Folger Digital Texts](http://www.folgerdigitaltexts.org/) of William Shakespeare. To understand these expressions, you'll need to acquaint yourself a bit with the TEI markup. Here's a snippet from *Julius Caesar*.
+Finally, let's tackle a few more complicated XQuery expressions using the [Folger Digital Texts](http://www.folgerdigitaltexts.org/) of William Shakespeare. To understand these expressions, you'll need to acquaint yourself a bit with the TEI markup used in this digital edition. Here's two snippets from *Julius Caesar*.
+
+First, let's look at ```<listPerson>``` 'list of persons'. Here we see a number of persons related to Julius Caesar, including Caesar himself, his wife Calphurnia, and their servants. There are similar lists of persons for other characters and roles in the play.
+
+```xml
+<listPerson>
+    <person xml:id="Caesar_JC">
+        <persName>
+            <name>Julius Caesar</name>
+        </persName>
+        <sex value="1">male</sex>
+        <death when-custom="ftln-1238"/>
+    </person>
+    <person xml:id="Calphurnia_JC">
+        <persName>
+            <name>Calphurnia</name>
+        </persName>
+        <state>
+            <p><rs ref="#Caesar_JC">his</rs> wife</p>
+        </state>
+        <sex value="2">female</sex>
+    </person>
+    <person xml:id="SERVANTS.CAESAR.1_JC" corresp="#SERVANTS_JC">
+        <persName>Servant to <rs ref="#Caesar_JC #Calphurnia_JC">them</rs></persName>
+        <sex value="1">male</sex>
+    </person>
+</listPerson>
+```
+In the body of the play, we find ```<sp>``` or speech elements, with ```who``` attributes that identify the speakers. Note also the use of ```w``` (word), ```pc``` (punctuation character), and ```<c>``` (character) elements to markup the text of the speeches.
 
 ```xml
 <sp xml:id="sp-0006" who="#COMMONERS.Carpenter_JC">
@@ -330,7 +361,7 @@ Finally, let's tackle a few more complicated XQuery expressions using the [Folge
 </sp>
 ```
 
-Our first expression will find all the stage directions associated with characters in a play–in this instance, *Julius Caesar*.
+Our first expression will find all the stage directions associated with characters in *Julius Caesar*.
 
 ```xquery
 xquery version "3.0";
@@ -354,7 +385,7 @@ return
 
 Ready to try this expression out with [Zorba](http://try-zorba.28.io/queries/xquery/JCBuIC%2Fiq7nR%2FyMzxY%2FMniqdqb8%3D)?
 
-In this next example, let's list all characters and the scenes during which they appear on stage.
+In this next example, let's list all characters and the scenes during which they appear on stage. This query illustrates the use of multiple ```for``` clauses in an FLWOR expression. 
 
 ```xquery
 xquery version "3.0";
@@ -375,8 +406,23 @@ return element appearances
       return <actor id="{$person}"  act-scene=" {$act-scene}" />
   }
 ```
+Let's give this expression a whirl using [Zorba](http://try-zorba.28.io/queries/xquery/J%2FOptdOBD9ZYoD5%2FGr9%2FxsmaT28%3D). Here is what the results look like.
+
+```xml
+<appearances>
+  <actor id="#Antony_JC" act-scene=" Act-1.Scene-2 Act-2.Scene-2 Act-3.Scene-1 Act-3.Scene-2 Act-4.Scene-1 Act-5.Scene-1 Act-5.Scene-4 Act-5.Scene-5"/>
+  <actor id="#Artemidorus_JC" act-scene=" Act-2.Scene-3 Act-3.Scene-1"/>
+  <actor id="#Brutus_JC" act-scene=" Act-1.Scene-2 Act-2.Scene-1 Act-2.Scene-2 Act-3.Scene-1 Act-3.Scene-2 Act-4.Scene-2 Act-4.Scene-3 Act-5.Scene-1 Act-5.Scene-2 Act-5.Scene-3 Act-5.Scene-4 Act-5.Scene-5"/>
+  <actor id="#COMMONERS.Carpenter_JC" act-scene=" Act-1.Scene-1"/>
+  <actor id="#COMMONERS.Cobbler_JC" act-scene=" Act-1.Scene-1"/>
+ ...
+</appearances>
+```
 
 ##Wrapping Up
 
-Please feel free to improve on these examples and to share your work with everyone else. The easiest way to do that is to write your expression in [Zorba](try-zorba.28.io) and then tweet out the permalink to [#prog4humanists](https://twitter.com/hashtag/prog4humanists). I look forward to seeing how you improve on my work! :)
+I hope that you've enjoyed this brief tour of XQuery. Please [be in touch](http://www.library.vanderbilt.edu/scholarly/) if you have any questions.
 
+Feel free to improve on these examples and to share your work with everyone else. The easiest way to do that is to write your expression in [Zorba](try-zorba.28.io) and then tweet out the permalink to [#prog4humanists](https://twitter.com/hashtag/prog4humanists). I look forward to seeing how you improve on my work! :)
+
+Many thanks to [Dr. Laura Mandell](http://idhmc.tamu.edu/the-director/) and her colleagues at the [Initiative for Digital Humanities, Media, and Culture](http://idhmc.tamu.edu/) for the opportunity to lead this session of her [Programming4Humanists](http://www.programming4humanists.org/) series.
