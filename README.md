@@ -4,6 +4,8 @@ We're going to explore some fundamental concepts of XQuery and then try out some
 
 ![Imgur](http://i.imgur.com/pAcmiju.png)
 
+If you cannot get oXygen to work, don't worry! You can also execute these XQuery expressions using an hosted instance of [Zorba](http://try-zorba.28.io/queries/xquery), an open source XQuery and JSONiq processor. Just clear out the code and substitute the XQuery code you want to evaluate. 
+
 ##Introduction to Functional Programming
 
 If you've programmed in a language like PHP or Python, you've probably been exposed to imperative and object-oriented constructs. XQuery belongs to a different strand of programming languages derived from the lambda calculus and related to programming languages like Erlang, Haskell, Lisp, and R. In functional programming languages, everything is an expression and all expressions evaluate to some value. While many programmers consider functional programming languages hard to learn, my experience is that first-time programmers find them easier to understand.
