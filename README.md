@@ -24,7 +24,7 @@ Since all expressions evaluate to some value, you can use a expression in XQuery
 string-join(fn:reverse(fn:tokenize("1,2,3",",")),",")
 ```
 
-This ability to substitute expressions with values is called [referential transparency](https://en.wikipedia.org/wiki/Referential_transparency_(computer_science). In a nutshell, it means that your expression will always evaluate to the same value when given the same input. Programming in XQuery (and XSLT and R) is different from other kinds of programming because you're not producing 'side effects' such as updating the value of your variables.
+This ability to substitute expressions with values is called (referential transparency)[https://en.wikipedia.org/wiki/Referential_transparency_(computer_science)]. In a nutshell, it means that your expression will always evaluate to the same value when given the same input. Programming in XQuery (and XSLT and R) is different from other kinds of programming because you're not producing 'side effects' such as updating the value of your variables.
 
 ###FLWOR Expressions
 
