@@ -505,6 +505,93 @@ The ```map {'header':'true'}``` is an [XQuery Map](http://docs.basex.org/wiki/XQ
 
 Not bad for a few lines of code, right? But, wait, there's more! Let's not just leave our data as is. Let's combine it with another source of data on the internet. In our next section, we'll learn a little more about JSON and how to interact with APIs that only provide JSON data.
 
+For this example, we'll be drawing on an API (Application Programming Interface) provided by the Open Library: the [Open Library Read API](https://openlibrary.org/dev/docs/api/read). We will use this API to enrich our book information with additional details. The API allows us to pass in an ISBN and receive a whole bunch of additional information in JSON format. To do so, we just concatenate this base URL (http://openlibrary.org/api/volumes/brief/isbn/) with an ISBN and add .json to the end. For example, the ISBN of Jeannette Walls' *The Glass Castle* is 074324754X. So the URL to retrieve the JSON is [http://openlibrary.org/api/volumes/brief/isbn/074324754X.json](http://openlibrary.org/api/volumes/brief/isbn/074324754X.json). Try it and see what you get back! Looks a little complicated right? You can actually use oXygen to 'pretty print' or format JSON. Suitably cleaned up, the JSON looks like this:
+
+![JSON data about the Glass Castle](http://i.imgur.com/da92Xze.png)
+
+Just a short (and terminologically free) note about the syntax. The square brackets represent arrays, meaning that they contain zero to many ordered values. The curly brackets represent objects, which contain keys on the left side of the colon and values on the right side. If you are using a string as a key or value, then you must put it in quotation marks. You can read the [whole JSON specification](http://www.json.org/) in less than ten minutes.
+
+To fetch the JSON with XQuery, we write an expression very similar to our initial expression to fetch a CSV document.
+
+```xquery
+xquery version "3.1";
+
+let $url := "http://openlibrary.org/api/volumes/brief/isbn/074324754X.json"
+let $json := fetch:text($url)
+return $json
+```
+We can treat JSON as text but it would be easier to convert it to XML so that we can work with it in a more familiar format. XQuery 3.1 introduces a new built-in function to produce this conversion: [fn:json-to-xml](http://docs.basex.org/wiki/XQuery_3.1#fn:json-to-xml). As you see, the usage of this function is very similar to ```csv:parse```.
+
+```xquery
+xquery version "3.1";
+
+let $url := "http://openlibrary.org/api/volumes/brief/isbn/074324754X.json"
+let $json := fetch:text($url)
+let $book := fn:json-to-xml($json)
+return $book
+````
+Our next step is to join these two sources of information together. Let's write a query that converts our CSV of book data to XML, collects all the ISBNs, queries the Open Library for the subject information, and adds that information back to the XML document . Whew! Sounds complicated, right? Let's give it a shot!
+
+We start by modifying our initial expression to get and convert the CSV of book data. But this time we won't return the data. Instead, we'll pass the ISBNs into a function that queries the Open Library for more information. 
+
+Let's proceed step-by-step. We will build a function first that takes an ISBN and returns ```<subject>``` elements with the respective subjects as child text nodes.
+
+```xquery
+
+declare function local:get-subjects-by-isbn($isbn as xs:string) as element()*
+{
+  let $url := "http://openlibrary.org/api/volumes/brief/isbn/" || $isbn || ".json"
+  let $json := fetch:text($url)
+  let $book-data := fn:json-to-xml($json)
+  for $subject in $book-data//xf:array[@key="subjects"]/xf:string/text()
+  return element subject {$subject}
+};
+```
+
+The final line converts the text nodes into elements using something called a [computed element constructor](http://www.w3.org/TR/xquery/#id-computedElements). Basically, we take a bunch of strings and wrap them into subject elements in order to include them with the other elements in our book records.
+
+The body of the query expression looks like this:
+
+```xquery
+let $url := "https://raw.githubusercontent.com/CliffordAnderson/XQuery4Humanists/c362876f6f6b4ec6755069a3ab256fb01d495616/data/books.csv"
+let $csv := fetch:text($url)
+let $books := csv:parse($csv, map {'header':'true'} )
+let $records :=
+  for $book in $books/csv/record
+  let $subjects := local:get-subjects-by-isbn($book/ISBN/text())
+  let $record := element record {($book/*, $subjects)}
+return element csv {$records}
+```
+This expression is basically the same as our previous expression, apart from iterating through the list of books to gather the subjects for each book individually. Perhaps the only tricky thing about this expression appears in this sub-expression ```element record {($book/*, $subjects)}```. Here we are creating a new record element by combining the entry elements from the previous book element with the new subject elements we've retrieved from the Internet Archive. If you look closely at the last two lines, you'll realize that we're not actually changing the original $book document; we are just creating a copy with more information added. As we mentioned at the outset, functional languages generally avoid changing state; once you define a variable, you can't change it. Here, we get around that problem (or feature!) by generating a new CSV element combining information from both sources.
+
+Here's the full XQuery expression:
+
+```xquery
+xquery version "3.1";
+
+declare namespace xf = "http://www.w3.org/2005/xpath-functions";
+
+declare function local:get-subjects-by-isbn($isbn as xs:string) as element()*
+{
+  let $url := "http://openlibrary.org/api/volumes/brief/isbn/" || $isbn || ".json"
+  let $json := fetch:text($url)
+  let $book-data := fn:json-to-xml($json)
+  for $subject in $book-data//xf:array[@key="subjects"]/xf:string/text()
+  return element subject {$subject}
+};
+
+let $url := "https://raw.githubusercontent.com/CliffordAnderson/XQuery4Humanists/c362876f6f6b4ec6755069a3ab256fb01d495616/data/books.csv"
+let $csv := fetch:text($url)
+let $books := csv:parse($csv, map {'header':'true'} )
+let $records :=
+  for $book in $books/csv/record
+  let $subjects := local:get-subjects-by-isbn($book/ISBN/text())
+  let $record := element record {($book/*, $subjects)}
+return element csv {$records}
+```
+and also a resulting record with the added subject information:
+![CSV record with added subject information](http://i.imgur.com/WklULX7.png)
+
 ###Wrapping Up
 
 I hope that you've enjoyed this brief tour of XQuery. Please [be in touch](http://www.library.vanderbilt.edu/scholarly/) if you have any questions. I'm always glad to help whenever I can.
