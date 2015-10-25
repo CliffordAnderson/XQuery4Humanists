@@ -137,14 +137,7 @@ order -> "French Dip Sandwich", salad -> true
 		if salad is true, then order -> "French Dip Sandwich & Salad"
 		otherwise order stays the same
 ```
-
-In other words, we take the initial order, add information about whether the patron also wants a salad, and return an updated order based on the result. Fairly straightforward, right?
-
-So let's turn this pseudo-code into a real XQuery expression.
-
-
-
-
+In other words, we take the initial food order, add information about whether the patron also wants a salad, and return an updated order based on the result. Fairly straightforward, right?
 
 The great thing about XQuery is that many functions already come built into the language. Check out Priscilla Walmsley's very helpful [list of XQuery functions](http://www.xqueryfunctions.com/). The built-in functions all come prefixed with the ```fn``` namespace. Shall we try a few together?
 
@@ -171,6 +164,38 @@ xquery version "3.0";
 let $say-hello := function($name as xs:string) as xs:string {"Hello, " || $name || "!" }
 return $say-hello("Dave")
 ```
+
+Let's get back to our pseudo-function that we sketch out at top. How may we turn this pseudo-code into a real XQuery expression? Let's write the function first. Remember that we want to take a food choice and a yes/no (true/false) decision about whether to add a salad as inputs and then return a combined food choice as a result. Below is a first pass at writing that function.
+
+```xquery
+xquery version "3.1"; 
+
+declare function local:add-salad($food, $salad)
+{
+	if ($salad = true()) then $food || " and salad"
+	else $food
+};
+```
+To call this function we need a main expression body. It's actually pretty simple.
+```xquery
+local:add-salad("Steak",false())
+```
+Et voilá! You have written a function to add (or not) salads to every food order. Still, there is a problem. What if someone sends a malformed order? For example, what if patron just asked for 1 with a salad. What would happen? We'd get back the result ```1 and salad```. Even stranger, what happens when someone orders "Fish" and says "No" to salad. We'd an error saying ```Items of type xs:string and xs:boolean cannot be compared.``` What does that mean? Isn't there a way to check for these errors before they happen? 
+
+In fact, there is. In the fancy language of computer science, this is called type checking. Basically, we want to define what type of information can go into our function and also what type of information can be returned as values by our function. In XQuery, we can check the types in the so-called function signature. Here's how we do that.
+```xquery
+xquery version "3.1"; 
+
+declare function local:add-salad($food as xs:string, $salad as xs:boolean) as xs:string
+{
+	if ($salad = true()) then $food || " and salad"
+	else $food
+};
+
+local:add-salad("Fish", true())
+```
+By adding the clause ```as xs:string``` and ```as xs:boolean``` you limit the range of acceptable values to strings and booleans respectively. The ```as xs:string``` after the paragraph indicates that the return value will always be a string. While it's not strictly necessary to add types to your inputs and to your return values, it's a very good habit to get into. You'll find that if you cannot determine what type of information your function can accept and what type of information your function will return, you probably don't really understand what your function is doing.
+
 
 Whether you declare named functions in your prologue or assign anonymous functions to variables in your expression body depends on the purpose you intend to achieve.
 
@@ -226,7 +251,7 @@ Ready to check your work? Here's how I did it... [Zorba](http://try-zorba.28.io/
 
 *Bonus Credit: Remember that recursion always requires a base case. In my example, the base case works most of the time but will not always work. Can you create an example where it will fail? Actually, don't try this in class–recursion is painful to the nth degree when it fails.* 
 
-There are always lots of different ways to accomplish a task in any programming language, though some may have subtle bugs and others may be less straightforwrd. [Here are a few other attempts at a Pig Latin parser in XQuery](https://gist.github.com/CliffordAnderson/a1ac3141828b504ee756/edit). If we have time, we might look at these. Otherwise, please try them out yourself and see if you can spot any bugs.
+There are always lots of different ways to accomplish a task in any programming language, though some may have subtle bugs and others may be less straightforward. [Here are a few other attempts at a Pig Latin parser in XQuery](https://gist.github.com/CliffordAnderson/a1ac3141828b504ee756/edit). If we have time, we might look at these. Otherwise, please try them out yourself and see if you can spot any bugs.
 
 ##Session Two
 
