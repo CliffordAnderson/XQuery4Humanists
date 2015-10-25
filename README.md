@@ -465,9 +465,45 @@ A common challenge when loading data into an XML database is turning it from som
 
 [A CSV file on Github](http://i.imgur.com/tYLvWJ2.png)
 
-How would we load the information in this file into BaseX? Fortunately, BaseX has you covered. There's a function called [csv:parse](http://docs.basex.org/wiki/CSV_Module) that converts CSV files into XML files. Let's try it out!
+How would we load the information in this file into BaseX? Fortunately, BaseX has you covered. There are two functions in BaseX that you can use in combination to load a CSV file and convert it to XML.  Let's try them out!
 
-The CSV file shown above is available on [Github](
+The CSV file shown above is available on [Github](https://raw.githubusercontent.com/CliffordAnderson/XQuery4Humanists/c362876f6f6b4ec6755069a3ab256fb01d495616/data/books.csv). First, we'll write a function to grab the text from Github and display it as a CSV. To do this, we'll use a BaseX function called [fetch:text](http://docs.basex.org/wiki/Fetch_Module#fetch:text), which just grabs the content of websites and returns them as a big string of text. So we can get the CSV with this code:
+```xquery
+xquery version "3.1";
+
+let $url := "https://raw.githubusercontent.com/CliffordAnderson/XQuery4Humanists/c362876f6f6b4ec6755069a3ab256fb01d495616/data/books.csv"
+let $csv := fetch:text($url)
+return $csv
+```
+The only complicated part of this expression is the crazy long URL for the CSV file. Otherwise, it's simple and straightforward, right? Our next step is to convert the CSV into XML. In this case, there's a function called [csv:parse](http://docs.basex.org/wiki/CSV_Module) that converts CSV files into XML files. Here's how it works.
+```xquery
+xquery version "3.1";
+
+let $url := "https://raw.githubusercontent.com/CliffordAnderson/XQuery4Humanists/c362876f6f6b4ec6755069a3ab256fb01d495616/data/books.csv"
+let $csv := fetch:text($url)
+let $books := csv:parse($csv)
+return $books
+```
+
+Nice, right? The only problem with the output is that it's pretty generic. In particular, the entries do not differentiate between authors, titles, ISBNs, binding, and publication dates. So it would be easy to get lost when query this document, mistakenly asking for the ISBN when you actually wanted a date, for instance. 
+
+![CSV without labelled entries](http://i.imgur.com/2k6fVoq.png)
+
+Fixing the problem is also relatively straightforward, though you'll notice a new syntax. What's up with that strange ```map``` syntax?
+
+```xquery
+xquery version "3.1";
+
+let $url := "https://raw.githubusercontent.com/CliffordAnderson/XQuery4Humanists/c362876f6f6b4ec6755069a3ab256fb01d495616/data/books.csv"
+let $csv := fetch:text($url)
+let $books := csv:parse($csv, map {'header':'true'} )
+return $books
+```
+The ```map {'header':'true'}``` is an [XQuery Map](http://docs.basex.org/wiki/XQuery_3.1#Maps). Maps and arrays are being introduced into XQuery primarily to handle a widely used format called JSON. (While there's more to XQuery maps than JSON compatibility, we don't need to worry about other uses here.)  JSON stands for JavaScript Object Notation. It's a lightweight format originally designed for use with JavaScript but now frequently employed to transmit information back and forth on the Internet. We'll see that kind of use in a moment. Here, however, we're using this XQuery map to provide some configuration information. The map is essentially acting like a config file for the function, telling it that the CSV has defined headers. After calling the expression with the configuration information provided by the map, we get a much more articulate result.
+
+![CSV with headers as entries]http://i.imgur.com/jS8aNZm.png[/img]
+
+Not bad for a few lines of code, right? But, wait, there's more! Let's not just leave our data as is. Let's combine it with another source of data on the internet. In our next section, we'll learn a little more about JSON and how to interact with APIs that only provide JSON data.
 
 ###Wrapping Up
 
