@@ -461,9 +461,13 @@ XQuery is a powerful language for exploring and drawing results from individual 
 
 ###Loading CSV
 
-
+A common challenge when loading data into an XML database is turning it from some other format into XML. For example, you might have data stored in Excel or perhaps a relational database like Access or MySQL. Consider, for example, the tabular data shown below.
 
 [A CSV file on Github](http://i.imgur.com/tYLvWJ2.png)
+
+How would we load the information in this file into BaseX? Fortunately, BaseX has you covered. There's a function called [csv:parse](http://docs.basex.org/wiki/CSV_Module) that converts CSV files into XML files. Let's try it out!
+
+The CSV file shown above is available on [Github](
 
 ###Wrapping Up
 
