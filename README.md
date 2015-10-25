@@ -255,7 +255,9 @@ There are always lots of different ways to accomplish a task in any programming 
 
 ##Session Two
 
-##Word Frequencies in XQuery
+Today, we are going to tackle some textual analysis with XQuery. When you are working with real world data like documents encoded according to the [TEI](http://www.tei-c.org/index.xml), your query expressions will frequently become more complicated. Today, we'll try to consolidate what we've learned and use our new-found knowledge of XQuery to explore 
+
+###Word Frequencies in XQuery
 
 A good use case for XQuery is developing word frequency lists for digital texts. Among the first poems I learned as a child was "Eldorado" by Edgar Allen Poe. I recall being struck by the repetition of the word "shadow" in the poem. Why did Poe repeat the word so many times in so few lines? While this month's XQuery exercise won't sort out the answer to that question, it will help us find out how many times he used that and other words.
 
@@ -364,9 +366,9 @@ Give it a try yourself before checking out what I came up with... [Zorba](http:/
 
 Extra Credit: Add an expression to the query to eliminate common stop-words–i.e. "of," "the," etc.–from your dictionary.
 
-##Exploring Shakespeare
+###Exploring Shakespeare
 
-Finally, let's tackle a few more complicated XQuery expressions using the [Folger Digital Texts](http://www.folgerdigitaltexts.org/) of William Shakespeare. To understand these expressions, you'll need to acquaint yourself a bit with the TEI markup used in this digital edition. Here's two snippets from *Julius Caesar*.
+Let's tackle a few more complicated XQuery expressions using the [Folger Digital Texts](http://www.folgerdigitaltexts.org/) of William Shakespeare. To understand these expressions, you'll need to acquaint yourself a bit with the TEI markup used in this digital edition. Here's two snippets from *Julius Caesar*.
 
 First, let's look at ```<listPerson>``` 'list of persons'. Here we see a number of persons related to Julius Caesar, including Caesar himself, his wife Calphurnia, and their servants. There are similar lists of persons for other characters and roles in the play.
 
@@ -475,6 +477,51 @@ Let's give this expression a whirl using [Zorba](http://try-zorba.28.io/queries/
  ...
 </appearances>
 ```
+
+We've got the information we want but it's not a very attractive display. Can we do any better with the output?
+
+###Formatting XQuery Results
+
+```xquery
+xquery version "3.0";
+
+declare namespace tei = "http://www.tei-c.org/ns/1.0";
+
+let $play := fn:doc("https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml")
+let $actors :=
+	element appearances 
+  {
+      let $persons := $doc//tei:person/@xml:id ! fn:concat("#", .)
+      for $person in $persons
+      for $act in $doc//tei:div1[@type="act"]
+      for $scene in $act/tei:div2
+      let $act-scene := fn:concat("Act-", $act/@n, ".", "Scene-", $scene/@n)
+      where $person = $scene//tei:stage/@who ! fn:tokenize(., " ") 
+      group by $person
+      order by $person
+      return <actor id="{$person}"  act-scene=" {$act-scene}" />
+  } 
+
+for $actor in $data//actor
+let $name :=
+  let $id := fn:translate($actor/@id, "#", "")
+  let $persName := $play//tei:person[@xml:id = $id]
+  return fn:string-join($persName/tei:persName//text(), " ")
+let $scenes := 
+  fn:string-join(
+  for $scene in fn:tokenize($actor/@act-scene, " ") 
+  return $scene, " ")
+  
+return <p>{$name} appears in {$scenes}.</p>
+```
+
+
+###XQuery verus XSLT
+
+We might conclude today with a few remarks on how XQuery and XSLT work together. We've seen in these examples that we can use XQuery to transform XML results into HTML (and other formats too). And, as Laura has shown, XSLT can carry out these transformations too. So what's the difference between XQuery and XSLT? When should you select one over the other?
+
+In fact, there is a significant degree of overlap between the two languages. While XSLT is frequently used to transform documents of one type to another—say from TEI to HTML—we've seen that you can actually accomplish the same thing in XQuery, albeit sometimes less efficiently with complex documents. In truth, a lot comes down to context and programming preference. If you're working in a database context with many hundreds or perhaps thousand documents, then XQuery will be the natural choice. 
+
 
 ##Session Three
 
@@ -617,7 +664,7 @@ return element csv {$records}
 and also a resulting record with the added subject information:
 ![CSV record with added subject information](http://i.imgur.com/WklULX7.png)
 
-###Wrapping Up
+##Wrapping Up
 
 I hope that you've enjoyed this brief tour of XQuery. Please [be in touch](http://www.library.vanderbilt.edu/scholarly/) if you have any questions. I'm always glad to help whenever I can.
 
