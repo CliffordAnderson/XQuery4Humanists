@@ -1,14 +1,20 @@
 #XQuery4Humanists
 
+##Session One
+
 We're going to explore some fundamental concepts of XQuery and then try out some applications. If you're using the oXygen XML editor, we're assuming that you're using Saxon PE (professional edition) v. 9.5.1.7 and that you've turned on support for XQuery 3.0. Check your settings to make sure we'll all on the same page.
 
 ![Imgur](http://i.imgur.com/pAcmiju.png)
 
 If you cannot get oXygen to work, don't worry! You can also execute these XQuery expressions using an hosted instance of [Zorba](http://try-zorba.28.io/queries/xquery), an open source XQuery and JSONiq processor. Just clear out the code and substitute the XQuery code you want to evaluate. 
 
-##Introduction to Functional Programming
+###Introduction to Functional Programming
 
-If you've programmed in a language like PHP or Python, you've probably been exposed to imperative and object-oriented constructs. XQuery belongs to a different strand of programming languages derived from the lambda calculus and related to programming languages like Erlang, Haskell, Lisp, and R. In functional programming languages, everything is an expression and all expressions evaluate to some value. While many programmers consider functional programming languages hard to learn, my experience is that first-time programmers find them easier to understand.
+If you've programmed in a language like PHP or Python, you've probably been exposed to imperative and object-oriented constructs. The distinguishing feature of such programming languages is that they rely on changes of state to process information. That is, they require you to tell the computer how to process your ideas step-by-step, kind of like when you are making a recipe and taking the flour from a dry mix to dough to some baked good.
+
+XQuery belongs to a different strand of programming languages derived from the lambda calculus and related to programming languages like Erlang, Haskell, Lisp, and R. In functional programming languages, everything is an expression and all expressions evaluate to some value. Clear? :) A simpler way of putting things is that in functional programming you write functions that take a value as input and produce a value as an output. So, returning to our baking example, 
+
+While many programmers consider functional programming languages hard to learn, my experience is that first-time programmers find them easier to understand.
 
 For example, try out this expression in XQuery:
 ```xquery
@@ -120,6 +126,26 @@ Ready to try it out on [Zorba](http://try-zorba.28.io/queries/xquery/TUTdQbUrDJ5
 
 ###User-Defined Functions
 
+Functions represent the heart of functional programming but they can appear a little intimidating at first. The basic idea of a function is to break up complicated code into nice, simple, smaller units. A function also allows us to control better the information we receive and the outputs we provide.
+
+Before we get started writing functions in XQuery, let's try to explore the concept in pseudo-code, i.e. something that looks like code but doesn't actually run. Let's say that we want to write a function for our local diner. Imagine that every order can be supplemented with a salad if you choose. So we'll need to update the order for the chef and also the price of the meal whenever someone decides to compliment the meal with a salad.
+
+So our pseudo-function would look something like this:
+```
+order -> "French Dip Sandwich", salad -> true
+	function add-salad
+		if salad is true, then order -> "French Dip Sandwich & Salad"
+		otherwise order stays the same
+```
+
+In other words, we take the initial order, add information about whether the patron also wants a salad, and return an updated order based on the result. Fairly straightforward, right?
+
+So let's turn this pseudo-code into a real XQuery expression.
+
+
+
+
+
 The great thing about XQuery is that many functions already come built into the language. Check out Priscilla Walmsley's very helpful [list of XQuery functions](http://www.xqueryfunctions.com/). The built-in functions all come prefixed with the ```fn``` namespace. Shall we try a few together?
 
 Of course, it's also possible to write your own functions in XQuery. In fact, it's usually *necessary* to write new functions. You can do so in two ways. On the one hand, you can declare functions in the XQuery prologue. Or you can write anonymous functions. Let's take a look at both examples.
@@ -148,13 +174,15 @@ return $say-hello("Dave")
 
 Whether you declare named functions in your prologue or assign anonymous functions to variables in your expression body depends on the purpose you intend to achieve.
 
-##Pig Latin in XQuery
+###Problem Sets
+
+####Pig Latin in XQuery
 
 My son Theodore loves to speak Pig Latin. He can speak it really fast, making it difficult for my wife and I to follow him. Wouldn't it be helpful to have a Pig Latin interpreter, I thought? So let's write a basic parser for Pig Latin in XQuery this month.
 
 The rules for [Pig Latin](https://en.wikipedia.org/wiki/Pig_Latin) are relatively simple though different dialects exist, as we shall see. Let's take the simplest dialect first. Basically, to turn any English word into an equivalent word in Pig Latin you take the first consonant off the front of the word, add it to the end, and then add "ay." If your word already starts with a vowel, then just add "ay" to the end. Thus, "Hello" becomes "Ellohay." "I" becomes "Iay."
 
-###Exercise #1
+*Exercise #1*
 
 So, for our first exercise, let's write a basic XQuery expression that takes a word and returns its equivalent this dialect of Pig Latin. 
 
@@ -162,7 +190,7 @@ So, for our first exercise, let's write a basic XQuery expression that takes a w
 
 Ready to compare your expression?Here's what I came up with...[Zorba](http://try-zorba.28.io/queries/xquery/QK5qu0xXmoe16U2ruUvUJMyf768%3D) and [Gist](https://gist.github.com/CliffordAnderson/076b5e82f1d7e22e05ca)
 
-###Exercise #2
+*Exercise #2*
 
 Now that we can convert individual words to Pig Latin, let's move on to sentences. Try to write an expression to convert sentences to Pig Latin. It's OK if you strip away punctuation to do so, though you get extra credit if you retain it. Write an expression to convert, e.g., "I speak Pig Latin" to "Iay peaksay igpay atinlay".
 
@@ -170,7 +198,7 @@ Now that we can convert individual words to Pig Latin, let's move on to sentence
 
 Ready to compare your expression? Here's my go at it... [Zorba](http://try-zorba.28.io/queries/xquery/viIDlwPueygREld7%2FOCE3n9AYEE%3D) and [Gist](https://gist.github.com/CliffordAnderson/e75fd3e4e3e569a661cf)
 
-###Exercise #3
+*Exercise #3*
 
 I mentioned that other dialectics of Pig Latin exist. In fact, we speak a different version at home. In this version, all the consonants preceeding the vowel must be moved to the end of the word before adding "ay". So "there" becomes "erethay." If the word starts with a vowel, then the rules remain the same as previously. Your function should turn "I speak Pig Latin" into "Iay eakspay igpay atinlay"
 
@@ -199,6 +227,8 @@ Ready to check your work? Here's how I did it... [Zorba](http://try-zorba.28.io/
 *Bonus Credit: Remember that recursion always requires a base case. In my example, the base case works most of the time but will not always work. Can you create an example where it will fail? Actually, don't try this in class–recursion is painful to the nth degree when it fails.* 
 
 There are always lots of different ways to accomplish a task in any programming language, though some may have subtle bugs and others may be less straightforwrd. [Here are a few other attempts at a Pig Latin parser in XQuery](https://gist.github.com/CliffordAnderson/a1ac3141828b504ee756/edit). If we have time, we might look at these. Otherwise, please try them out yourself and see if you can spot any bugs.
+
+##Session Two
 
 ##Word Frequencies in XQuery
 
@@ -421,10 +451,24 @@ Let's give this expression a whirl using [Zorba](http://try-zorba.28.io/queries/
 </appearances>
 ```
 
-##Wrapping Up
+##Session Three
 
-I hope that you've enjoyed this brief tour of XQuery. Please [be in touch](http://www.library.vanderbilt.edu/scholarly/) if you have any questions.
+###XML Databases
+
+XQuery is a powerful language for exploring and drawing results from individual XML documents. However, its real power comes to the fore when you combine it with XML databases. In this session, we're going to explore how to use XQuery in BaseX, an open source XML database.
+
+![BaseX, an open source XML Database](http://i.imgur.com/twQUdGH.png)
+
+###Loading CSV
+
+
+
+[A CSV file on Github](http://i.imgur.com/tYLvWJ2.png)
+
+###Wrapping Up
+
+I hope that you've enjoyed this brief tour of XQuery. Please [be in touch](http://www.library.vanderbilt.edu/scholarly/) if you have any questions. I'm always glad to help whenever I can.
 
 Feel free to improve on these examples and to share your work with everyone else. The easiest way to do that is to write your expression in [Zorba](try-zorba.28.io) and then tweet out the permalink to [#prog4humanists](https://twitter.com/hashtag/prog4humanists). I look forward to seeing how you improve on my work! :)
 
-Many thanks to [Dr. Laura Mandell](http://idhmc.tamu.edu/the-director/) and her colleagues at the [Initiative for Digital Humanities, Media, and Culture](http://idhmc.tamu.edu/) for the opportunity to lead this session of her [Programming4Humanists](http://www.programming4humanists.org/) series.
+Many thanks to [Dr. Laura Mandell](http://idhmc.tamu.edu/the-director/) and her colleagues at the [Initiative for Digital Humanities, Media, and Culture](http://idhmc.tamu.edu/) for the opportunity to lead these three sessions of her [Programming4Humanists](http://www.programming4humanists.org/) series.
