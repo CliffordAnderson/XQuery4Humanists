@@ -2,11 +2,26 @@
 
 ##Session One
 
-We're going to explore some fundamental concepts of XQuery and then try out some applications. If you're using the oXygen XML editor, we're assuming that you're using Saxon PE (professional edition) v. 9.5.1.7 and that you've turned on support for XQuery 3.0. Check your settings to make sure we'll all on the same page.
+We're going to explore some fundamental concepts of XQuery and then try out some applications. You've got three options for an XQuery processor.
+
+###Installation Instructions
+
+**oXygen XML**
+ If you're using the oXygen XML editor, we're assuming that you're using Saxon PE (professional edition) v. 9.5.1.7 or later and that you've turned on support for XQuery 3.0. Check your settings to make sure we'll all on the same page.
 
 ![Imgur](http://i.imgur.com/pAcmiju.png)
 
-If you cannot get oXygen to work, don't worry! You can also execute these XQuery expressions using an hosted instance of [Zorba](http://try-zorba.28.io/queries/xquery), an open source XQuery and JSONiq processor. Just clear out the code and substitute the XQuery code you want to evaluate. 
+**Zorba**
+
+If you cannot get oXygen to work, don't worry! You can also execute these XQuery expressions using an hosted instance of [Zorba](http://try-zorba.28.io/queries/xquery), an open source XQuery and JSONiq processor. Just clear out the code and substitute the XQuery code you want to evaluate. This is a good option 
+
+**BaseX**
+
+In our third session, we'll be looking at XQuery in the context of XML databases. For that session, we'll be using [BaseX](http://basex.org/), an open source XML database. I recommend using the [Windows installer](http://files.basex.org/releases/8.3/BaseX83.exe) if you're using Windows and using [Homebrew](http://brew.sh/) if you're on a Mac. The installation command is ```brew install basex```.
+
+> Note: Installing BaseX may require that you update to Java 7. If so, install the [Java Runtime Environment (JRE)](https://java.com/en/download/) and try again.
+
+Personally, I'd recommend getting started with BaseX right at the beginning of our sessions. It's got a easy to user interface and is highly standards compliant. (You can tell that I'm a big BaseX fan!) But it's not necessary until our third session.
 
 ###Introduction to Functional Programming
 
@@ -561,7 +576,7 @@ In fact, there is a significant degree of overlap between the two languages. Whi
 
 ###XML Databases
 
-XQuery is a powerful language for exploring and drawing results from individual XML documents. However, its real power comes to the fore when you combine it with XML databases. In this session, we're going to explore how to use XQuery in BaseX, an open source XML database.
+XQuery is a powerful language for exploring and drawing results from individual XML documents. However, its real power comes to the fore when you combine it with XML databases. In this session, we're going to explore how to use XQuery in BaseX, an open source XML database. (See the instructions from Session One above about installing BaseX.)
 
 ![BaseX, an open source XML Database](http://i.imgur.com/twQUdGH.png)
 
