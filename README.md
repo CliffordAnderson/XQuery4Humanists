@@ -368,9 +368,43 @@ Extra Credit: Add an expression to the query to eliminate common stop-words–i.
 
 ###Exploring Shakespeare
 
-Let's tackle a few more complicated XQuery expressions using the [Folger Digital Texts](http://www.folgerdigitaltexts.org/) of William Shakespeare. To understand these expressions, you'll need to acquaint yourself a bit with the TEI markup used in this digital edition. Here's two snippets from *Julius Caesar*.
+Let's tackle a few more complicated XQuery expressions using the [Folger Digital Texts](http://www.folgerdigitaltexts.org/) of William Shakespeare. To understand these expressions, you'll need to acquaint yourself a bit with the TEI markup used in this digital edition. The best way to do that with XQuery is just to write some simple exploratory expressions.
 
-First, let's look at ```<listPerson>``` 'list of persons'. Here we see a number of persons related to Julius Caesar, including Caesar himself, his wife Calphurnia, and their servants. There are similar lists of persons for other characters and roles in the play.
+For instance, let's grab a whole document first and see what's there. I've put the edition of Julius Caesar up at an ungainly [url](https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml"), which we will assign to a variable for easier use.
+
+```xquery
+xquery version "3.0";
+
+let $url := "https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml"
+return fn:doc($url)
+```
+
+OK, now let's take a look at some of its constituent parts. What's in the header, for instance? *Don't forget to add the TEI namespace!*
+
+```xquery
+xquery version "3.0";
+
+declare namespace tei = "http://www.tei-c.org/ns/1.0";
+
+let $url := "https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml"
+let $play := fn:doc($url)
+return $play/tei:TEI/tei:teiHeader
+```
+
+As far as TEI documents go, there's a lot information here! So perhaps we ought to drill down to the encoding description. Let's do that.
+
+```xquery
+xquery version "3.0";
+
+declare namespace tei = "http://www.tei-c.org/ns/1.0";
+
+let $url := "https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml"
+let $play := fn:doc($url)
+return $play//tei:encodingDesc
+```
+We find really valuable information about the usage of particular TEI elements, which can in turn inform the kinds of queries we will write. XQuery makes this form of exploratory analysis very easy. Just as statisticians would explore a dataset with simple queries before undertaking any complex analysis, I'd encourage you to spend time exploring your XML (or JSON) documents before diving into writing significant queries.
+
+Let's try to now to write a couple analytical queries. Here's two snippets from *Julius Caesar*. First, let's look at ```<listPerson>``` 'list of persons'. Here we see a number of persons related to Julius Caesar, including Caesar himself, his wife Calphurnia, and their servants. There are similar lists of persons for other characters and roles in the play.
 
 ```xml
 <listPerson>
