@@ -257,9 +257,22 @@ Let's give this expression a whirl using [Zorba](http://try-zorba.28.io/queries/
 </appearances>
 ```
 
-We've got the information we want but it's not a very attractive display. Can we do any better with the output?
+We've got the information we want but it's not a very attractive display. Can we do any better with the output? Sure, we can. Let's try now to format the results and output them as a HTML document. And why not add [Bootstrap](http://getbootstrap.com/) into the mix for better formatting?
 
 ###Formatting XQuery Results
+
+So a problem with the XQuery expression above is that it's a little hard to follow. How exactly are we matching names with scenes? I wrote the expression but, returning to it several days later, it find it hard to parse out. So, realistically, we cannot expect to add more complexity and hope to understand what we're doing. So let's [refactor](https://en.wikipedia.org/wiki/Code_refactoring) our expression into several sub-expressions (or functions) to maintain readability and comprehensibility. 
+
+Let's start out with our main expression body, which we'll keep as simple as possible.
+
+```xquery
+xquery version "3.0";
+
+let $url := "https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml"
+let $play := local:get-play($url)
+let $appearances := element div {local:get-appearances($play)}
+return local:html($appearances)
+```
 
 ```xquery
 xquery version "3.0";
