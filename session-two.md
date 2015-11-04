@@ -105,9 +105,71 @@ return element dictionary {$word-elements}
 
 To get this to work, we just have to write two functions: ```local:collect-words()```, which we will use to clean up the words by getting rid of capitalization, punctuation, and the like, and ```local:determine-frequency()```, which we will use to get the frequency of the various words.
 
-Hint: You'll probably need to use regular expressions in ```local:collect-words()``` to clean up the strings. If so, this function ```fn:replace($words, "[!?.',/-]", "")``` should do the trick nicely.
+> Hint: You'll probably need to use regular expressions in ```local:collect-words()``` to clean up the strings. If so, this function ```fn:replace($words, "[!?.',/-]", "")``` should do the trick nicely.
 
-Give it a try yourself before checking out what I came up with... [Zorba](http://try-zorba.28.io/queries/xquery/ZZf2fGYOwtkBvN8sbzI4cX4plYw%3D) and [Gist](https://gist.github.com/CliffordAnderson/468e0b6a8ee6143676f9). 
+Give it a try yourself before checking out what I came up with... [Zorba](http://try-zorba.28.io/queries/xquery/ZZf2fGYOwtkBvN8sbzI4cX4plYw%3D) and [Gist](https://gist.github.com/CliffordAnderson/468e0b6a8ee6143676f9).  Ready to check your work?
+
+Let's write the ```local:collect-words``` function first. This function accepts a sequence of text nodes, strips away punctuation and other non-essential differences, and returns a sequence of words.
+
+```xquery
+(:~
+: This function accepts a sequence of text nodes and returns a sequence of normalized string tokens.
+: @param  $words the text nodes from a given text
+: @return  the sequence of normalized string tokens
+:)
+declare function local:collect-words($words as xs:string*) as xs:string*
+{
+    let $words := fn:string-join($words, " ")
+    let $words := fn:replace($words, "[!?.',]", "")
+    let $words := fn:lower-case($words)
+    let $words := fn:tokenize($words, " ")
+    return
+        $words
+};
+
+local:collect-words("This is a test of the system.")
+```
+
+Writing a function in this style is perfectly OK in XQuery, but it's not especially good style. We're rebinding $words three times. (Technically, this is called "shadow binding." We're actually creating different variables behind the scenes.) From a functional perspective, it gets confusing since variables are not supposed to vary. We could rewrite FLWOR expression this as a sequence of nested sub-expressions, but doing so makes our expression hard to read: ```fn:tokenize(fn:lower-case(fn:replace(fn:string-join($words, " "), "[!?.',-]", "")), " ")```
+
+The XQuery 3.1 Recommendation introduces the 'arrow operator' to avoid writing these kinds of expressions. The arrow operator pipes the value of a previous expression as the first argument to another expression. So, for example, we could rewrite the expression above like this:
+
+```xquery
+xquery version "3.1";
+
+declare function local:collect-words($words as xs:string*) as xs:string*
+{
+    fn:string-join($words, " ") 
+    => fn:replace("[!?.',]", "") 
+    => fn:lower-case()
+    => fn:tokenize (" ")
+};
+
+local:collect-words("This is a test of the system.")
+```
+The arrow operator allows us to keep our code clean and straightforward by removing any need for rebinding variables in a FLWOR expression or writing complexly nested subexpressions. Note that you'll need to try the expression above with a processor that supports XQuery 3.1. 
+
+ OK, now let's write our next function: ```local:determine-frequency```. This function accepts a sequence of word tokens and then returns a sequence of ```word``` elements indicating the frequency of word types. So we need to write something like the following.
+ ```xquery 
+ (:~
+: This function accepts a sequence of normalized string tokens and returns a sequence of word elements in frequency order.
+: @param  $words a sequence of normalized string tokens
+: @return  a sequence of word elements
+:)
+declare function local:determine-frequency($words as xs:string*) as element(word)*
+{
+    for $word in fn:distinct-values($words)
+    let $item := 
+        element word { 
+        attribute frequency {fn:count($words[. = $word])},
+        $word}
+    order by $item/@frequency descending
+    return $item 
+};
+```
+So we iterate through the distinct values of words and build word elements for each of those word types. We then count the number of times that a token of that word type appears in our original sequence, assigning that count as the ```frequency``` attribute. Finally, we sort them into descending order according to their frequency and return them.
+
+> A final note. Do you note the strange way we've formatted our XQuery comments? The use of (:~, @param, @return allows us to produce documentation from our code with a tool called [XQDoc](http://xqdoc.org]. If you're writing anything beyond simple, one-off XQuery expressions, you should consider writing XQDoc comments to alert others (and remind yourself) about how your code works.
 
 Extra Credit: Add an expression to the query to eliminate common stop-words–i.e. "of," "the," etc.–from your dictionary.
 
