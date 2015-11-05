@@ -1,6 +1,6 @@
 ##Session Two
 
-Today, we are going to tackle some textual analysis with XQuery. When you are working with real world data like documents encoded according to the [TEI](http://www.tei-c.org/index.xml), your query expressions will frequently become more complicated. Today, we'll try to consolidate what we've learned and use our new-found knowledge of XQuery to explore 
+Today, we are going to tackle some textual analysis with XQuery. When you are working with real world data like documents encoded according to the [TEI](http://www.tei-c.org/index.xml), your query expressions will frequently become more complicated. Today, we'll try to consolidate what we've learned and use our new-found knowledge of XQuery to explore literary documents.
 
 ###Word Frequencies in XQuery
 
