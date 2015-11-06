@@ -339,15 +339,6 @@ return local:html($appearances)
 Our next function ```local:get-play()``` simply opens the play for us. Maybe we don't really even need it, but it helps to be clear about how we're accessing the play. I've put a free expression below our function just so that we can test it out.
 
 ```xquery
-declare function local:get-person-ids($play as document-node()) as xs:string*
-{
-  let $persons := $play//tei:person/@xml:id ! fn:concat("#", .)
-  for $person in $persons
-  let $id := fn:translate($person, "#", "")
-  return $id
-  
-};
-
 
 declare function local:get-play($url as xs:string) as document-node()
 {
@@ -386,7 +377,11 @@ return local:get-person-ids(local:get-play($url))
 
 ```
 
-The combination of evaluating the two nested functions in our return clause produces a sequence of string nodes listing all the ids in the play: ```Caesar_JC Calphurnia_JC SERVANTS.CAESAR.1_JC Brutus_JC Portia_JC Lucius_JC Cassius_JC Casca_JC Cinna_JC Decius_JC Ligarius_JC Metellus_JC Trebonius_JC Cicero_JC Publius_JC Popilius_JC Flavius_JC Marullus_JC Antony_JC Lepidus_JC Octavius_JC SERVANTS.ANTONY.1_JC SERVANTS.OCTAVIUS.1_JC SOLDIERS.BRUTUS.Lucilius_JC SOLDIERS.BRUTUS.Titinius_JC SOLDIERS.BRUTUS.Messala_JC SOLDIERS.BRUTUS.Varro_JC SOLDIERS.BRUTUS.Claudius_JC SOLDIERS.BRUTUS.Cato_JC SOLDIERS.BRUTUS.Strato_JC SOLDIERS.BRUTUS.Volumnius_JC SOLDIERS.BRUTUS.Labeo_JC SOLDIERS.BRUTUS.Flavius_JC SOLDIERS.BRUTUS.Dardanus_JC SOLDIERS.BRUTUS.Clitus_JC COMMONERS.Carpenter_JC COMMONERS.Cobbler_JC Soothsayer_JC Artemidorus_JC PLEBEIANS.0.1_JC PLEBEIANS.0.2_JC PLEBEIANS.0.3_JC PLEBEIANS.0.4_JC CinnaPoet_JC Pindarus_JC SOLDIERS.BRUTUS.0.1_JC SOLDIERS.BRUTUS.0.2_JC SOLDIERS.BRUTUS.0.3_JC Poet_JC Messenger_JC SOLDIERS.ANTONY.0.1_JC SOLDIERS.ANTONY.0.2_JC``` Not much to look at right now, but it's the data we need for our next function.
+The combination of evaluating the two nested functions in our return clause produces a sequence of string nodes listing all the ids in the play: 
+
+> ```Caesar_JC Calphurnia_JC SERVANTS.CAESAR.1_JC Brutus_JC Portia_JC Lucius_JC Cassius_JC Casca_JC Cinna_JC Decius_JC Ligarius_JC Metellus_JC Trebonius_JC Cicero_JC Publius_JC Popilius_JC Flavius_JC Marullus_JC Antony_JC Lepidus_JC Octavius_JC SERVANTS.ANTONY.1_JC SERVANTS.OCTAVIUS.1_JC SOLDIERS.BRUTUS.Lucilius_JC SOLDIERS.BRUTUS.Titinius_JC SOLDIERS.BRUTUS.Messala_JC SOLDIERS.BRUTUS.Varro_JC SOLDIERS.BRUTUS.Claudius_JC SOLDIERS.BRUTUS.Cato_JC SOLDIERS.BRUTUS.Strato_JC SOLDIERS.BRUTUS.Volumnius_JC SOLDIERS.BRUTUS.Labeo_JC SOLDIERS.BRUTUS.Flavius_JC SOLDIERS.BRUTUS.Dardanus_JC SOLDIERS.BRUTUS.Clitus_JC COMMONERS.Carpenter_JC COMMONERS.Cobbler_JC Soothsayer_JC Artemidorus_JC PLEBEIANS.0.1_JC PLEBEIANS.0.2_JC PLEBEIANS.0.3_JC PLEBEIANS.0.4_JC CinnaPoet_JC Pindarus_JC SOLDIERS.BRUTUS.0.1_JC SOLDIERS.BRUTUS.0.2_JC SOLDIERS.BRUTUS.0.3_JC Poet_JC Messenger_JC SOLDIERS.ANTONY.0.1_JC SOLDIERS.ANTONY.0.2_JC``` 
+
+Not much to look at right now, but it's the data we need for our next function.
 
 
 ```xquery
