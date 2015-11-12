@@ -376,6 +376,88 @@ and also a resulting record with the added subject information:
   </record>
 ```
 
+##Storing XML documents in BaseX
+
+Our final project today will be to store our enriched bibliographic records in an XML database.
+
+```xquery
+xquery version "3.1";
+
+(: Enriches book metadata with subject information and stores in BaseX database :)
+
+declare namespace xf = "http://www.w3.org/2005/xpath-functions";
+
+declare function local:get-subjects-by-isbn($isbn as xs:string) as element()*
+{
+  let $url := "http://openlibrary.org/api/volumes/brief/isbn/" || $isbn || ".json"
+  let $json := fetch:text($url)
+  let $book-data := fn:json-to-xml($json)
+  for $subject in $book-data//xf:array[@key="subjects"]/xf:string/text()
+  return element subject {$subject}
+};
+
+let $database := "books" (: Change as necessary :)
+let $url := "https://raw.githubusercontent.com/CliffordAnderson/XQuery4Humanists/c362876f6f6b4ec6755069a3ab256fb01d495616/data/books.csv"
+let $csv := fetch:text($url)
+let $books := csv:parse($csv, map {'header':'true'} )
+for $book in $books/csv/record
+let $isbn := $book/ISBN/text()
+let $subjects := local:get-subjects-by-isbn($isbn)
+let $record := element record {($book/*, $subjects)}
+(: See http://docs.basex.org/wiki/Database_Module#db:add for more information :)
+return db:add($database, $record, $isbn || ".xml") 
+```
+
+Let's just check to make sure that we created the database properly. To bring back all the records, we can write a simple expression (assuming that we've already opened the database).
+
+```xquery
+xquery version "3.1";
+
+//record
+```
+
+We might also count the records with another simple expression.
+
+```xquery
+xquery version "3.1";
+
+fn:count(//record)
+```
+
+What is we wanted to look up Jeanette Walls as an author? First, let's check that she's listed as an author in some record in our database.
+
+```xquery
+xquery version "3.1"
+
+//Author[fn:contains(., "Walls")]
+```
+
+How can we retrieve her whole record? We might, for instance, rewrite our XPath expression.
+
+```xquery
+xquery version "3.1";
+
+/record[Author[fn:contains(., "Walls")]]
+```
+
+Alternatively, we could rewrite this expression as a FLWOR expression, now iterating explicitly over all the documents in the collection by using the ```fn:collection()``` function.
+
+```xquery
+xquery version "3.1";
+
+for $record in fn:collection()
+where $record//Author[fn:contains(., "Walls")]
+return $record
+```
+
+Finally, we could also use [XQuery Full-Text](http://www.w3.org/TR/xpath-full-text-10/) to rewrite our expression in a more natural style.
+
+```xquery
+xquery version "3.1";
+
+//record[Author contains text "Walls"]
+```
+
 ##Wrapping Up
 
 I hope that you've enjoyed this brief tour of XQuery. Please [be in touch](http://www.library.vanderbilt.edu/scholarly/) if you have any questions. I'm always glad to help whenever I can.
