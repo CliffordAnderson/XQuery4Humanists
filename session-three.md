@@ -32,7 +32,24 @@ return $books
 
 Nice, right? The only problem with the output is that it's pretty generic. In particular, the entries do not differentiate between authors, titles, ISBNs, binding, and publication dates. So it would be easy to get lost when query this document, mistakenly asking for the ISBN when you actually wanted a date, for instance. 
 
-![CSV without labelled entries](http://i.imgur.com/2k6fVoq.png)
+```xml
+<csv>
+  <record>
+    <entry>Author</entry>
+    <entry>Title</entry>
+    <entry>ISBN</entry>
+    <entry>Binding</entry>
+    <entry>Year Published</entry>
+  </record>
+  <record>
+    <entry>Jeannette Walls</entry>
+    <entry>The Glass Castle</entry>
+    <entry>074324754X</entry>
+    <entry>Paperback</entry>
+    <entry>2006</entry>
+  </record>
+</csv>
+```
 
 Fixing the problem is also relatively straightforward, though you'll notice a new syntax. What's up with that strange ```map``` syntax?
 
@@ -46,13 +63,221 @@ return $books
 ```
 The ```map {'header':'true'}``` is an [XQuery Map](http://docs.basex.org/wiki/XQuery_3.1#Maps). Maps and arrays are being introduced into XQuery primarily to handle a widely used format called JSON. (While there's more to XQuery maps than JSON compatibility, we don't need to worry about other uses here.)  JSON stands for JavaScript Object Notation. It's a lightweight format originally designed for use with JavaScript but now frequently employed to transmit information back and forth on the Internet. We'll see that kind of use in a moment. Here, however, we're using this XQuery map to provide some configuration information. The map is essentially acting like a config file for the function, telling it that the CSV has defined headers. After calling the expression with the configuration information provided by the map, we get a much more articulate result.
 
-![CSV with headers as entries]http://i.imgur.com/jS8aNZm.png[/img]
+```xml
+<csv>
+  <record>
+    <Author>Jeannette Walls</Author>
+    <Title>The Glass Castle</Title>
+    <ISBN>074324754X</ISBN>
+    <Binding>Paperback</Binding>
+    <Year_Published>2006</Year_Published>
+  </record>
+  <record>
+    <Author>James Surowiecki</Author>
+    <Title>The Wisdom of Crowds</Title>
+    <ISBN>385721706</ISBN>
+    <Binding>Paperback</Binding>
+    <Year_Published>2005</Year_Published>
+  </record>
+</csv>
+```
+
 
 Not bad for a few lines of code, right? But, wait, there's more! Let's not just leave our data as is. Let's combine it with another source of data on the internet. In our next section, we'll learn a little more about JSON and how to interact with APIs that only provide JSON data.
 
 For this example, we'll be drawing on an API (Application Programming Interface) provided by the Open Library: the [Open Library Read API](https://openlibrary.org/dev/docs/api/read). We will use this API to enrich our book information with additional details. The API allows us to pass in an ISBN and receive a whole bunch of additional information in JSON format. To do so, we just concatenate this base URL (http://openlibrary.org/api/volumes/brief/isbn/) with an ISBN and add .json to the end. For example, the ISBN of Jeannette Walls' *The Glass Castle* is 074324754X. So the URL to retrieve the JSON is [http://openlibrary.org/api/volumes/brief/isbn/074324754X.json](http://openlibrary.org/api/volumes/brief/isbn/074324754X.json). Try it and see what you get back! Looks a little complicated right? You can actually use oXygen to 'pretty print' or format JSON. Suitably cleaned up, the JSON looks like this:
 
-![JSON data about the Glass Castle](http://i.imgur.com/da92Xze.png)
+```javascript
+{
+    "records": {"/books/OL7928299M": {
+        "recordURL": "http://openlibrary.org/books/OL7928299M/The_Glass_Castle",
+        "oclcs": [],
+        "publishDates": ["January 9, 2006"],
+        "lccns": [],
+        "details": {
+            "info_url": "http://openlibrary.org/books/OL7928299M/The_Glass_Castle",
+            "bib_key": "isbn:074324754X",
+            "preview_url": "http://openlibrary.org/books/OL7928299M/The_Glass_Castle",
+            "thumbnail_url": "https://covers.openlibrary.org/b/id/473601-S.jpg",
+            "details": {
+                "number_of_pages": 288,
+                "subtitle": "A Memoir",
+                "weight": "8.8 ounces",
+                "covers": [473601],
+                "latest_revision": 7,
+                "first_sentence": {
+                    "type": "/type/text",
+                    "value": "I WAS SITTING IN a taxi, wondering if I had overdressed for the evening, when I looked out the window and saw Mom rooting through a Dumpster."
+                },
+                "source_records": ["amazon:074324754X:cp:4147739557:267382"],
+                "title": "The Glass Castle",
+                "languages": [{"key": "/languages/eng"}],
+                "subjects": [
+                    "Entertainment & Performing Arts - Television Personalities",
+                    "Women",
+                    "Personal Memoirs",
+                    "Childhood Memoir",
+                    "Alcohol Abuse",
+                    "Family Development",
+                    "United States",
+                    "Biography & Autobiography",
+                    "Biography / Autobiography",
+                    "Literary",
+                    "Biography/Autobiography",
+                    "Children of alcoholics",
+                    "Biography & Autobiography / Personal Memoirs",
+                    "Problem families",
+                    "Welch",
+                    "West Virginia",
+                    "Biography",
+                    "Case studies"
+                ],
+                "type": {"key": "/type/edition"},
+                "physical_dimensions": "7.9 x 5.2 x 0.8 inches",
+                "revision": 7,
+                "publishers": ["Scribner"],
+                "physical_format": "Paperback",
+                "last_modified": {
+                    "type": "/type/datetime",
+                    "value": "2011-08-11T17:47:59.304270"
+                },
+                "key": "/books/OL7928299M",
+                "authors": [{
+                    "name": "Jeannette Walls",
+                    "key": "/authors/OL34287A"
+                }],
+                "classifications": {},
+                "created": {
+                    "type": "/type/datetime",
+                    "value": "2008-04-29T15:03:11.581851"
+                },
+                "identifiers": {
+                    "librarything": ["7903"],
+                    "goodreads": ["7445"]
+                },
+                "isbn_13": ["9780743247542"],
+                "isbn_10": ["074324754X"],
+                "publish_date": "January 9, 2006",
+                "works": [{"key": "/works/OL46760W"}]
+            },
+            "preview": "noview"
+        },
+        "isbns": [
+            "074324754X",
+            "9780743247542"
+        ],
+        "olids": ["OL7928299M"],
+        "issns": [],
+        "data": {
+            "publishers": [{"name": "Scribner"}],
+            "number_of_pages": 288,
+            "subtitle": "A Memoir",
+            "weight": "8.8 ounces",
+            "title": "The Glass Castle",
+            "url": "http://openlibrary.org/books/OL7928299M/The_Glass_Castle",
+            "identifiers": {
+                "isbn_13": ["9780743247542"],
+                "openlibrary": ["OL7928299M"],
+                "isbn_10": ["074324754X"],
+                "goodreads": ["7445"],
+                "librarything": ["7903"]
+            },
+            "cover": {
+                "small": "https://covers.openlibrary.org/b/id/473601-S.jpg",
+                "large": "https://covers.openlibrary.org/b/id/473601-L.jpg",
+                "medium": "https://covers.openlibrary.org/b/id/473601-M.jpg"
+            },
+            "subject_places": [
+                {
+                    "url": "https://openlibrary.org/subjects/place:welch",
+                    "name": "Welch"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/place:west_virginia",
+                    "name": "West Virginia"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/place:united_states",
+                    "name": "United States"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/place:new_york_(state)",
+                    "name": "New York (State)"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/place:new_york",
+                    "name": "New York"
+                }
+            ],
+            "subjects": [
+                {
+                    "url": "https://openlibrary.org/subjects/biography",
+                    "name": "Biography"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/case_studies",
+                    "name": "Case studies"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/children_of_alcoholics",
+                    "name": "Children of alcoholics"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/problem_families",
+                    "name": "Problem families"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/poor",
+                    "name": "Poor"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/homeless_persons",
+                    "name": "Homeless persons"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/family_relationships",
+                    "name": "Family relationships"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/dysfunctional_families",
+                    "name": "Dysfunctional families"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/accessible_book",
+                    "name": "Accessible book"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/protected_daisy",
+                    "name": "Protected DAISY"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/new_york_times_bestseller",
+                    "name": "New York Times bestseller"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/nyt:paperback_nonfiction=2007-03-03",
+                    "name": "nyt:paperback_nonfiction=2007-03-03"
+                }
+            ],
+            "subject_people": [{
+                "url": "https://openlibrary.org/subjects/person:jeannette_walls",
+                "name": "Jeannette Walls"
+            }],
+            "key": "/books/OL7928299M",
+            "authors": [{
+                "url": "http://openlibrary.org/authors/OL34287A/Jeannette_Walls",
+                "name": "Jeannette Walls"
+            }],
+            "publish_date": "January 9, 2006",
+            "excerpts": [{
+                "comment": "",
+                "text": "I WAS SITTING IN a taxi, wondering if I had overdressed for the evening, when I looked out the window and saw Mom rooting through a Dumpster.",
+                "first_sentence": true
+            }]
+        }
+    }},
+    "items": []
+}
 
 Just a short (and terminologically free) note about the syntax. The square brackets represent arrays, meaning that they contain zero to many ordered values. The curly brackets represent objects, which contain keys on the left side of the colon and values on the right side. If you are using a string as a key or value, then you must put it in quotation marks. You can read the [whole JSON specification](http://www.json.org/) in less than ten minutes.
 
@@ -132,10 +357,23 @@ let $records :=
   for $book in $books/csv/record
   let $subjects := local:get-subjects-by-isbn($book/ISBN/text())
   let $record := element record {($book/*, $subjects)}
+  return $record
 return element csv {$records}
 ```
 and also a resulting record with the added subject information:
-![CSV record with added subject information](http://i.imgur.com/WklULX7.png)
+
+```xml
+ <record>
+    <Author>Stefan Zweig</Author>
+    <Title>Beware of Pity</Title>
+    <ISBN>1590172000</ISBN>
+    <Binding>Paperback</Binding>
+    <Year_Published>2006</Year_Published>
+    <subject>Austro-Hungarian Monarchy. Heer -- Officers -- Fiction</subject>
+    <subject>World War, 1914-1918 -- Fiction</subject>
+    <subject>Sympathy -- Fiction</subject>
+  </record>
+```
 
 ##Wrapping Up
 
