@@ -507,6 +507,8 @@ let $appearances := element div {local:get-appearances($play)}
 return local:html($appearances)
 ```
 
+You can try running the whole XQuery expression with [Zorba](http://try.zorba.io/queries/xquery/7tclGE7xRIiRrpvuNhs5zpYKJ5I%3D). Better yet, check out [the HTML output with Zorba](http://try.zorba.io/queries/xquery/7tclGE7xRIiRrpvuNhs5zpYKJ5I%3D).
+
 ###XQuery verus XSLT
 
 We might conclude today with a few remarks on how XQuery and XSLT work together. We've seen in these examples that we can use XQuery to transform XML results into HTML (and other formats too). And, as Laura has shown, XSLT can carry out these transformations too. So what's the difference between XQuery and XSLT? When should you select one over the other?
