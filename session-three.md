@@ -380,6 +380,16 @@ and also a resulting record with the added subject information:
 
 Our final project today will be to store our enriched bibliographic records in an XML database.
 
+First, we need to create the database. To do this, click on "Database --> New" from the BaseX menu. When creating your database, name it "books" and leave the "Input file or directory" field empty.
+
+![Imgur](http://i.imgur.com/JAaIPje.png)
+
+We'll also create some indexes that we'll use a bit later in this session.
+
+![Imgur](http://i.imgur.com/leNEhKX.png)
+
+Now we just need to write some code to populate our database. Let's adapt the code from our example above. The main difference is that we'll return a bunch of ```record``` documents instead of a single ```csv``` document.
+
 ```xquery
 xquery version "3.1";
 
@@ -407,6 +417,8 @@ let $record := element record {($book/*, $subjects)}
 (: See http://docs.basex.org/wiki/Database_Module#db:add for more information :)
 return db:add($database, $record, $isbn || ".xml") 
 ```
+
+Note that the final line does the work of adding each record to the database. The function ```db:add``` takes three arguments in this case: the name of the database, the actual XML document we want to add to the database, and a filename (or URI) for the document. We create the name of the document by concatenating the ISBN with ".xml" and hoping for the best–i.e., no collisions between ISBNs.
 
 Let's just check to make sure that we created the database properly. To bring back all the records, we can write a simple expression (assuming that we've already opened the database).
 
