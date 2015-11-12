@@ -1,6 +1,6 @@
 ##Session Three
 
-###XML Databases
+###Mashups and XML Databases
 
 XQuery is a powerful language for exploring and drawing results from individual XML documents. However, its real power comes to the fore when you combine it with XML databases. In this session, we're going to explore how to use XQuery in BaseX, an open source XML database. 
 
