@@ -85,7 +85,7 @@ The ```map {'header':'true'}``` is an [XQuery Map](http://docs.basex.org/wiki/XQ
 
 Not bad for a few lines of code, right? But, wait, there's more! Let's not just leave our data as is. Let's combine it with another source of data on the internet. In our next section, we'll learn a little more about JSON and how to interact with APIs that only provide JSON data.
 
-For this example, we'll be drawing on an API (Application Programming Interface) provided by the Open Library: the [Open Library Read API](https://openlibrary.org/dev/docs/api/read). We will use this API to enrich our book information with additional details. The API allows us to pass in an ISBN and receive a whole bunch of additional information in JSON format. To do so, we just concatenate this base URL (http://openlibrary.org/api/volumes/brief/isbn/) with an ISBN and add .json to the end. For example, the ISBN of Jeannette Walls' *The Glass Castle* is 074324754X. So the URL to retrieve the JSON is [http://openlibrary.org/api/volumes/brief/isbn/074324754X.json](http://openlibrary.org/api/volumes/brief/isbn/074324754X.json). Try it and see what you get back! Looks a little complicated right? You can actually use oXygen to 'pretty print' or format JSON. Suitably cleaned up, the JSON looks like this:
+For this example, we'll be drawing on an API (Application Programming Interface) provided by the Open Library: the [Open Library Read API](https://openlibrary.org/dev/docs/api/read). We will use this API to enrich our book information with additional details. The API allows us to pass in an ISBN and receive a whole bunch of additional information in JSON format. To do so, we just concatenate this base URL (http://openlibrary.org/api/volumes/brief/isbn/) with an ISBN and add .json to the end. For example, the ISBN of Jeannette Walls' *The Glass Castle* is 074324754X. So the URL to retrieve the JSON is http://openlibrary.org/api/volumes/brief/isbn/074324754X.json. [Try it](http://openlibrary.org/api/volumes/brief/isbn/074324754X.json) and see what you get back! Looks a little complicated right? You can actually use oXygen to 'pretty print' or format JSON. Suitably cleaned up, the JSON looks like this:
 
 ```javascript
 {
@@ -278,6 +278,7 @@ For this example, we'll be drawing on an API (Application Programming Interface)
     }},
     "items": []
 }
+```
 
 Just a short (and terminologically free) note about the syntax. The square brackets represent arrays, meaning that they contain zero to many ordered values. The curly brackets represent objects, which contain keys on the left side of the colon and values on the right side. If you are using a string as a key or value, then you must put it in quotation marks. You can read the [whole JSON specification](http://www.json.org/) in less than ten minutes.
 
