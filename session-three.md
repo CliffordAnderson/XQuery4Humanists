@@ -469,6 +469,44 @@ xquery version "3.1";
 
 //record[Author contains text "Walls"]
 ```
+Finally, we can start writing some more complex queries using different options from the XQuery Full-Text Recommendation.
+
+```xquery
+xquery version "3.1";
+
+for $record in fn:collection()
+where $record//subject/text() contains text { "Austria", "Austro-Hungarian" } any 
+return $record
+```
+
+If we have more time, we can try different examples. But, to wrap up, let's also discuss how to make changes to documents. First, let's remember that XQuery does not normally allow us to update documents. To get around this problem, we can just rebuild the document, adding (or subtracting) information. For example, here's how we can add a ```cover``` element to one of our record documents using the [Internet Archive's Cover API](https://openlibrary.org/dev/docs/api/covers)
+
+```xquery
+xquery version "3.1";
+
+(: The URL for the book covers API is http://covers.openlibrary.org/b/$key/$value-$size.jpg :)
+
+let $cover-api := "http://covers.openlibrary.org/b/ibsn/"
+let $glass-castle := //record[Title[text()="The Glass Castle"]]
+let $isbn := $glass-castle/ISBN/text()
+let $cover := element cover {$cover-api || $isbn || "-M.jpg"}
+let $fields := $glass-castle/*
+return element record {$fields, $cover}
+```
+However, this approach just makes a copy of our document. If we want to save the change in our database, we'll need to draw on [XQuery Update Facility](http://www.w3.org/TR/xquery-update-10/) recommendation. 
+
+```xquery
+xquery version "3.1";
+
+(: The URL for the book covers API is http://covers.openlibrary.org/b/$key/$value-$size.jpg :)
+
+let $cover-api := "http://covers.openlibrary.org/b/ibsn/"
+let $glass-castle := //record[Title[text()="The Glass Castle"]]
+let $isbn := $glass-castle/ISBN/text()
+let $cover := element cover {$cover-api || $isbn || "-M.jpg"}
+return insert node $cover into $glass-castle
+```
+In this version, we don't make a copy, we actually add a node directly to the document in the database. XQuery Update is a powerful and important addition to the XQuery set of recommendations, but it should be used with some caution since it mutates, creates, and potentially deletes data.
 
 ##Wrapping Up
 
