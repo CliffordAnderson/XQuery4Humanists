@@ -169,7 +169,7 @@ declare function local:determine-frequency($words as xs:string*) as element(word
 ```
 So we iterate through the distinct values of words and build word elements for each of those word types. We then count the number of times that a token of that word type appears in our original sequence, assigning that count as the ```frequency``` attribute. Finally, we sort them into descending order according to their frequency and return them.
 
-> A final note. Do you note the strange way we've formatted our XQuery comments? The use of (:~, @param, @return allows us to produce documentation from our code with a tool called [XQDoc](http://xqdoc.org). If you're writing anything beyond simple, one-off XQuery expressions, you should consider writing XQDoc comments to alert others (and remind yourself) about how your code works.
+> A final note. Do you note the strange way we've formatted our XQuery comments? The use of `(:~`, `@param`, and `@return` allows us to produce documentation from our code with a tool called [XQDoc](http://xqdoc.org). If you're writing anything beyond simple, one-off XQuery expressions, you should consider writing XQDoc comments to alert others (and remind yourself) about how your code works.
 
 Extra Credit: Add an expression to the query to eliminate common stop-words—i.e. "of," "the," etc.—from your dictionary.
 
@@ -211,7 +211,7 @@ return $play//tei:encodingDesc
 ```
 We find really valuable information about the usage of particular TEI elements, which can in turn inform the kinds of queries we will write. XQuery makes this form of exploratory analysis very easy. Just as statisticians would explore a dataset with simple queries before undertaking any complex analysis, I'd encourage you to spend time exploring your XML (or JSON) documents before diving into writing significant queries.
 
-Let's try to now to write a couple analytical queries. Here's two snippets from *Julius Caesar*. First, let's look at ```<listPerson>``` 'list of persons'. Here we see a number of persons related to Julius Caesar, including Caesar himself, his wife Calphurnia, and their servants. There are similar lists of persons for other characters and roles in the play.
+Let's try to now to write a couple analytical queries. Here's two snippets from _Julius Caesar_. First, let's look at ```<listPerson>``` 'list of persons'. Here we see a number of persons related to Julius Caesar, including Caesar himself, his wife Calphurnia, and their servants. There are similar lists of persons for other characters and roles in the play.
 
 ```xml
 <listPerson>
