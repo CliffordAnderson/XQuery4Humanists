@@ -228,8 +228,8 @@ let $phrase := "I speak Pig Latin"
 for $word in fn:tokenize($phrase, " ")
 return
     if (fn:count($word) > 1) then
-        let $first := fn:replace($word, "^(.*?)[a,e,i,o,u].*", "$1")
-        let $last := fn:replace($word, "^.*?([a,e,i,o,u].*)", "$1")
+        let $first := fn:replace($word, "^(.*?)[aeiou].*", "$1")
+        let $last := fn:replace($word, "^.*?([aeiou].*)", "$1")
         return $last || $first || "ay"
     else
         $word || "ay"
@@ -243,4 +243,4 @@ Ready to check your work? Here's how I did it... [Zorba](http://try-zorba.28.io/
 
 *Bonus Credit: Remember that recursion always requires a base case. In my example, the base case works most of the time but will not always work. Can you create an example where it will fail? Actually, don't try this in class–recursion is painful to the nth degree when it fails.* 
 
-There are always lots of different ways to accomplish a task in any programming language, though some may have subtle bugs and others may be less straightforward. [Here are a few other attempts at a Pig Latin parser in XQuery](https://gist.github.com/CliffordAnderson/a1ac3141828b504ee756/edit). If we have time, we might look at these. Otherwise, please try them out yourself and see if you can spot any bugs.
+There are always lots of different ways to accomplish a task in any programming language, though some may have subtle bugs and others may be less straightforward. [Here are a few other attempts at a Pig Latin parser in XQuery](https://gist.github.com/CliffordAnderson/a1ac3141828b504ee756). If we have time, we might look at these. Otherwise, please try them out yourself and see if you can spot any bugs.
