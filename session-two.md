@@ -1,8 +1,8 @@
-##Session Two
+## Session Two
 
 Today, we are going to tackle some textual analysis with XQuery. When you are working with real world data like documents encoded according to the [TEI](http://www.tei-c.org/index.xml), your query expressions will frequently become more complicated. Today, we'll try to consolidate what we've learned and use our new-found knowledge of XQuery to explore literary documents.
 
-###Word Frequencies in XQuery
+### Word Frequencies in XQuery
 
 A good use case for XQuery is developing word frequency lists for digital texts. Among the first poems I learned as a child was "Eldorado" by Edgar Allen Poe. I recall being struck by the repetition of the word "shadow" in the poem. Why did Poe repeat the word so many times in so few lines? While this month's XQuery exercise won't sort out the answer to that question, it will help us find out how many times he used that and other words.
 
@@ -173,7 +173,7 @@ So we iterate through the distinct values of words and build word elements for e
 
 Extra Credit: Add an expression to the query to eliminate common stop-words—i.e. "of," "the," etc.—from your dictionary.
 
-###Exploring Shakespeare
+### Exploring Shakespeare
 
 Let's tackle a few more complicated XQuery expressions using the [Folger Digital Texts](http://www.folgerdigitaltexts.org/) of William Shakespeare. To understand these expressions, you'll need to acquaint yourself a bit with the TEI markup used in this digital edition. The best way to do that with XQuery is just to write some simple exploratory expressions.
 
@@ -321,7 +321,7 @@ Let's give this expression a whirl using [Zorba](http://try-zorba.28.io/queries/
 
 We've got the information we want but it's not a very attractive display. Can we do any better with the output? Sure, we can. Let's try now to format the results and output them as a HTML document. And why not add [Bootstrap](http://getbootstrap.com/) into the mix for better formatting?
 
-###Formatting XQuery Results
+### Formatting XQuery Results
 
 So a problem with the XQuery expression above is that it's a little hard to follow. How exactly are we matching names with scenes? I wrote the expression but, returning to it several days later, it find it hard to parse out. So, realistically, we cannot expect to add more complexity and hope to understand what we're doing. So let's [refactor](https://en.wikipedia.org/wiki/Code_refactoring) our expression into several sub-expressions (or functions) to maintain readability and comprehensibility. 
 
@@ -509,7 +509,7 @@ return local:html($appearances)
 
 You can try running the whole XQuery expression with [Zorba](http://try.zorba.io/queries/xquery/7tclGE7xRIiRrpvuNhs5zpYKJ5I%3D). Better yet, check out [the HTML output with Zorba](http://try.zorba.io/queries/xquery/7tclGE7xRIiRrpvuNhs5zpYKJ5I%3D).
 
-###XQuery verus XSLT
+### XQuery verus XSLT
 
 We might conclude today with a few remarks on how XQuery and XSLT work together. We've seen in these examples that we can use XQuery to transform XML results into HTML (and other formats too). And, as Laura has shown, XSLT can carry out these transformations too. So what's the difference between XQuery and XSLT? When should you select one over the other?
 
