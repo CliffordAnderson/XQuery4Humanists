@@ -1,6 +1,6 @@
-##Session One
+## Session One
 
-###Introduction to Functional Programming
+### Introduction to Functional Programming
 
 If you've programmed in a language like PHP or Python, you've probably been exposed to imperative and object-oriented constructs. The distinguishing feature of such programming languages is that they rely on changes of state to process information. That is, they require you to tell the computer how to process your ideas step-by-step, kind of like when you are making a recipe and taking the flour from a dry mix to dough to some baked good.
 
@@ -24,7 +24,7 @@ string-join(fn:reverse(fn:tokenize("1,2,3",",")),",")
 
 This ability to substitute expressions with values is called [referential transparency](https://en.wikipedia.org/wiki/Referential_transparency_(computer_science)). In a nutshell, it means that your expression will always evaluate to the same value when given the same input. Programming in XQuery (and XSLT and R) is different from other kinds of programming because you're not producing 'side effects' such as updating the value of your variables.
 
-###FLWOR Expressions
+### FLWOR Expressions
 
 Things are already looking a little messy, aren't they? A fundamental construct in XQuery is the FLWOR expression. While you could write XQuery expressions without FLWOR expressions, you probably wouldn't want to. FLWOR expressions introduce some key concepts, including variable binding, sorting, and filtering. FLWOR stands for "for, let, where, order by, return."
 
@@ -98,7 +98,7 @@ return element {$class} {$num || ". " || $title}
 ```
 Try [Zorba](http://try-zorba.28.io/queries/xquery/AGJEUoN%2BXytamwW%2B2CgXzJ6rY74%3D) to see this query.
 
-###Conditional Expressions
+### Conditional Expressions
 
 Like other programming languages, XQuery permits conditions expressions of the form ```if...then...else```. However, unlike other programming languages, the ```else``` case is always required. This is because an expression must always evaluate to a value. We'll be using ```if...then...else``` in some examples below. To make sure you understand how to use them, let's quickly code the famous (at least in programmers' circles) [fizzbuzz](http://c2.com/cgi/wiki?FizzBuzzTest) exercise in XQuery.
 
@@ -116,7 +116,7 @@ return
 ```
 Ready to try it out on [Zorba](http://try-zorba.28.io/queries/xquery/TUTdQbUrDJ5IehMnHsGlej66A4M%3D)?
 
-###User-Defined Functions
+### User-Defined Functions
 
 Functions represent the heart of functional programming but they can appear a little intimidating at first. The basic idea of a function is to break up complicated code into nice, simple, smaller units. A function also allows us to control better the information we receive and the outputs we provide.
 
@@ -191,9 +191,9 @@ By adding the clause ```as xs:string``` and ```as xs:boolean``` you limit the ra
 
 Whether you declare named functions in your prologue or assign anonymous functions to variables in your expression body depends on the purpose you intend to achieve.
 
-###Problem Sets
+### Problem Sets
 
-####Pig Latin in XQuery
+#### Pig Latin in XQuery
 
 My son Theodore loves to speak Pig Latin. He can speak it really fast, making it difficult for my wife and I to follow him. Wouldn't it be helpful to have a Pig Latin interpreter, I thought? So let's write a basic parser for Pig Latin in XQuery this month.
 
