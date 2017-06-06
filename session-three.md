@@ -1,10 +1,10 @@
-##Session Three
+## Session Three
 
-###Mashups and XML Databases
+### Mashups and XML Databases
 
 XQuery is a powerful language for exploring and drawing results from individual XML documents. However, its real power comes to the fore when you combine it with XML databases. In this session, we're going to explore how to use XQuery in BaseX, an open source XML database. 
 
-###Loading CSV
+### Loading CSV
 
 A common challenge when loading data into an XML database is turning it from some other format into XML. For example, you might have data stored in Excel or perhaps a relational database like Access or MySQL. Consider, for example, the tabular data shown below.
 
@@ -376,7 +376,7 @@ and also a resulting record with the added subject information:
   </record>
 ```
 
-##Storing XML documents in BaseX
+## Storing XML documents in BaseX
 
 Our final project today will be to store our enriched bibliographic records in an XML database.
 
@@ -508,7 +508,7 @@ return insert node $cover into $glass-castle
 ```
 In this version, we don't make a copy, we actually add a node directly to the document in the database. XQuery Update is a powerful and important addition to the XQuery set of recommendations, but it should be used with some caution since it mutates, creates, and potentially deletes data.
 
-##Wrapping Up
+## Wrapping Up
 
 I hope that you've enjoyed this brief tour of XQuery. Please [be in touch](http://www.library.vanderbilt.edu/scholarly/) if you have any questions. I'm always glad to help whenever I can.
 
