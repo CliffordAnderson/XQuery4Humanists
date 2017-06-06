@@ -1,4 +1,4 @@
-#XQuery4Humanists
+# XQuery4Humanists
 
 We're going to explore some fundamental concepts of XQuery and then try out some applications. 
 
