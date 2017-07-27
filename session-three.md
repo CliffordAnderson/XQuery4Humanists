@@ -2,7 +2,7 @@
 
 ### Mashups and XML Databases
 
-XQuery is a powerful language for exploring and drawing results from individual XML documents. However, its real power comes to the fore when you combine it with XML databases. In this session, we're going to explore how to use XQuery in BaseX, an open source XML database. 
+XQuery is a powerful language for exploring and drawing results from individual XML documents. However, its real power comes to the fore when you combine it with XML databases. In this session, we're going to explore how to use XQuery in BaseX, an open source XML database.
 
 ### Loading CSV
 
@@ -30,7 +30,7 @@ let $books := csv:parse($csv)
 return $books
 ```
 
-Nice, right? The only problem with the output is that it's pretty generic. In particular, the entries do not differentiate between authors, titles, ISBNs, binding, and publication dates. So it would be easy to get lost when query this document, mistakenly asking for the ISBN when you actually wanted a date, for instance. 
+Nice, right? The only problem with the output is that it's pretty generic. In particular, the entries do not differentiate between authors, titles, ISBNs, binding, and publication dates. So it would be easy to get lost when query this document, mistakenly asking for the ISBN when you actually wanted a date, for instance.
 
 ```xml
 <csv>
@@ -303,7 +303,7 @@ return $book
 ````
 Our next step is to join these two sources of information together. Let's write a query that converts our CSV of book data to XML, collects all the ISBNs, queries the Open Library for the subject information, and adds that information back to the XML document . Whew! Sounds complicated, right? Let's give it a shot!
 
-We start by modifying our initial expression to get and convert the CSV of book data. But this time we won't return the data. Instead, we'll pass the ISBNs into a function that queries the Open Library for more information. 
+We start by modifying our initial expression to get and convert the CSV of book data. But this time we won't return the data. Instead, we'll pass the ISBNs into a function that queries the Open Library for more information.
 
 Let's proceed step-by-step. We will build a function first that takes an ISBN and returns ```<subject>``` elements with the respective subjects as child text nodes.
 
@@ -415,7 +415,7 @@ let $isbn := $book/ISBN/text()
 let $subjects := local:get-subjects-by-isbn($isbn)
 let $record := element record {($book/*, $subjects)}
 (: See http://docs.basex.org/wiki/Database_Module#db:add for more information :)
-return db:add($database, $record, $isbn || ".xml") 
+return db:add($database, $record, $isbn || ".xml")
 ```
 
 Note that the final line does the work of adding each record to the database. The function ```db:add``` takes three arguments in this case: the name of the database, the actual XML document we want to add to the database, and a filename (or URI) for the document. We create the name of the document by concatenating the ISBN with ".xml" and hoping for the best–i.e., no collisions between ISBNs.
@@ -475,7 +475,7 @@ Finally, we can start writing some more complex queries using different options 
 xquery version "3.1";
 
 for $record in fn:collection()
-where $record//subject/text() contains text { "Austria", "Austro-Hungarian" } any 
+where $record//subject/text() contains text { "Austria", "Austro-Hungarian" } any
 return $record
 ```
 
@@ -493,7 +493,7 @@ let $cover := element cover {$cover-api || $isbn || "-M.jpg"}
 let $fields := $glass-castle/*
 return element record {$fields, $cover}
 ```
-However, this approach just makes a copy of our document. If we want to save the change in our database, we'll need to draw on [XQuery Update Facility](http://www.w3.org/TR/xquery-update-10/) recommendation. 
+However, this approach just makes a copy of our document. If we want to save the change in our database, we'll need to draw on [XQuery Update Facility](http://www.w3.org/TR/xquery-update-10/) recommendation.
 
 ```xquery
 xquery version "3.1";
@@ -512,6 +512,4 @@ In this version, we don't make a copy, we actually add a node directly to the do
 
 I hope that you've enjoyed this brief tour of XQuery. Please [be in touch](http://www.library.vanderbilt.edu/scholarly/) if you have any questions. I'm always glad to help whenever I can.
 
-Feel free to improve on these examples and to share your work with everyone else. The easiest way to do that is to write your expression in [Zorba](try-zorba.28.io) and then tweet out the permalink to [#prog4humanists](https://twitter.com/hashtag/prog4humanists). I look forward to seeing how you improve on my work! :)
-
-Many thanks to [Dr. Laura Mandell](http://idhmc.tamu.edu/the-director/) and her colleagues at the [Initiative for Digital Humanities, Media, and Culture](http://idhmc.tamu.edu/) for the opportunity to lead these three sessions of her [Programming4Humanists](http://www.programming4humanists.org/) series.
+Feel free to improve on these examples and to share your work with everyone else.

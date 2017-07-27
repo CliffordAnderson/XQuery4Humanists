@@ -107,7 +107,7 @@ To get this to work, we just have to write two functions: ```local:collect-words
 
 > Hint: You'll probably need to use regular expressions in ```local:collect-words()``` to clean up the strings. If so, this function ```fn:replace($words, "[!?.',/-]", "")``` should do the trick nicely.
 
-Give it a try yourself before checking out what I came up with... [Zorba](http://try-zorba.28.io/queries/xquery/ZZf2fGYOwtkBvN8sbzI4cX4plYw%3D) and [Gist](https://gist.github.com/CliffordAnderson/468e0b6a8ee6143676f9).  Ready to check your work?
+Give it a try yourself before [checking out what I came up with....](https://gist.github.com/CliffordAnderson/468e0b6a8ee6143676f9)
 
 Let's write the ```local:collect-words``` function first. This function accepts a sequence of text nodes, strips away punctuation and other non-essential differences, and returns a sequence of words.
 
@@ -139,18 +139,18 @@ xquery version "3.1";
 
 declare function local:collect-words($words as xs:string*) as xs:string*
 {
-    fn:string-join($words, " ") 
-    => fn:replace("[!?.',]", "") 
+    fn:string-join($words, " ")
+    => fn:replace("[!?.',]", "")
     => fn:lower-case()
     => fn:tokenize (" ")
 };
 
 local:collect-words("This is a test of the system.")
 ```
-The arrow operator allows us to keep our code clean and straightforward by removing any need for rebinding variables in a FLWOR expression or writing complexly nested subexpressions. Note that you'll need to try the expression above with a processor that supports XQuery 3.1. 
+The arrow operator allows us to keep our code clean and straightforward by removing any need for rebinding variables in a FLWOR expression or writing complexly nested subexpressions. Note that you'll need to try the expression above with a processor that supports XQuery 3.1.
 
  OK, now let's write our next function: ```local:determine-frequency```. This function accepts a sequence of word tokens and then returns a sequence of ```word``` elements indicating the frequency of word types. So we need to write something like the following.
- ```xquery 
+ ```xquery
  (:~
 : This function accepts a sequence of normalized string tokens and returns a sequence of word elements in frequency order.
 : @param  $words a sequence of normalized string tokens
@@ -159,12 +159,12 @@ The arrow operator allows us to keep our code clean and straightforward by remov
 declare function local:determine-frequency($words as xs:string*) as element(word)*
 {
     for $word in fn:distinct-values($words)
-    let $item := 
-        element word { 
+    let $item :=
+        element word {
         attribute frequency {fn:count($words[. = $word])},
         $word}
     order by $item/@frequency descending
-    return $item 
+    return $item
 };
 ```
 So we iterate through the distinct values of words and build word elements for each of those word types. We then count the number of times that a token of that word type appears in our original sequence, assigning that count as the ```frequency``` attribute. Finally, we sort them into descending order according to their frequency and return them.
@@ -280,12 +280,10 @@ return
                 return $stage
             }
         </direction>
-      </directions> 
+      </directions>
 ```
 
-Ready to try this expression out with [Zorba](http://try-zorba.28.io/queries/xquery/JCBuIC%2Fiq7nR%2FyMzxY%2FMniqdqb8%3D)?
-
-In this next example, let's list all characters and the scenes during which they appear on stage. This query illustrates the use of multiple ```for``` clauses in an FLWOR expression. 
+In this next example, let's list all characters and the scenes during which they appear on stage. This query illustrates the use of multiple ```for``` clauses in an FLWOR expression.
 
 ```xquery
 xquery version "3.0";
@@ -293,20 +291,20 @@ xquery version "3.0";
 declare namespace tei = "http://www.tei-c.org/ns/1.0";
 
 let $doc := fn:doc("https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml")
-return element appearances 
+return element appearances
   {
       let $persons := $doc//tei:person/@xml:id ! fn:concat("#", .)
       for $person in $persons
       for $act in $doc//tei:div1[@type="act"]
       for $scene in $act/tei:div2
       let $act-scene := fn:concat("Act-", $act/@n, ".", "Scene-", $scene/@n)
-      where $person = $scene//tei:stage/@who ! fn:tokenize(., " ") 
+      where $person = $scene//tei:stage/@who ! fn:tokenize(., " ")
       group by $person
       order by $person
       return <actor id="{$person}"  act-scene=" {$act-scene}" />
   }
 ```
-Let's give this expression a whirl using [Zorba](http://try-zorba.28.io/queries/xquery/J%2FOptdOBD9ZYoD5%2FGr9%2FxsmaT28%3D). Here is what the results look like.
+Let's give this expression a whirl. Here is what the results look like.
 
 ```xml
 <appearances>
@@ -323,7 +321,7 @@ We've got the information we want but it's not a very attractive display. Can we
 
 ### Formatting XQuery Results
 
-So a problem with the XQuery expression above is that it's a little hard to follow. How exactly are we matching names with scenes? I wrote the expression but, returning to it several days later, it find it hard to parse out. So, realistically, we cannot expect to add more complexity and hope to understand what we're doing. So let's [refactor](https://en.wikipedia.org/wiki/Code_refactoring) our expression into several sub-expressions (or functions) to maintain readability and comprehensibility. 
+So a problem with the XQuery expression above is that it's a little hard to follow. How exactly are we matching names with scenes? I wrote the expression but, returning to it several days later, it find it hard to parse out. So, realistically, we cannot expect to add more complexity and hope to understand what we're doing. So let's [refactor](https://en.wikipedia.org/wiki/Code_refactoring) our expression into several sub-expressions (or functions) to maintain readability and comprehensibility.
 
 Let's start out with our main expression body, which we'll keep as simple as possible.
 
@@ -350,7 +348,7 @@ return local:get-play($url)
 
 ```
 
-OK, now we've got the play. Let's get all the ids of the actors in the play. 
+OK, now we've got the play. Let's get all the ids of the actors in the play.
 
 ```xquery
 xquery version "3.0";
@@ -363,7 +361,7 @@ declare function local:get-person-ids($play as document-node()) as xs:string*
   for $person in $persons
   let $id := fn:translate($person, "#", "")
   return $id
-  
+
 };
 
 
@@ -377,13 +375,13 @@ return local:get-person-ids(local:get-play($url))
 
 ```
 
-The combination of evaluating the two nested functions in our return clause produces a sequence of string nodes listing all the ids in the play: 
+The combination of evaluating the two nested functions in our return clause produces a sequence of string nodes listing all the ids in the play:
 
-> ```Caesar_JC Calphurnia_JC SERVANTS.CAESAR.1_JC Brutus_JC Portia_JC Lucius_JC Cassius_JC Casca_JC Cinna_JC Decius_JC Ligarius_JC Metellus_JC Trebonius_JC Cicero_JC Publius_JC Popilius_JC Flavius_JC Marullus_JC Antony_JC Lepidus_JC Octavius_JC SERVANTS.ANTONY.1_JC SERVANTS.OCTAVIUS.1_JC SOLDIERS.BRUTUS.Lucilius_JC SOLDIERS.BRUTUS.Titinius_JC SOLDIERS.BRUTUS.Messala_JC SOLDIERS.BRUTUS.Varro_JC SOLDIERS.BRUTUS.Claudius_JC SOLDIERS.BRUTUS.Cato_JC SOLDIERS.BRUTUS.Strato_JC SOLDIERS.BRUTUS.Volumnius_JC SOLDIERS.BRUTUS.Labeo_JC SOLDIERS.BRUTUS.Flavius_JC SOLDIERS.BRUTUS.Dardanus_JC SOLDIERS.BRUTUS.Clitus_JC COMMONERS.Carpenter_JC COMMONERS.Cobbler_JC Soothsayer_JC Artemidorus_JC PLEBEIANS.0.1_JC PLEBEIANS.0.2_JC PLEBEIANS.0.3_JC PLEBEIANS.0.4_JC CinnaPoet_JC Pindarus_JC SOLDIERS.BRUTUS.0.1_JC SOLDIERS.BRUTUS.0.2_JC SOLDIERS.BRUTUS.0.3_JC Poet_JC Messenger_JC SOLDIERS.ANTONY.0.1_JC SOLDIERS.ANTONY.0.2_JC``` 
+> ```Caesar_JC Calphurnia_JC SERVANTS.CAESAR.1_JC Brutus_JC Portia_JC Lucius_JC Cassius_JC Casca_JC Cinna_JC Decius_JC Ligarius_JC Metellus_JC Trebonius_JC Cicero_JC Publius_JC Popilius_JC Flavius_JC Marullus_JC Antony_JC Lepidus_JC Octavius_JC SERVANTS.ANTONY.1_JC SERVANTS.OCTAVIUS.1_JC SOLDIERS.BRUTUS.Lucilius_JC SOLDIERS.BRUTUS.Titinius_JC SOLDIERS.BRUTUS.Messala_JC SOLDIERS.BRUTUS.Varro_JC SOLDIERS.BRUTUS.Claudius_JC SOLDIERS.BRUTUS.Cato_JC SOLDIERS.BRUTUS.Strato_JC SOLDIERS.BRUTUS.Volumnius_JC SOLDIERS.BRUTUS.Labeo_JC SOLDIERS.BRUTUS.Flavius_JC SOLDIERS.BRUTUS.Dardanus_JC SOLDIERS.BRUTUS.Clitus_JC COMMONERS.Carpenter_JC COMMONERS.Cobbler_JC Soothsayer_JC Artemidorus_JC PLEBEIANS.0.1_JC PLEBEIANS.0.2_JC PLEBEIANS.0.3_JC PLEBEIANS.0.4_JC CinnaPoet_JC Pindarus_JC SOLDIERS.BRUTUS.0.1_JC SOLDIERS.BRUTUS.0.2_JC SOLDIERS.BRUTUS.0.3_JC Poet_JC Messenger_JC SOLDIERS.ANTONY.0.1_JC SOLDIERS.ANTONY.0.2_JC```
 
 Not much to look at right now, but it's the data we need for our next function, which returns the characters' actual names.
 
-```xquery 
+```xquery
 xquery version "3.0";
 
 declare namespace tei = "http://www.tei-c.org/ns/1.0";
@@ -400,7 +398,7 @@ declare function local:get-person-ids($play as document-node()) as xs:string*
   for $person in $persons
   let $id := fn:translate($person, "#", "")
   return $id
-  
+
 };
 
 declare function local:get-play($url as xs:string) as document-node()
@@ -410,13 +408,13 @@ declare function local:get-play($url as xs:string) as document-node()
 
 let $url := "https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml"
 let $play := local:get-play($url)
-return local:get-person-ids($play) ! local:get-person-name-by-id($play , .) 
+return local:get-person-ids($play) ! local:get-person-name-by-id($play , .)
 
 ```
 
-This function evaluates to a friendlier sequence of names, rather than ids: 
+This function evaluates to a friendlier sequence of names, rather than ids:
 
-```Julius Caesar Calphurnia Servant to them Marcus Brutus Portia Lucius Caius Cassius Casca Cinna Decius Brutus Caius Ligarius Metellus Cimber Trebonius Cicero Publius Popilius Lena Flavius Marullus Mark Antony Lepidus Octavius Servant to Antony Servant to Octavius Lucilius Titinius Messala Varro Claudius Young Cato Strato Volumnius Labeo (nonspeaking) Flavius (nonspeaking) Dardanus Clitus A Carpenter A Cobbler A Soothsayer Artemidorus Cinna the poet Pindarus Another Poet A Messenger``` 
+```Julius Caesar Calphurnia Servant to them Marcus Brutus Portia Lucius Caius Cassius Casca Cinna Decius Brutus Caius Ligarius Metellus Cimber Trebonius Cicero Publius Popilius Lena Flavius Marullus Mark Antony Lepidus Octavius Servant to Antony Servant to Octavius Lucilius Titinius Messala Varro Claudius Young Cato Strato Volumnius Labeo (nonspeaking) Flavius (nonspeaking) Dardanus Clitus A Carpenter A Cobbler A Soothsayer Artemidorus Cinna the poet Pindarus Another Poet A Messenger```
 
 It would be a bit tedious, I think, to run through all the functions. But I hope you can see now how we build up our expression step-by-step from smaller sub-expressions. Putting it all together, then, we have the following:
 
@@ -436,7 +434,7 @@ declare function local:get-person-ids($play as document-node()) as xs:string*
   for $person in $persons
   let $id := fn:translate($person, "#", "")
   return $id
-  
+
 };
 
 declare function local:get-person-name-by-id($play as document-node(), $id as xs:string) as xs:string
@@ -475,7 +473,7 @@ declare function local:html($div as element(div)) as element(html)
 
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous">&#x20;</script>
-    
+
   </head>
   <body>
     <div class="container">
@@ -488,10 +486,10 @@ declare function local:html($div as element(div)) as element(html)
     </div>
   </body>
 </html>
-  
+
 };
 
-declare function local:get-appearances($play as document-node()) as element(p)* 
+declare function local:get-appearances($play as document-node()) as element(p)*
 {
   for $person-id in local:get-person-ids($play)
   let $name := local:get-person-name-by-id($play, $person-id)
@@ -507,11 +505,4 @@ let $appearances := element div {local:get-appearances($play)}
 return local:html($appearances)
 ```
 
-You can try running the whole XQuery expression with [Zorba](http://try.zorba.io/queries/xquery/7tclGE7xRIiRrpvuNhs5zpYKJ5I%3D). Better yet, check out [the HTML output with Zorba](http://try.zorba.io/queries/xquery/7tclGE7xRIiRrpvuNhs5zpYKJ5I%3D).
-
-### XQuery verus XSLT
-
-We might conclude today with a few remarks on how XQuery and XSLT work together. We've seen in these examples that we can use XQuery to transform XML results into HTML (and other formats too). And, as Laura has shown, XSLT can carry out these transformations too. So what's the difference between XQuery and XSLT? When should you select one over the other?
-
-In fact, there is a significant degree of overlap between the two languages. While XSLT is frequently used to transform documents of one type to another—say from TEI to HTML—we've seen that you can actually accomplish the same thing in XQuery, albeit sometimes less efficiently with complex documents. In truth, a lot comes down to context and programming preference. If you're working in a database context with many hundreds or perhaps thousand documents, then XQuery will be the natural choice. 
-
+Try running the whole XQuery expression with BaseX or eXist.
