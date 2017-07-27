@@ -1,8 +1,8 @@
 ## Session One
 
-### Introduction to Functional Programming
+### Introduction
 
-If you've programmed in a language like PHP or Python, you've probably been exposed to imperative and object-oriented constructs. The distinguishing feature of such programming languages is that they rely on changes of state to process information. That is, they require you to tell the computer how to process your ideas step-by-step, kind of like when you are making a recipe and taking the flour from a dry mix to dough to some baked good.
+If you've programmed in a language like PHP or Python, you've used imperative and object-oriented constructs. The distinguishing feature of such programming languages is that they rely on changes of state to process information. That is, they require you to tell the computer how to process your ideas step-by-step, kind of like when you are making a recipe and taking the flour from a dry mix to dough to some baked good.
 
 XQuery belongs to a different strand of programming languages derived from the lambda calculus and related to programming languages like Erlang, Haskell, Lisp, and R. In functional programming languages, everything is an expression and all expressions evaluate to some value. Clear? :) A simpler way of putting things is that in functional programming you write functions that take a value as input and produce a value as an output. So, returning to our baking example,
 
@@ -97,6 +97,75 @@ count $num
 return element {$class} {$num || ". " || $title}
 ```
 
+### Comparisons
+
+#### Comparisons
+
+* Value Comparisons (eq, ne, lt, le, gt, and ge)
+* General Comparisons (=, !=, <, <=, >, and >=)
+* Node Comparisons (is, <<, >>)
+
+#### Quantified Expressions
+
+* Some
+
+```xquery
+some $num in (1,2,3) satisfies $num mod 2 = 0
+```  
+
+* Every
+
+```xquery
+every $num in (1,2,3) satisfies $num mod 2 = 0
+```
+
+* General
+
+```xquery
+1 = (1,2)
+```
+* Value
+
+```xquery
+1 eq 3-2
+```
+
+```xquery
+let $ids :=
+  <identifiers>
+    <isbn num="13">978-0133507645</isbn>
+    <isbn num="10">0133507645</isbn>
+    <isbn num="13">978-0133507645</isbn>
+  </identifiers>
+where $ids/isbn/@num = "13"
+return $ids
+```
+
+```xquery
+let $ids :=
+  <identifiers>
+    <isbn num="13">978-0133507645</isbn>
+    <isbn num="10">0133507645</isbn>
+    <isbn num="13">978-0133507645</isbn>
+  </identifiers>
+where some $id in ($ids/isbn/@num) satisfies ($id = 13)
+return $ids
+```
+
+```xquery
+xquery version "3.1";
+
+let $coffee-shops :=
+  <coffee-shops>
+   <shop location="Birmigham">Revelator</shop>
+   <shop location="Greenwich">CFCF</shop>  
+   <shop location="Nashville">Revelator</shop>          
+  </coffee-shops>
+let $first-shop := $coffee-shops/shop[1]/text()
+let $second-shop := $coffee-shops/shop[1]/text()
+return $first-shop is $second-shop
+```
+
 ### Conditional Expressions
 
 Like other programming languages, XQuery permits conditions expressions of the form ```if...then...else```. However, unlike other programming languages, the ```else``` case is always required. This is because an expression must always evaluate to a value. We'll be using ```if...then...else``` in some examples below. To make sure you understand how to use them, let's quickly code the famous (at least in programmers' circles) [fizzbuzz](http://c2.com/cgi/wiki?FizzBuzzTest) exercise in XQuery.
@@ -114,11 +183,75 @@ return
   else $i
 ```
 
+You can also use a `switch` expression to handle complicated branching logic.
+
+```xquery
+xquery version "3.0";
+
+for $day in (1 to 7)
+return switch ($day)
+  case 1 return "Monday"
+  case 2 return "Tuesday"
+  case 3 return "Wednesday"
+  case 4 return "Thursday"
+  case 5 return "Friday"
+  case 6 return "Saturday"
+  case 7 return "Sunday"
+  default return "What day again?"
+```
+
+There is also a operator called a `typeswitch` that let's you branch on types rather than values.
+
+```xquery
+xquery version "3.0";
+
+declare namespace tei = "http://www.tei-c.org/ns/1.0";
+
+let $doc :=
+    <TEI xmlns="http://www.tei-c.org/ns/1.0">
+        <teiHeader type="text">
+            <fileDesc>
+                <titleStmt>
+                    <title>Testing XPath</title>
+                    <author>Clifford Anderson</author>
+                </titleStmt>
+                <publicationStmt>
+                    <idno>Test Document #1</idno>
+                    <publisher>Paralipomena</publisher>
+                    <pubPlace>Nashville, TN</pubPlace>
+                    <date when="2014"/>
+                </publicationStmt>
+                <!--comment-->
+                <sourceDesc>
+                    <p xml:lang="eng">Born digitally as a classroom exercise</p>
+                </sourceDesc>
+            </fileDesc>   
+        </teiHeader>
+        <text>
+            <front>
+                <note type="abstract">This is a sample XPath Document</note>
+            </front>
+            <body>
+                <p n="1">Who wants to learn XPath?</p>
+                <p n="2" xml:lang="eng">Let's get started with XPath</p>
+                <p>No time to waste!</p>
+            </body>
+        </text>
+    </TEI>
+for $node in $doc//node()    
+return
+    typeswitch($node)
+        case comment() return fn:string($node)
+        case text() return fn:string($node)
+        case element(tei:p) return fn:string-join($node/@*, " ")
+        default return ()
+```
+
 ### User-Defined Functions
 
 Functions represent the heart of functional programming but they can appear a little intimidating at first. The basic idea of a function is to break up complicated code into nice, simple, smaller units. A function also allows us to control better the information we receive and the outputs we provide.
 
-Before we get started writing functions in XQuery, let's try to explore the concept in pseudo-code, i.e. something that looks like code but doesn't actually run. Let's say that we want to write a function for our local diner. Imagine that every order can be supplemented with a salad if you choose. So we'll need to update the order for the chef and also the price of the meal whenever someone decides to compliment the meal with a salad.
+Before we get started writing functions in XQuery, let's try to explore the concept in pseudo-code, i.e. something that looks like code but doesn't actually run. Let's say that we want to write a function for our local diner. Imagine that every order can be supplemented with a salad if you choose. We'll need to update the order for the chef and also the price of the meal whenever someone decides to compliment the meal with a salad.
 
 So our pseudo-function would look something like this:
 ```
@@ -172,7 +305,10 @@ local:add-salad("Steak",false())
 ```
 Et voilá! You have written a function to add (or not) salads to every food order. Still, there is a problem. What if someone sends a malformed order? For example, what if patron just asked for 1 with a salad. What would happen? We'd get back the result ```1 and salad```. Even stranger, what happens when someone orders "Fish" and says "No" to salad. We'd an error saying ```Items of type xs:string and xs:boolean cannot be compared.``` What does that mean? Isn't there a way to check for these errors before they happen?
 
-In fact, there is. In the fancy language of computer science, this is called type checking. Basically, we want to define what type of information can go into our function and also what type of information can be returned as values by our function. In XQuery, we can check the types in the so-called function signature. Here's how we do that.
+In fact, there is. In the fancy language of computer science, this is called type checking. Basically, we want to define what type of information can go into our function and also what type of information can be returned as values by our function. In XQuery, we can check the types in the so-called function signature.
+
+Here's how we do that.
+
 ```xquery
 xquery version "3.1";
 
@@ -186,8 +322,23 @@ local:add-salad("Fish", true())
 ```
 By adding the clause ```as xs:string``` and ```as xs:boolean``` you limit the range of acceptable values to strings and booleans respectively. The ```as xs:string``` after the paragraph indicates that the return value will always be a string. While it's not strictly necessary to add types to your inputs and to your return values, it's a very good habit to get into. You'll find that if you cannot determine what type of information your function can accept and what type of information your function will return, you probably don't really understand what your function is doing.
 
-
 Whether you declare named functions in your prologue or assign anonymous functions to variables in your expression body depends on the purpose you intend to achieve.
+
+#### recursion
+
+```xquery
+xquery version "3.1";
+
+declare function local:fib($num as xs:integer) as xs:integer
+{
+  switch($num)
+  case 0 return 0
+  case 1 return 1
+  default return local:fib($num - 1) + local:fib($num - 2)
+};
+
+local:fib(30)
+```
 
 ### Problem Sets
 
