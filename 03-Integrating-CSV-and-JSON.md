@@ -12,12 +12,13 @@ A common challenge when loading data into an XML database is turning it from som
 
 How would we load the information in this file into BaseX? Fortunately, BaseX has you covered. There are two functions in BaseX that you can use in combination to load a CSV file and convert it to XML.  Let's try them out!
 
-The CSV file shown above is available on [Github](https://raw.githubusercontent.com/CliffordAnderson/XQuery4Humanists/c362876f6f6b4ec6755069a3ab256fb01d495616/data/books.csv). First, we'll write a function to grab the text from Github and display it as a CSV. To do this, we'll use a BaseX function called [fetch:text](http://docs.basex.org/wiki/Fetch_Module#fetch:text), which just grabs the content of websites and returns them as a big string of text. So we can get the CSV with this code:
+The CSV file shown above is available on [Github](https://raw.githubusercontent.com/CliffordAnderson/XQuery4Humanists/c362876f6f6b4ec6755069a3ab256fb01d495616/data/books.csv). First, we'll write a function to grab the text from Github and display it as a CSV. To do this, we'll use a function called `fn:unparsed-text`, which grabs the content at the URL and returns it as a big string of text. So we can get the CSV with this code:
+
 ```xquery
 xquery version "3.1";
 
 let $url := "https://raw.githubusercontent.com/CliffordAnderson/XQuery4Humanists/c362876f6f6b4ec6755069a3ab256fb01d495616/data/books.csv"
-let $csv := fetch:text($url)
+let $csv := fn:unparsed-text($url)
 return $csv
 ```
 The only complicated part of this expression is the crazy long URL for the CSV file. Otherwise, it's simple and straightforward, right? Our next step is to convert the CSV into XML. In this case, there's a function called [csv:parse](http://docs.basex.org/wiki/CSV_Module) that converts CSV files into XML files. Here's how it works.
@@ -25,7 +26,7 @@ The only complicated part of this expression is the crazy long URL for the CSV f
 xquery version "3.1";
 
 let $url := "https://raw.githubusercontent.com/CliffordAnderson/XQuery4Humanists/c362876f6f6b4ec6755069a3ab256fb01d495616/data/books.csv"
-let $csv := fetch:text($url)
+let $csv := fn:unparsed-text($url)
 let $books := csv:parse($csv)
 return $books
 ```
@@ -57,7 +58,7 @@ Fixing the problem is also relatively straightforward, though you'll notice a ne
 xquery version "3.1";
 
 let $url := "https://raw.githubusercontent.com/CliffordAnderson/XQuery4Humanists/c362876f6f6b4ec6755069a3ab256fb01d495616/data/books.csv"
-let $csv := fetch:text($url)
+let $csv := fn:unparsed-text($url)
 let $books := csv:parse($csv, map {'header':'true'} )
 return $books
 ```
@@ -288,7 +289,7 @@ To fetch the JSON with XQuery, we write an expression very similar to our initia
 xquery version "3.1";
 
 let $url := "http://openlibrary.org/api/volumes/brief/isbn/074324754X.json"
-let $json := fetch:text($url)
+let $json := fn:unparsed-text($url)
 return $json
 ```
 We can treat JSON as text but it would be easier to convert it to XML so that we can work with it in a more familiar format. XQuery 3.1 introduces a new built-in function to produce this conversion: [fn:json-to-xml](http://docs.basex.org/wiki/XQuery_3.1#fn:json-to-xml). As you see, the usage of this function is very similar to ```csv:parse```.
@@ -297,7 +298,7 @@ We can treat JSON as text but it would be easier to convert it to XML so that we
 xquery version "3.1";
 
 let $url := "http://openlibrary.org/api/volumes/brief/isbn/074324754X.json"
-let $json := fetch:text($url)
+let $json := fn:unparsed-text($url)
 let $book := fn:json-to-xml($json)
 return $book
 ````
@@ -312,7 +313,7 @@ Let's proceed step-by-step. We will build a function first that takes an ISBN an
 declare function local:get-subjects-by-isbn($isbn as xs:string) as element()*
 {
   let $url := "http://openlibrary.org/api/volumes/brief/isbn/" || $isbn || ".json"
-  let $json := fetch:text($url)
+  let $json := fn:unparsed-text($url)
   let $book-data := fn:json-to-xml($json)
   for $subject in $book-data//xf:array[@key="subjects"]/xf:string/text()
   return element subject {$subject}
@@ -325,7 +326,7 @@ The body of the query expression looks like this:
 
 ```xquery
 let $url := "https://raw.githubusercontent.com/CliffordAnderson/XQuery4Humanists/c362876f6f6b4ec6755069a3ab256fb01d495616/data/books.csv"
-let $csv := fetch:text($url)
+let $csv := fn:unparsed-text($url)
 let $books := csv:parse($csv, map {'header':'true'} )
 let $records :=
   for $book in $books/csv/record
@@ -345,14 +346,14 @@ declare namespace xf = "http://www.w3.org/2005/xpath-functions";
 declare function local:get-subjects-by-isbn($isbn as xs:string) as element()*
 {
   let $url := "http://openlibrary.org/api/volumes/brief/isbn/" || $isbn || ".json"
-  let $json := fetch:text($url)
+  let $json := fn:unparsed-text($url)
   let $book-data := fn:json-to-xml($json)
   for $subject in $book-data//xf:array[@key="subjects"]/xf:string/text()
   return element subject {$subject}
 };
 
 let $url := "https://raw.githubusercontent.com/CliffordAnderson/XQuery4Humanists/c362876f6f6b4ec6755069a3ab256fb01d495616/data/books.csv"
-let $csv := fetch:text($url)
+let $csv := fn:unparsed-text($url)
 let $books := csv:parse($csv, map {'header':'true'} )
 let $records :=
   for $book in $books/csv/record
@@ -400,7 +401,7 @@ declare namespace xf = "http://www.w3.org/2005/xpath-functions";
 declare function local:get-subjects-by-isbn($isbn as xs:string) as element()*
 {
   let $url := "http://openlibrary.org/api/volumes/brief/isbn/" || $isbn || ".json"
-  let $json := fetch:text($url)
+  let $json := fn:unparsed-text($url)
   let $book-data := fn:json-to-xml($json)
   for $subject in $book-data//xf:array[@key="subjects"]/xf:string/text()
   return element subject {$subject}
@@ -408,7 +409,7 @@ declare function local:get-subjects-by-isbn($isbn as xs:string) as element()*
 
 let $database := "books" (: Change as necessary :)
 let $url := "https://raw.githubusercontent.com/CliffordAnderson/XQuery4Humanists/c362876f6f6b4ec6755069a3ab256fb01d495616/data/books.csv"
-let $csv := fetch:text($url)
+let $csv := fn:unparsed-text($url)
 let $books := csv:parse($csv, map {'header':'true'} )
 for $book in $books/csv/record
 let $isbn := $book/ISBN/text()
