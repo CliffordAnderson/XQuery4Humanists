@@ -176,56 +176,72 @@ Now, can you apply them to solve the questions above? Give it a shot by writing 
 
 #### Comparisons
 
-* Value Comparisons (eq, ne, lt, le, gt, and ge)
-* General Comparisons (=, !=, <, <=, >, and >=)
-* Node Comparisons (is, <<, >>)
+XQuery offers three different ways of making comparisons. At first glance, you might wonder why the language designers included different options. Couldn't they have simple picked one set of comparison operators and stuck with them? In practice, experienced XQuery programmers frequently use them, at least the first two, interchangeably. As beginning XQuery programmers, it behooves you to understand the differences since mixing them up can introduce subtle bugs.
 
+* Value Comparisons (`eq`, `ne`, `lt`, `le`, `gt`, and `ge`)
+* General Comparisons (`=`, `!=`, `<`, `<=`, `>`, and `>=`)
+* Node Comparisons (`is`, `<<`, `>>`)
 
-* General
+##### Value Comparisons
 
-```xquery
-1 = (1,2)
-```
-* Value
+Value comparisons check whether two values are equal. 
 
 ```xquery
 1 eq 3-2
 ```
 
-```xquery
-let $ids :=
-  <identifiers>
-    <isbn num="13">978-0133507645</isbn>
-    <isbn num="10">0133507645</isbn>
-    <isbn num="13">978-0133507645</isbn>
-  </identifiers>
-where $ids/isbn/@num = "13"
-return $ids
-```
+##### General Comparisons
+
+General comparisons check whether the value of the left is equal to *any* value on the right. In other words, a general comparison performs an implicit existential quantification. 
 
 ```xquery
-let $ids :=
-  <identifiers>
-    <isbn num="13">978-0133507645</isbn>
-    <isbn num="10">0133507645</isbn>
-    <isbn num="13">978-0133507645</isbn>
-  </identifiers>
-where some $id in ($ids/isbn/@num) satisfies ($id = 13)
-return $ids
+1 = (1,2)
 ```
+
+You could rewrite this expression with the `some` operator as `some $num in (1,2) satisfies $num = 1`. As you can see, you can rewrite a value comparison using general comparison. Let's try it on the example above: `1 = 3-2`. But the math can go haywire if you're not careful since `1 = (3-2, 2-3)` is also true. 
+
+##### Node Comparisons
+
+There is also a comparison that checks node identity. In the example below, we list three coffee shops in Nashville. Two of the `shop` elements are apparently identical. But your XQuery intepreter keeps track of their distinct identities so you can ask whether they're actually the same.
 
 ```xquery
 xquery version "3.1";
 
 let $coffee-shops :=
   <coffee-shops>
-   <shop location="Birmigham">Revelator</shop>
-   <shop location="Greenwich">CFCF</shop>  
-   <shop location="Nashville">Revelator</shop>          
+   <shop>Barista Parlor</shop>
+   <shop>Revelator</shop>  
+   <shop>Barista Parlor</shop>          
   </coffee-shops>
-let $first-shop := $coffee-shops/shop[1]/text()
-let $second-shop := $coffee-shops/shop[1]/text()
+let $first-shop := $coffee-shops/shop[1]
+let $second-shop := $coffee-shops/shop[3]
 return $first-shop is $second-shop
+```
+
+Try using `<<` and `>>` to check whether `$first-shop` comes before or after the `$second-shop`.
+
+For practice, can you fill in the correct comparison operators in the two examples below?
+
+```xquery
+let $ids :=
+  <identifiers>
+    <isbn num="13">978-0133507645</isbn>
+    <isbn num="10">0133507645</isbn>
+    <isbn num="13">978-0133507645</isbn>
+  </identifiers>
+where $ids/isbn/@num FIX ME! "13"
+return $ids
+```
+
+```xquery
+let $ids :=
+  <identifiers>
+    <isbn num="13">978-0133507645</isbn>
+    <isbn num="10">0133507645</isbn>
+    <isbn num="13">978-0133507645</isbn>
+  </identifiers>
+where some $id in ($ids/isbn/@num) satisfies FIXE ME!
+return $ids
 ```
 
 ### Conditional Expressions
