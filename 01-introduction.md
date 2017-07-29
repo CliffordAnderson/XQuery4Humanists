@@ -4,9 +4,9 @@ In this session, you will learn the basics of the [XQuery](https://www.w3.org/TR
 
 ### Learning Outcomes
 
-*
-*
-*
+* Understand why XQuery makes a good fit for digital humanists
+* Apply XQuery FLWOR expressions to manipulate XML Data
+* Solve problems with simple user-defined functions in XQuery
 
 ### Introduction
 
@@ -148,7 +148,17 @@ return $num || ". " || $title
 
 Other ways exist to count in FLWOR expressions, but it's easy to get the order mixed up as you manipulate the tuple stream. Try combining `group by` with `count` to see what I mean. Can you partition books into fiction and nonfiction while also order the books sequentially in those groups? Try it out yourself, then check my [solution](https://gist.github.com/CliffordAnderson/35cde75043b55ab8a213d3e0449941c9).
 
-#### Quantified Expressions
+#### Quantified Expressions  
+
+What if you want to ask whether items in a sequence satisfy certain criteria? For instance, we might want to ask whether any names in a list contain initials. This would be useful, for instance, if you are standardizing name authority records. Here's a FLWOR expression that uses a built-in function called `fn:contains` that checks for a period in name forms. 
+
+```xquery
+let $names := ("G. G. Ashwood", "Patricia Conley", "S. Dole Melipone", "Ella Runciter")
+for $name in $names
+return fn:contains($name, ".")
+```
+
+The expression returns a sequence of boolean values: `true, false, true, false`. That's good information, but we want to check whether any or all items in the list satisfy our condition. We can use quantified expressions in XQuery to ask those questions. If you have studied predicate logic, you'll already be familiar with [existential quantification](https://en.wikipedia.org/wiki/Existential_quantification) using the symbols `∃` for some and `∀` for all.) Here are examples of `some` and `every` expressions.
 
 * Some
 
@@ -161,6 +171,8 @@ some $num in (1,2,3) satisfies $num mod 2 = 0
 ```xquery
 every $num in (1,2,3) satisfies $num mod 2 = 0
 ```
+
+Now, can you apply them to solve the questions above? Give it a shot by writing a query that asks whether there are any initials in the list of names and another that checks whether none of the names have initials. When you're ready, check your answers [against my versions](https://gist.github.com/CliffordAnderson/86c9a0ec058749257a3bd6aff2897700).
 
 #### Comparisons
 
