@@ -4,9 +4,9 @@ In this session, you will learn the basics of the [XQuery](https://www.w3.org/TR
 
 ### Learning Outcomes
 
-* Understand why XQuery makes a good fit for digital humanists
-* Apply XQuery FLWOR expressions to manipulate XML Data
-* Solve problems with simple user-defined functions in XQuery
+* Understand why XQuery makes a good fit for digital humanists;
+* Apply XQuery FLWOR expressions to manipulate XML Data;
+* Solve problems with simple user-defined functions in XQuery.
 
 ### Introduction
 
@@ -34,6 +34,18 @@ string-join(fn:reverse(fn:tokenize("1,2,3",",")),",")
 ```
 
 This ability to substitute expressions with values is called [referential transparency](https://en.wikipedia.org/wiki/Referential_transparency_(computer_science)). Your expression will always evaluate to the same value when given the same input. Programming in XQuery (and XSLT and R) is different from other kinds of programming because you're not producing 'side effects' such as updating the value of your variables.
+
+### A Bit of Syntax
+
+Like any programming language, you need to memorize a bit of syntax and operators to write XQuery expressions. This does not cover all the syntax, but here are some key parts.
+
+| Syntax        | Meaning                                     |
+| ------------- | -------------                               |
+| `:=`          | assignment, binds a variable to a value     |
+| `(:  :)`      | XQuery comment, not interpreted             |
+| `||`          | concatenation, joins together two strings   |
+| `!`           | simple mapping operator, applies a function on right to value on the right                    |
+| `=>`          | arrow operator, pipes the value on the left to the function on the right |
 
 ### FLWOR Expressions
 
@@ -150,7 +162,7 @@ Other ways exist to count in FLWOR expressions, but it's easy to get the order m
 
 #### Quantified Expressions  
 
-What if you want to ask whether items in a sequence satisfy certain criteria? For instance, we might want to ask whether any names in a list contain initials. This would be useful, for instance, if you are standardizing name authority records. Here's a FLWOR expression that uses a built-in function called `fn:contains` that checks for a period in name forms. 
+What if you want to ask whether items in a sequence meet certain criteria? For instance, we might want to ask whether any names in a list contain initials. This would be useful, for instance, if you are standardizing name authority records. Here's a FLWOR expression that uses a built-in function called `fn:contains` that checks for a period in name forms.
 
 ```xquery
 let $names := ("G. G. Ashwood", "Patricia Conley", "S. Dole Melipone", "Ella Runciter")
@@ -184,7 +196,7 @@ XQuery offers three different ways of making comparisons. At first glance, you m
 
 ##### Value Comparisons
 
-Value comparisons check whether two values are equal. 
+Value comparisons check whether two values are equal.
 
 ```xquery
 1 eq 3-2
@@ -192,13 +204,26 @@ Value comparisons check whether two values are equal.
 
 ##### General Comparisons
 
-General comparisons check whether the value of the left is equal to *any* value on the right. In other words, a general comparison performs an implicit existential quantification. 
+General comparisons check whether the value of the left is equal to *any* value on the right. In other words, a general comparison performs an implicit existential quantification.
 
 ```xquery
 1 = (1,2)
 ```
 
-You could rewrite this expression with the `some` operator as `some $num in (1,2) satisfies $num = 1`. As you can see, you can rewrite a value comparison using general comparison. Let's try it on the example above: `1 = 3-2`. But the math can go haywire if you're not careful since `1 = (3-2, 2-3)` is also true. 
+You could rewrite this expression with the `some` operator as `some $num in (1,2) satisfies $num = 1`. As you can see, you can rewrite a value comparison using general comparison. Let's try it on the example above: `1 = 3-2`. But the math can go haywire if you're not careful since `1 = (3-2, 2-3)` is also true.
+
+A deeper difference between value and general comparisons is that the first are transitive and the second are not. As Katz and Chamberlain point out in [XQuery from the Experts](https://books.google.com/books?id=VEWRh5_On38C&pg=PA105#v=onepage&q&f=false), when you write general comparisons, you may find yourself facing non-transitive equations.
+
+```xquery
+xquery version "3.1";
+
+let $first := 1
+let $second := (1,2,3)
+let $third := 3
+return ($first = $second, $third = $second, $first = $third)
+```
+
+If your analysis depends on the transitivity property, make sure that you stay with value comparisons rather than general comparisons.
 
 ##### Node Comparisons
 
