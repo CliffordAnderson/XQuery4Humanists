@@ -41,9 +41,10 @@ Like any programming language, you need to memorize a bit of syntax and operator
 
 | Syntax        | Meaning                                     |
 | ------------- | -------------                               |
+| `( )`         | sequence constructor                        |
 | `:=`          | assignment, binds a variable to a value     |
 | `(:  :)`      | XQuery comment, not interpreted             |
-| `||`          | concatenation, joins together two strings   |
+| `&#124;&#124;`| concatenation, joins together two strings   |
 | `!`           | simple mapping operator, applies a function on right to value on the right                    |
 | `=>`          | arrow operator, pipes the value on the left to the function on the right |
 
@@ -274,7 +275,7 @@ return $ids
 Like other programming languages, XQuery permits conditions expressions of the form ```if...then...else```. However, unlike other programming languages, the ```else``` case is always required. This is because an expression must always evaluate to a value. We'll be using ```if...then...else``` in some examples below. To make sure you understand how to use them, let's quickly code the famous (at least in programmers' circles) [fizzbuzz](http://c2.com/cgi/wiki?FizzBuzzTest) exercise in XQuery.
 
 ```xquery
-xquery version "3.0";
+xquery version "3.1";
 
 (: Fizz Buzz in XQuery :)
 
@@ -289,7 +290,7 @@ return
 You can also use a `switch` expression to handle complicated branching logic.
 
 ```xquery
-xquery version "3.0";
+xquery version "3.1";
 
 for $day in (1 to 7)
 return switch ($day)
@@ -303,10 +304,10 @@ return switch ($day)
   default return "What day again?"
 ```
 
-There is also a operator called a `typeswitch` that let's you branch on types rather than values.
+There is also a operator called a `typeswitch` that let's you branch on types rather than values. Here's an example of
 
 ```xquery
-xquery version "3.0";
+xquery version "3.1";
 
 declare namespace tei = "http://www.tei-c.org/ns/1.0";
 
@@ -344,27 +345,66 @@ let $doc :=
 for $node in $doc//node()    
 return
     typeswitch($node)
-        case comment() return fn:string($node)
-        case text() return fn:string($node)
-        case element(tei:p) return fn:string-join($node/@*, " ")
+        case comment() return "A comment: " || fn:string($node)
+        case element(tei:p) return "An paragraph element: " || $node/data()
         default return ()
 ```
+
+Can you expand this `typeswitch` example to return the text values of the author and the title elements?
 
 ### Built-in Functions
 
 Functions represent the heart of functional programming but they can appear a little intimidating at first. The basic idea of a function is to break up complicated code into nice, simple, smaller units. A function also allows us to control better the information we receive and the outputs we provide.
 
-The great thing about XQuery is that many functions already come built into the language. Check out Priscilla Walmsley's very helpful [list of XQuery functions](http://www.xqueryfunctions.com/). The built-in functions all come prefixed with the ```fn``` namespace. Shall we try a few together?
+The great thing about XQuery is that many functions already come built into the language. You can check out the [official list](https://www.w3.org/TR/xpath-functions-31/), but you will probably find Priscilla Walmsley's synopsis more helpful [list of XQuery functions](http://www.xqueryfunctions.com/). The built-in functions all come prefixed with the ```fn``` namespace.
 
+Want to try a few together? Let's experiment with the functions that apply to sequences. Here's the set of [General functions and operators on sequences] (minus one function) from the XQuery 3.1 Recommendation.
+
+| Function       | Meaning                                      |
+| -------------- | --------------                               |
+|fn:empty	       | Returns true if the argument is the empty sequence. |
+|fn:exists	     | Returns true if the argument is a non-empty sequence. |
+|fn:head	       | Returns the first item in a sequence. |
+|fn:tail	       | Returns all but the first item in a sequence. |
+|fn:insert-before| Returns a sequence constructed by inserting an item or a sequence of items at a given position within an existing sequence. |
+|fn:remove       | Returns a new sequence containing all the items of $target except the item at position $position. |
+|fn:reverse	     | Reverses the order of items in a sequence.
+|fn:subsequence  | Returns the contiguous sequence of items in the value of $sourceSeq beginning at the position indicated by the value of $startingLoc and continuing for the number of items indicated by the value of $length. |
+
+Let's apply each of these functions to the sequence: `("Kraków", "Montreal", "Mexico City", "Utrecht")`. As you experiment with each of these functions, note that they take different numbers of arguments. Some take one, two, and three arguments.
+
+As we noted at the beginning of this introduction, you can also chain functions together. You can write these chains in many ways, but we'll focus on two here.
+
+The first is to put one function inside another. To reverse our sequence and then take the first item (i.e., the item had been the last), you could write this function within a function.
+
+```xquery
+fn:head(fn:reverse(("Kraków", "Montreal", "Mexico City", "Utrecht")))
+```
+
+Another possibility would be to pipe the result from the first function to the next function using the arrow operator: `=>`.
+
+```xquery
+fn:reverse(("Kraków", "Montreal", "Mexico City", "Utrecht")) => fn:head()
+```
+
+This format is easier to read when you're working with longer functions. Remember that the argument to the function on the right side of the function is implied; you don't state it directly because it's being "piped" or "forwarded" from the previous expression.
+
+You can also combine expressions using the simple mapping operator (`!`), which acts like a `for` in an FLWOR expression. The simple mapping operator applies the function on the right side of the operator to each item on the left hand sequence. Let's use it to create upper-case equivalents of all the items in our sequence.
+
+```xquery
+("Kraków", "Montreal", "Mexico City", "Utrecht") ! fn:upper-case(.)
+```
+
+Note that we have to use the `.` operator to indicate where we want to substitute the items in the left-handed sequence. This actually allows greater flexibility in our expressions. For instance, can you create a version of the expression above that concatenates the phrase that "DH met in  " plus the place name? If you can do that, can you also create a version that indicates the correct year of the meeting (without using a FLWOR expression)? My [version](https://gist.github.com/CliffordAnderson/484b42eff8b4c7b8644edecaf22e6da2) could probably be improved.
 
 ### user-defined Functions
 
-Of course, it's also possible to write your own functions in XQuery. In fact, it's usually *necessary* to write new functions. You can do so in two ways. On the one hand, you can declare functions in the XQuery prologue. Or you can write anonymous functions. Let's take a look at both examples.
+Of course, it's also possible to write your own functions in XQuery. In fact, it's generally *necessary* to write new functions. You can do so in two ways. On the one hand, you can declare functions in the XQuery prologue. Or you can write anonymous functions. Let's take a look at both examples.
 
 Here's a user-defined function to write a friendly hello to someone. Our function will accept a string representing someone's name as an argument and return a greeting in response.
 
 ```xquery
-xquery version "3.0";
+xquery version "3.1";
 
 declare function local:say-hello($name as xs:string) as xs:string
 {
@@ -377,13 +417,13 @@ local:say-hello("Dave")
 Another way of writing this function is to use a FLWOR expression. In this case, we'll write an anonymous function, meaning we cannot access it by name, and bind it to a variable with a ```let``` clause. We'll then use the ```return``` clause to call and evaluate the function.
 
 ```xquery
-xquery version "3.0";
+xquery version "3.1";
 
 let $say-hello := function($name as xs:string) as xs:string {"Hello, " || $name || "!" }
 return $say-hello("Dave")
 ```
 
-Let's get back to our pseudo-function that we sketch out at top. How may we turn this pseudo-code into a real XQuery expression? Let's write the function first. Remember that we want to take a food choice and a yes/no (true/false) decision about whether to add a salad as inputs and then return a combined food choice as a result. Below is a first pass at writing that function.
+Let's write a function to help fulfill restaurant orders. Our function will take a food choice along with a yes/no (true/false) decision about whether to add a salad as inputs and then return a combined food choice as a result. Below is a first pass at writing that function.
 
 ```xquery
 xquery version "3.1";
@@ -395,6 +435,7 @@ declare function local:add-salad($food, $salad)
 };
 ```
 To call this function we need a main expression body. It's actually pretty simple.
+
 ```xquery
 local:add-salad("Steak",false())
 ```
@@ -415,11 +456,14 @@ declare function local:add-salad($food as xs:string, $salad as xs:boolean) as xs
 
 local:add-salad("Fish", true())
 ```
-By adding the clause ```as xs:string``` and ```as xs:boolean``` you limit the range of acceptable values to strings and booleans respectively. The ```as xs:string``` after the paragraph indicates that the return value will always be a string. While it's not strictly necessary to add types to your inputs and to your return values, it's a very good habit to get into. You'll find that if you cannot determine what type of information your function can accept and what type of information your function will return, you probably don't really understand what your function is doing.
+
+By adding the clause ```as xs:string``` and ```as xs:boolean``` you limit the range of acceptable values to strings and booleans respectively. The ```as xs:string``` after the paragraph indicates that the return value will always be a string. While it's not strictly necessary to add types to your inputs and to your return values, it's a good habit to get into. You'll find that if you cannot determine what type of information your function can accept and what type of information your function will return, you probably don't fully understand what your function is doing.
 
 Whether you declare named functions in your prologue or assign anonymous functions to variables in your expression body depends on the purpose you intend to achieve.
 
 ### Recursive Functions
+
+Recursion forms the gateway to more advanced XQuery. We will explore a basic example of a recursive function here. The basic idea behind recursion is dividing a big task into a set of smaller tasks. To make recursion work, you need to have at least one recursive case (i.e., a case of a big task that you can split into smaller tasks) as well as at least one base case (i.e., a case that represents an indivisible task). Let's test out these concepts by computing the [fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_number) in XQuery.
 
 ```xquery
 xquery version "3.1";
@@ -435,17 +479,19 @@ declare function local:fib($num as xs:integer) as xs:integer
 local:fib(30)
 ```
 
+Can you create a version of this function that outputs all the numbers in the fibonacci sequence up to and including the nth fibnonacci number that you pass into the function? See my answers in this [gist](https://gist.github.com/CliffordAnderson/7997843).
+
 ### Problem Sets
 
 #### Pig Latin in XQuery
 
-My son Theodore loves to speak Pig Latin. He can speak it really fast, making it difficult for my wife and I to follow him. Wouldn't it be helpful to have a Pig Latin interpreter, I thought? So let's write a basic parser for Pig Latin in XQuery this month.
+My son Theodore loves to speak Pig Latin. He can speak it fast, making it difficult for my wife and I to follow him. Wouldn't it be helpful to have a Pig Latin interpreter, I thought? Let's write a basic parser for Pig Latin in XQuery this month.
 
-The rules for [Pig Latin](https://en.wikipedia.org/wiki/Pig_Latin) are simple though different dialects exist, as we will see. Let's take the simplest dialect first. Basically, to turn any English word into its equivalent in Pig Latin you take the first consonant off the front of the word, add it to the end, and then add "ay." If your word already starts with a vowel, then just add "ay" to the end. Thus, "Hello" becomes "Ellohay." "I" becomes "Iay."
+The rules for [Pig Latin](https://en.wikipedia.org/wiki/Pig_Latin) are simple though different dialects exist, as we will see. Let's take the simplest dialect first. Basically, to turn any English word into its translation in Pig Latin you take the first consonant off the front of the word, add it to the end, and then add "ay." If your word already starts with a vowel, then add "ay" to the end. Thus, "Hello" becomes "Ellohay." "I" becomes "Iay."
 
 *Exercise #1*
 
-So, for our first exercise, let's write a basic XQuery expression that takes a word and returns its equivalent this dialect of Pig Latin.
+For our first exercise, let's write a basic XQuery expression that takes a word and returns its equivalent this dialect of Pig Latin.
 
 *Hint: If you need help getting started, try using this function: [fn:substring](http://www.xqueryfunctions.com/xq/fn_substring.html)*
 
@@ -466,7 +512,7 @@ I mentioned that other dialectics of Pig Latin exist. In fact, we speak a differ
 If you know how to use regular expressions, you might write the expression like this.
 
 ```xquery
-xquery version "3.0";
+xquery version "3.1";
 
 let $phrase := "I speak Pig Latin"
 for $word in fn:tokenize($phrase, " ")
