@@ -1,8 +1,8 @@
-## Session Three
+## Session Four
 
-### Mashups and XML Databases
+### Working with CSV, JSON, and XML
 
-XQuery is a powerful language for exploring and drawing results from individual XML documents. However, its real power comes to the fore when you combine it with XML databases. In this session, we're going to explore how to use XQuery in BaseX, an open source XML database.
+XQuery is a powerful language for exploring and drawing results from individual XML documents. However, you can use it to tackle fomats as diverse as CSV and JSON. In this session, we're going to explore how combine all three with XQuery. Optionally, we'll also show how to save our results in BaseX, an open source XML database.
 
 ### Loading CSV
 
