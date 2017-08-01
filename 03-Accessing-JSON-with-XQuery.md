@@ -1,4 +1,4 @@
-## Session Four
+## Session Three
 
 The focus of this session is on using [XQuery](https://www.w3.org/TR/xquery-31/) to explore [JSON](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). We'll explore the array and map datatypes introduced in XQuery 3.1 along with related functions.
 
