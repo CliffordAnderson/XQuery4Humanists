@@ -277,7 +277,34 @@ xquery version "3.1";
 fn:unparsed-text("http://openlibrary.org/search.json?title=black%20spider")
 ```
 
-Try them out and take notice of the difference between the two. As you'll note, the first returns the JSON document as a text document. The second converts the JSON into XQuery maps and arrays.
+Try them out and take notice of the difference between the two. As you'll note, the first returns the JSON document as a text document. The second converts the JSON into XQuery maps and arrays. What if you want to convert your JSON into XML? You could write XQuery code to parse the string returned from the first expression or to convert the maps and array structure of the second expression in XML. But I'm glad to report there is an easier way: `fn:json-to-xml`. 
+
+```xquery
+version "3.1";
+
+fn:unparsed-text("http://openlibrary.org/search.json?title=black%20spider") => fn:json-to-xml()
+
+```
+
+If you need to serialize JSON to XML, there's a function for that too: `fn:xml-to-json`. Howevever, you cannot simply pass along XML as such. Try applying that function to any arbitrary XML document and you'll receive an error.
+
+```xquery
+xquery version "3.1";
+
+let $doc :=
+  <workshops>
+    <xquery>
+      <leader institution="Vanderbilt">Cliff</leader>
+      <leader institution="State">Joe</leader>
+    </xquery>
+  </workshops>
+return fn:xml-to-json($doc)
+```
+
+To convert this document into JSON, you'll need to apply the [template rules](https://www.w3.org/TR/xslt-30/#json-to-xml-mapping) for writing convertible XML. As an exercise, try writing an XQuery to convert the XML document above to JSON. Here's [my answer](https://gist.github.com/CliffordAnderson/c174928e43e7d4ab9115a4dadd68c74e) when you're ready to check.
+
+If you want to convert maps/arrays to JSON, then you'll need to wrote a more complex query. Happily, we can rely on the [utility function that Joe's written for this purpose](https://gist.github.com/joewiz/d986da715facaad633db).
+
 
 ### Oxford English Dictionary API
 
