@@ -308,28 +308,117 @@ If you want to convert maps/arrays to JSON, then you'll need to wrote a more com
 
 ### Oxford English Dictionary API
 
-```xquery
- declare function local:title($book as xs:string, $key as xs:string) {
-  let $uri := "http://openlibrary.org/search.json?title="
-  let $json := fn:json-doc($uri || $book)
-  return element results {
-    for $item in array:flatten(map:find($json, $key))
-    return element result {$item}
-  }
-};
-```
+Our final project today will be to read an entry from the [Oxford English Dictionary API](https://developer.oxforddictionaries.com/) and convert it from JSON to XML. To try out these exercises, you'll need to sign up for an API ID & Key. Register for the [Free](https://developer.oxforddictionaries.com/) plan, click on "Credentials," and create a new app. Copy the Application ID and the Application Key for use in the examples below. 
+
+We're going to need a different technique to access this API because we need to authenticate our requests. We'll be using Florent George's [HTTP Client Module](http://expath.org/spec/http-client), which is one of the ExPath standards that should work across implementations. A simple demonstration of the HTTP Client Module sends our key and id with a request for a word (in this case "person").
 
 ```xquery
 xquery version "3.1";
 
+declare namespace http = "http://expath.org/ns/http-client";
+
 let $word := "person"
 let $request :=
-  <http:request href="https://od-api.oxforddictionaries.com/api/v1/entries/en/{$word}"  method="get">
-    <http:header name="app_key" value="###"/>
-    <http:header name="app_id" value="###"/>
+  <http:request href="https://od-api.oxforddictionaries.com/api/v1/entries/en/{$word}"  override-media-type="text/plain" method="get" >
+    <http:header name="app_key" value="####"/>
+    <http:header name="app_id" value="####"/>
   </http:request>
 return http:send-request($request)
 ```
+
+We get back a JSON document in textual form.
+
+```json
+{
+    "metadata": {"provider": "Oxford University Press"},
+    "results": [{
+        "id": "person",
+        "language": "en",
+        "lexicalEntries": [{
+            "entries": [{
+                "etymologies": ["Middle English: from Old French persone, from Latin persona \u2018actor's mask, character in a play\u2019, later \u2018human being\u2019"],
+                "grammaticalFeatures": [{
+                    "text": "Singular",
+                    "type": "Number"
+                }],
+                "homographNumber": "000",
+                "notes": [{
+                    "text": "The words people and persons can both be used as the plural of person, but they have slightly different connotations. People is by far the commoner of the two words and is used in most ordinary contexts: a group of people; there were only about ten people; several thousand people have been rehoused. Persons, on the other hand, tends now to be restricted to official or formal contexts, as in this vehicle is authorized to carry twenty persons; no persons admitted without a pass",
+                    "type": "editorialNote"
+                }],
+                "senses": [
+                    {
+                        "definitions": ["a human being regarded as an individual"],
+                        "examples": [
+                            {"text": "she is a person of astonishing energy"},
+                            {"text": "the porter was the last person to see her prior to her disappearance"}
+                        ],
+                        "id": "m_en_gbus0768650.009",
+                        "subsenses": [
+                            {
+                                "definitions": ["(in legal or formal contexts) an unspecified individual"],
+                                "examples": [
+                                    {"text": "each of the persons using unlawful violence is guilty of riot"},
+                                    {"text": "the entrance fee is £2.00 per person"}
+                                ],
+                                "id": "m_en_gbus0768650.013"
+                            },
+                            {
+                                "definitions": ["an individual characterized by a preference or liking for a specified thing"],
+                                "examples": [{"text": "she's not a cat person"}],
+                                "id": "m_en_gbus0768650.018",
+                                "notes": [{
+                                    "text": "with modifier",
+                                    "type": "grammaticalNote"
+                                }]
+                            },
+                            {
+                                "definitions": ["a character in a play or story"],
+                                "examples": [{"text": "his previous roles in the person of a fallible cop"}],
+                                "id": "m_en_gbus0768650.021"
+                            },
+                            {
+                                "definitions": ["an individual's body"],
+                                "examples": [{"text": "I would have publicity photographs on my person at all times"}],
+                                "id": "m_en_gbus0768650.022"
+                            },
+                            {
+                                "definitions": ["(especially in legal contexts) used euphemistically to refer to a man's genitals."],
+                                "id": "m_en_gbus0768650.023",
+                                "registers": ["dated"]
+                            }
+                        ]
+                    },
+                    {
+                        "definitions": ["a category used in the classification of pronouns, possessive determiners, and verb forms, according to whether they indicate the speaker (first person), the addressee (second person), or a third party (third person)."],
+                        "domains": ["Grammar"],
+                        "id": "m_en_gbus0768650.025"
+                    },
+                    {
+                        "definitions": ["each of the three modes of being of God, namely the Father, the Son, or the Holy Ghost, who together constitute the Trinity."],
+                        "domains": ["Theology"],
+                        "id": "m_en_gbus0768650.031"
+                    }
+                ]
+            }],
+            "language": "en",
+            "lexicalCategory": "Noun",
+            "pronunciations": [{
+                "audioFile": "http://audio.oxforddictionaries.com/en/mp3/person_gb_1_8.mp3",
+                "dialects": ["British English"],
+                "phoneticNotation": "IPA",
+                "phoneticSpelling": "ˈpəːs(ə)n"
+            }],
+            "text": "person"
+        }],
+        "type": "headword",
+        "word": "person"
+    }]
+}
+```
+
+As an exercise, can you parse the result of this API call into XQuery maps and arrays and then return only the part of the data structure containing the senses? Check your work [against my expression](blob/master/code/senses.xqy).
+
 
 ```xquery
 xquery version "3.1";
