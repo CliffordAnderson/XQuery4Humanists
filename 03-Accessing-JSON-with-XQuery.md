@@ -417,7 +417,7 @@ We get back a JSON document in textual form.
 }
 ```
 
-As an exercise, can you parse the result of this API call into XQuery maps and arrays and then return only the part of the data structure containing the senses? Check your work [against my expression](blob/master/code/senses.xqy). Let's build on this example to produce a formated list of definitions. In this case, we'll find all the values of "definition" keys and then iterate through the resulting array to format the result. 
+As an exercise, can you parse the result of this API call into XQuery maps and arrays and then return only the part of the data structure containing the senses? Check your work [against my expression](code/senses.xqy). Let's build on this example to produce a formated list of definitions. In this case, we'll find all the values of "definition" keys and then iterate through the resulting array to format the result. 
 
 ```xquery
 xquery version "3.1";
@@ -434,8 +434,8 @@ declare function local:lookup-word($word as xs:string, $id as xs:string, $key as
 };
 
 let $word := "person"
-let $id := "993be3e7"
-let $key := "59207f4f580f9f12ab271c206d7d9789"
+let $id := "####"
+let $key := "####"
 let $lookup-word := local:lookup-word(?, $id, $key)
 let $definitions := map:find($lookup-word($word), "definitions")
 for $definition at $num in 1 to array:size($definitions)
@@ -444,7 +444,7 @@ return $num || ". " || $definitions($definition)
 
 This expression produces a nice list of definitions of "person".
 
-```xquery
+```txt
 1. a human being regarded as an individual
 2. (in legal or formal contexts) an unspecified individual
 3. an individual characterized by a preference or liking for a specified thing
@@ -457,37 +457,99 @@ This expression produces a nice list of definitions of "person".
 
 The extra work of finding the size of the array and iterating through its members is actually not necessary when we use the alternative lookup syntax. Can you rewrite this example with the lookup syntax?
 
+In this final set of examples, we will find synonyms for every word in a sentence. We'll make the result into an XML document with the original sentence plus the converted sentence. First, let's call the OED API for synonyms. We'll then use `map:find` to drill down to the synonyms and a lookup expression to pull out the values of the `text` map.
+
 ```xquery
 xquery version "3.1";
+
+declare namespace http = "http://expath.org/ns/http-client";
 
 let $word := "person"
 let $request :=
-  <http:request href="https://od-api.oxforddictionaries.com/api/v1/entries/en/{$word}/synonyms"  method="get">
-    <http:header name="app_key" value="###"/>
-    <http:header name="app_id" value="###"/>
+  <http:request href="https://od-api.oxforddictionaries.com/api/v1/entries/en/{$word}/synonyms" override-media-type="text/plain" method="get">
+    <http:header name="app_key" value="####"/>
+    <http:header name="app_id" value="####"/>
   </http:request>
-return http:send-request($request)
+let $synonyms := 
+   http:send-request($request)[2]
+   => fn:parse-json()
+   => map:find("synonyms")
+return $synonyms?1?*?text
 ```
+
+This query produces a list of the possible synonyms. 
+
+```txt
+human being
+individual
+man
+woman
+human
+being
+living soul
+soul
+mortal
+creature
+fellow
+```
+
+Now we'll use a random number generator (`fn:random-number-generator`) to generate a random number. We should pause here to look at this function carefully since it's a higher-order function, meaning in this case that it returns a function that returns a function that then returns a value: `fn:head(fn:random-number-generator()("permute")(1 to $count))`. Got it? We also need to check the HTTP headers to see whether we receive a 404 or a 200. If we receive a 404, we'll return the original word. If not, we'll return a random synonym.
 
 ```xquery
 xquery version "3.1";
 
+declare namespace http = "http://expath.org/ns/http-client";
+
 declare function local:get-synonym($word as xs:string) as xs:string?
 {
- let $request :=
-  <http:request href="https://od-api.oxforddictionaries.com/api/v1/entries/en/{$word}/synonyms"  method="get">
-    <http:header name="app_key" value="###"/>
-    <http:header name="app_id" value="###"/>
+let $request :=
+  <http:request href="https://od-api.oxforddictionaries.com/api/v1/entries/en/{$word}/synonyms" override-media-type="text/plain" method="get">
+    <http:header name="app_key" value="####"/>
+    <http:header name="app_id" value="####"/>
   </http:request>
-let $synonyms := http:send-request($request)[2]
-where $synonyms/json
-return ($synonyms//_/synonyms/_/id/string())[1]
+return
+  if (http:send-request($request)[1]/@status/fn:data() = "404") then $word
+  else 
+    let $synonyms := 
+    http:send-request($request)[2]
+    => fn:parse-json()
+    => map:find("synonyms")
+   let $words := $synonyms?1?*?text
+   let $count := fn:count($words)
+   let $random := fn:head(fn:random-number-generator()("permute")(1 to $count))
+   return $words[$random]
 };
 
-let $sentence := fn:tokenize("I sing of arms and woman", "\W+")
+let $sentence := fn:tokenize("I sing of arms and the man", "\W+")
 let $new-words :=
   for $word in $sentence
   return local:get-synonym($word)
 return fn:string-join($new-words, " ") || "."
 ```
 
+Try it out! I generated `I quaver of armaments in addition to the male` but you'll receive a different random sentence every time.
+
+Now let's just present the sentences together as an XML document. This is the easy part. We'll use direct element constructors to package up our results. Assuming the function remains the same, our free expression now reads:
+
+```xquery
+let $sentence := fn:tokenize("I sing of arms and the man", "\W+")
+let $new-words :=
+  for $word in $sentence
+  return local:get-synonym($word)
+return 
+  <sentence>
+    <original>{fn:string-join($sentence, " ") || "."}</original>
+    <synonym>{fn:string-join($new-words, " ") || "."}</synonym>
+  </sentence>
+```
+
+The result is a tidy XML document showing the original and the synonym sentences:
+
+```xml
+<sentence>
+  <original>I sing of arms and the man.</original>
+  <synonym>I quaver of instruments of war including the youth.</synonym>
+</sentence>
+```
+
+That's it for this session! We'll pick up next time with a demonstration of how to combine CSV and JSON using XQuery.
