@@ -417,8 +417,45 @@ We get back a JSON document in textual form.
 }
 ```
 
-As an exercise, can you parse the result of this API call into XQuery maps and arrays and then return only the part of the data structure containing the senses? Check your work [against my expression](blob/master/code/senses.xqy).
+As an exercise, can you parse the result of this API call into XQuery maps and arrays and then return only the part of the data structure containing the senses? Check your work [against my expression](blob/master/code/senses.xqy). Let's build on this example to produce a formated list of definitions. In this case, we'll find all the values of "definition" keys and then iterate through the resulting array to format the result. 
 
+```xquery
+xquery version "3.1";
+
+declare namespace http = "http://expath.org/ns/http-client";
+
+declare function local:lookup-word($word as xs:string, $id as xs:string, $key as xs:string) as map(*) {
+  let $request :=
+    <http:request href="https://od-api.oxforddictionaries.com/api/v1/entries/en/{$word}" override-media-type="text/plain" method="get">
+      <http:header name="app_key" value="{$key}"/>
+      <http:header name="app_id" value="{$id}"/>
+    </http:request>
+  return http:send-request($request)[2] => fn:parse-json()
+};
+
+let $word := "person"
+let $id := "993be3e7"
+let $key := "59207f4f580f9f12ab271c206d7d9789"
+let $lookup-word := local:lookup-word(?, $id, $key)
+let $definitions := map:find($lookup-word($word), "definitions")
+for $definition at $num in 1 to array:size($definitions)
+return $num || ". " || $definitions($definition)
+```
+
+This expression produces a nice list of definitions of "person".
+
+```xquery
+1. a human being regarded as an individual
+2. (in legal or formal contexts) an unspecified individual
+3. an individual characterized by a preference or liking for a specified thing
+4. a character in a play or story
+5. an individual's body
+6. (especially in legal contexts) used euphemistically to refer to a man's genitals.
+7. a category used in the classification of pronouns, possessive determiners, and verb forms, according to whether they indicate the speaker (first person), the addressee (second person), or a third party (third person).
+8. each of the three modes of being of God, namely the Father, the Son, or the Holy Ghost, who together constitute the Trinity.
+```
+
+The extra work of finding the size of the array and iterating through its members is actually not necessary when we use the alternative lookup syntax. Can you rewrite this example with the lookup syntax?
 
 ```xquery
 xquery version "3.1";
@@ -454,41 +491,3 @@ let $new-words :=
 return fn:string-join($new-words, " ") || "."
 ```
 
-```xquery
-xquery version "3.1";
-
-declare function local:lookup-word($word as xs:string, $id as xs:string, $key as xs:string) {
-  let $request :=
-    <http:request href="https://od-api.oxforddictionaries.com/api/v1/entries/en/{$word}"  method="get">
-      <http:header name="app_key" value="{$key}"/>
-      <http:header name="app_id" value="{$id}"/>
-    </http:request>
-  return http:send-request($request)
-};
-
-let $word := "person"
-let $id := "###"
-let $key := "###"
-let $lookup-word := local:lookup-word(?, $id, $key)
-for $definition at $num in $lookup-word($word)//definitions/_/fn:data()
-return $num || ". " || $definition
-```
-
-```xquery
-xquery version "3.1";
-
-declare function local:lookup-word($word as xs:string, $id as xs:string, $key as xs:string) {
-  let $request :=
-    <http:request href="https://od-api.oxforddictionaries.com/api/v1/wordlist/en/registers=Rare;domains=Art"  method="get">
-      <http:header name="app_key" value="{$key}"/>
-      <http:header name="app_id" value="{$id}"/>
-    </http:request>
-  return http:send-request($request)
-};
-
-let $word := "person"
-let $id := "###"
-let $key := "###"
-let $lookup-word := local:lookup-word(?, $id, $key)
-return $lookup-word("person")
-```
