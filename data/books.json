@@ -1,0 +1,190 @@
+{
+    "records": {"/books/OL7928299M": {
+        "recordURL": "http://openlibrary.org/books/OL7928299M/The_Glass_Castle",
+        "oclcs": [],
+        "publishDates": ["January 9, 2006"],
+        "lccns": [],
+        "details": {
+            "info_url": "http://openlibrary.org/books/OL7928299M/The_Glass_Castle",
+            "bib_key": "isbn:074324754X",
+            "preview_url": "http://openlibrary.org/books/OL7928299M/The_Glass_Castle",
+            "thumbnail_url": "https://covers.openlibrary.org/b/id/473601-S.jpg",
+            "details": {
+                "number_of_pages": 288,
+                "subtitle": "A Memoir",
+                "weight": "8.8 ounces",
+                "covers": [473601],
+                "latest_revision": 7,
+                "first_sentence": {
+                    "type": "/type/text",
+                    "value": "I WAS SITTING IN a taxi, wondering if I had overdressed for the evening, when I looked out the window and saw Mom rooting through a Dumpster."
+                },
+                "source_records": ["amazon:074324754X:cp:4147739557:267382"],
+                "title": "The Glass Castle",
+                "languages": [{"key": "/languages/eng"}],
+                "subjects": [
+                    "Entertainment & Performing Arts - Television Personalities",
+                    "Women",
+                    "Personal Memoirs",
+                    "Childhood Memoir",
+                    "Alcohol Abuse",
+                    "Family Development",
+                    "United States",
+                    "Biography & Autobiography",
+                    "Biography / Autobiography",
+                    "Literary",
+                    "Biography/Autobiography",
+                    "Children of alcoholics",
+                    "Biography & Autobiography / Personal Memoirs",
+                    "Problem families",
+                    "Welch",
+                    "West Virginia",
+                    "Biography",
+                    "Case studies"
+                ],
+                "type": {"key": "/type/edition"},
+                "physical_dimensions": "7.9 x 5.2 x 0.8 inches",
+                "revision": 7,
+                "publishers": ["Scribner"],
+                "physical_format": "Paperback",
+                "last_modified": {
+                    "type": "/type/datetime",
+                    "value": "2011-08-11T17:47:59.304270"
+                },
+                "key": "/books/OL7928299M",
+                "authors": [{
+                    "name": "Jeannette Walls",
+                    "key": "/authors/OL34287A"
+                }],
+                "classifications": {},
+                "created": {
+                    "type": "/type/datetime",
+                    "value": "2008-04-29T15:03:11.581851"
+                },
+                "identifiers": {
+                    "librarything": ["7903"],
+                    "goodreads": ["7445"]
+                },
+                "isbn_13": ["9780743247542"],
+                "isbn_10": ["074324754X"],
+                "publish_date": "January 9, 2006",
+                "works": [{"key": "/works/OL46760W"}]
+            },
+            "preview": "noview"
+        },
+        "isbns": [
+            "074324754X",
+            "9780743247542"
+        ],
+        "olids": ["OL7928299M"],
+        "issns": [],
+        "data": {
+            "publishers": [{"name": "Scribner"}],
+            "number_of_pages": 288,
+            "subtitle": "A Memoir",
+            "weight": "8.8 ounces",
+            "title": "The Glass Castle",
+            "url": "http://openlibrary.org/books/OL7928299M/The_Glass_Castle",
+            "identifiers": {
+                "isbn_13": ["9780743247542"],
+                "openlibrary": ["OL7928299M"],
+                "isbn_10": ["074324754X"],
+                "goodreads": ["7445"],
+                "librarything": ["7903"]
+            },
+            "cover": {
+                "small": "https://covers.openlibrary.org/b/id/473601-S.jpg",
+                "large": "https://covers.openlibrary.org/b/id/473601-L.jpg",
+                "medium": "https://covers.openlibrary.org/b/id/473601-M.jpg"
+            },
+            "subject_places": [
+                {
+                    "url": "https://openlibrary.org/subjects/place:welch",
+                    "name": "Welch"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/place:west_virginia",
+                    "name": "West Virginia"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/place:united_states",
+                    "name": "United States"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/place:new_york_(state)",
+                    "name": "New York (State)"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/place:new_york",
+                    "name": "New York"
+                }
+            ],
+            "subjects": [
+                {
+                    "url": "https://openlibrary.org/subjects/biography",
+                    "name": "Biography"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/case_studies",
+                    "name": "Case studies"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/children_of_alcoholics",
+                    "name": "Children of alcoholics"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/problem_families",
+                    "name": "Problem families"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/poor",
+                    "name": "Poor"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/homeless_persons",
+                    "name": "Homeless persons"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/family_relationships",
+                    "name": "Family relationships"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/dysfunctional_families",
+                    "name": "Dysfunctional families"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/accessible_book",
+                    "name": "Accessible book"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/protected_daisy",
+                    "name": "Protected DAISY"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/new_york_times_bestseller",
+                    "name": "New York Times bestseller"
+                },
+                {
+                    "url": "https://openlibrary.org/subjects/nyt:paperback_nonfiction=2007-03-03",
+                    "name": "nyt:paperback_nonfiction=2007-03-03"
+                }
+            ],
+            "subject_people": [{
+                "url": "https://openlibrary.org/subjects/person:jeannette_walls",
+                "name": "Jeannette Walls"
+            }],
+            "key": "/books/OL7928299M",
+            "authors": [{
+                "url": "http://openlibrary.org/authors/OL34287A/Jeannette_Walls",
+                "name": "Jeannette Walls"
+            }],
+            "publish_date": "January 9, 2006",
+            "excerpts": [{
+                "comment": "",
+                "text": "I WAS SITTING IN a taxi, wondering if I had overdressed for the evening, when I looked out the window and saw Mom rooting through a Dumpster.",
+                "first_sentence": true
+            }]
+        }
+    }},
+    "items": []
+}
