@@ -1,0 +1,55 @@
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+   <teiHeader>
+      <fileDesc>
+         <titleStmt>
+            <title>Eldorado</title>
+            <author>Edgar Allen Poe</author>
+         </titleStmt>
+         <publicationStmt>
+            <p>Originally published in <title>The Flag of Our Union</title> (<date>April 21, 1849</date>)</p>
+         </publicationStmt>
+         <sourceDesc>
+            <p>Converted from the digital text provided by The Poetry Foundation.</p>
+         </sourceDesc>
+      </fileDesc>
+   </teiHeader>
+   <text>
+      <body>
+         <lg type="poem">
+            <head>Eldorado</head>
+            <lg type="stanza" n="1">
+               <l n="1">Gaily bedight,</l>
+               <l n="2">A gallant knight,</l>
+               <l n="3">In sunshine and in shadow,</l>
+               <l n="4">Had journeyed long,</l>
+               <l n="5">Singing a song,</l>
+               <l n="6">In search of Eldorado.</l>
+            </lg>
+            <lg type="stanza" n="2">
+               <l n="7">But he grew old-</l>
+               <l n="8">This knight so bold-</l>
+               <l n="9">And o'er his heart a shadow-</l>
+               <l n="10">Fell as he found</l>
+               <l n="11">No spot of ground</l>
+               <l n="12">That looked like Eldorado.</l>
+            </lg>
+            <lg type="stanza" n="3">
+               <l n="13">And, as his strength</l>
+               <l n="14">Failed him at length,</l>
+               <l n="15">He met a pilgrim shadow.</l>
+               <l n="16">'Shadow,' said he-</l>
+               <l n="17">'Where can it be-</l>
+               <l n="18">This land of Eldorado?'</l>
+            </lg>
+            <lg type="stanza" n="4">
+               <l n="19">'Over the Mountains</l>
+               <l n="20">Of the Moon,</l>
+               <l n="21">Down the Valley of the Shadow,</l>
+               <l n="22">Ride, boldly ride,'</l>
+               <l n="23">The shade replied,</l>
+               <l n="24">'If you seek for Eldorado!'</l>
+            </lg>
+         </lg>
+      </body>
+   </text>
+</TEI>
