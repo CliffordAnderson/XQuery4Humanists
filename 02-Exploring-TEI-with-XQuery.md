@@ -1,6 +1,6 @@
 ## Session Two
 
-Today, we are going to tackle some textual analysis with XQuery. When you are working with real world data like documents encoded according to the [TEI](http://www.tei-c.org/index.xml), your query expressions will frequently become more complicated. Today, we'll try to consolidate what we've learned and use our new-found knowledge of XQuery to explore literary documents.
+Today, we are going to tackle some textual analysis with XQuery. When you are working with real world data like documents encoded according to the [TEI](http://www.tei-c.org/index.xml), your query expressions will frequently become more complicated. In this session, we'll try to apply what we've learned and use our new-found knowledge of XQuery to explore literary documents.
 
 ### Word Frequencies in XQuery
 
@@ -66,17 +66,17 @@ Let's start with a TEI edition of the poem:
 </TEI>
 ```
 
-I've also provided [a gist with the poem](https://gist.github.com/CliffordAnderson/2045cefaf2a687e5d078/), in case you'd like to use it. Here's an XQuery to retrieve it.
+I've also include the poem in data folder of this repository, in case you'd like to use it. Here's an XQuery to retrieve it.
 
 ```xquery
 xquery version "3.0";
 
 declare namespace tei = "http://www.tei-c.org/ns/1.0";
 
-fn:doc("https://gist.githubusercontent.com/CliffordAnderson/2045cefaf2a687e5d078/raw/8b79a0ddbfd1dd85c88d478ea76e083a2d6718c8/eldorado.xml")
+fn:doc("https://raw.githubusercontent.com/CliffordAnderson/XQuery4Humanists/master/data/eldorado.xml")
 ```
 
-Obviously, we could simply count the words with such a short poem. But our goal is to write an XQuery expression to do the counting for us. Your mission, should you choose to accept it, is to write an XQuery expression that takes the text nodes from the l elements of the source poem and produces a dictionary of the unique words in the poem along with their frequency.
+We could count the words manually with such a short poem. But our goal is to write an XQuery expression to do the counting for us. Your mission, should you choose to accept it, is to write an XQuery expression that takes the text nodes from the l elements of the source poem and produces a dictionary of the unique words in the poem along with their frequency.
 
 The output should look like this:
 
@@ -96,22 +96,29 @@ The output should look like this:
 ```
 
 To get you started, let's assume the expression body looks something like this
+
 ```xquery
-let $phrases:= fn:doc("https://gist.githubusercontent.com/CliffordAnderson/2045cefaf2a687e5d078/raw/8b79a0ddbfd1dd85c88d478ea76e083a2d6718c8/eldorado.xml")//tei:l/text()
+xquery version "3.1";
+
+declare namespace tei = "http://www.tei-c.org/ns/1.0";
+
+fn:doc("https://raw.githubusercontent.com/CliffordAnderson/XQuery4Humanists/master/data/eldorado.xml")//tei:l/text()
 let $words := local:collect-words($phrases)
 let $word-elements := local:determine-frequency($words)
 return element dictionary {$word-elements}
 ```
 
-To get this to work, we just have to write two functions: ```local:collect-words()```, which we will use to clean up the words by getting rid of capitalization, punctuation, and the like, and ```local:determine-frequency()```, which we will use to get the frequency of the various words.
+To get this to work, we just have to write two functions: `local:collect-words()`, which we will use to clean up the words by getting rid of capitalization, punctuation, and the like, and `local:determine-frequency()`, which we will use to get the frequency of the various words.
 
-> Hint: You'll probably need to use regular expressions in ```local:collect-words()``` to clean up the strings. If so, this function ```fn:replace($words, "[!?.',/-]", "")``` should do the trick nicely.
+> Hint: You'll need clean up the punctuation in `local:collect-words()` to get an accurate count of word tokens. The [`fn:translate` function](http://www.xqueryfunctions.com/xq/fn_translate.html) should do the trick nicely.
 
-Give it a try yourself before [checking out what I came up with....](https://gist.github.com/CliffordAnderson/468e0b6a8ee6143676f9)
+Give it a try yourself before [checking out what I came up with....](code/count-word-tokens.xqy)
 
 Let's write the ```local:collect-words``` function first. This function accepts a sequence of text nodes, strips away punctuation and other non-essential differences, and returns a sequence of words.
 
 ```xquery
+xquery version "3.1";
+
 (:~
 : This function accepts a sequence of text nodes and returns a sequence of normalized string tokens.
 : @param  $words the text nodes from a given text
@@ -120,7 +127,7 @@ Let's write the ```local:collect-words``` function first. This function accepts 
 declare function local:collect-words($words as xs:string*) as xs:string*
 {
     let $words := fn:string-join($words, " ")
-    let $words := fn:replace($words, "[!?.',]", "")
+    let $words := fn:translate($words, "!?.',-", "")
     let $words := fn:lower-case($words)
     let $words := fn:tokenize($words, " ")
     return
@@ -130,7 +137,7 @@ declare function local:collect-words($words as xs:string*) as xs:string*
 local:collect-words("This is a test of the system.")
 ```
 
-Writing a function in this style is perfectly OK in XQuery, but it's not especially good style. We're rebinding `$words` three times. (Technically, this is called "shadow binding." We're actually creating different variables behind the scenes.) From a functional perspective, it gets confusing since variables are not supposed to vary. We could rewrite FLWOR expression this as a sequence of nested sub-expressions, but doing so makes our expression hard to read: ```fn:tokenize(fn:lower-case(fn:replace(fn:string-join($words, " "), "[!?.',-]", "")), " ")```
+Writing a function in this style is perfectly OK in XQuery, but it's not good style. We're rebinding `$words` three times. (Technically, this is called "shadow binding." We're actually creating different variables behind the scenes.) From a functional perspective, it gets confusing since variables are not supposed to vary. We could rewrite FLWOR expression this as a sequence of nested sub-expressions, but doing so makes our expression hard to read: ```fn:tokenize(fn:lower-case(fn:replace(fn:string-join($words, " "), "[!?.',-]", "")), " ")```
 
 The XQuery 3.1 Recommendation introduces the 'arrow operator' to avoid writing these kinds of expressions. The arrow operator pipes the value of a previous expression as the first argument to another expression. So, for example, we could rewrite the expression above like this:
 
