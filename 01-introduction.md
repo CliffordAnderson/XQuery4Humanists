@@ -60,7 +60,7 @@ If you have used XPath to work with XML documents, you will also recognize these
 
 ### FLWOR Expressions
 
-Our code is already looking a little messy, isn't it? A fundamental construct in XQuery is the FLWOR expression. While you could write XQuery expressions without FLWOR expressions, you probably wouldn't want to. FLWOR expressions introduce some key concepts, including variable binding, sorting, and filtering. FLWOR stands for "for, let, where, order by, return."
+Our code is already looking a little messy, isn't it? A fundamental construct in XQuery is the *FLWOR expression*. While you could write XQuery expressions without FLWOR expressions, you probably wouldn't want to. FLWOR expressions introduce some key concepts, including variable binding, sorting, and filtering. FLWOR stands for "*for*, *let*, *where*, *order by*, *return*"—each *clauses* that make up a FLWOR *expression*.
 
 * `for` iteratives over a sequence (technically, a "tuple stream"), binding a variable to each item in turn.
 * `let` binds an variable to an expression.
@@ -68,9 +68,9 @@ Our code is already looking a little messy, isn't it? A fundamental construct in
 * `order by` orders the items in the sequence.
 * `return` gives the result of the FLWOR expression.
 
-If you use a `for` or a `let`, you must also provide a `return`. `where` and `order by` are optional.
+If you use a `for` or a `let`, you must also provide a `return`. The `where` and `order by` clauses are optional.
 
-Here's a simple `let` expression that binds a variable and then returns its value.
+Here's a simple FLWOR expression using just `let` to bind a variable and then and `return` to return its value.
 
 ```xquery
 let $date := fn:current-date()
@@ -79,7 +79,7 @@ return $date
 
 Try it out and see what you date get back. By the way, did you notice that we broke a fundamental rule we described above?
 
-Here's a basic `for` expression. In this example, we'll iterate through several cities and count the length of their names in characters.
+Here's a basic FLWOR expression that uses a `for` clause to iterate through several cities, binding each in turn to the variable `$city`, and using the `return` clause to return the count the number of characters of each city name.
 
 ```xquery
 for $city in ("Chicago", "New York", "Nashville", "Montreal")
@@ -88,7 +88,7 @@ return fn:string-length($city)
 
 Which city wins for longest name? Which for shortest?
 
-> Why are there parentheses surrounding the names of the cities? Why are city names in quotation marks? Why the need for this extra syntax? The quotation marks indicate that we're dealing with strings rather than, say, element names. We need to include the parentheses to make clear that we're dealing with a sequence of strings. If we wrote `for $city in "Chicago", "New York"` our XQuery interpreter would assume that we were introducing a new clause in our FLWOR expression rather than a sequence of items. We introduce the parentheses to resolve that interpretative ambiguity.`
+> Why are there parentheses surrounding the names of the cities? Why are city names in quotation marks? Why the need for this extra syntax? The quotation marks indicate that we're dealing with strings rather than, say, numbers or XML element names. We need to include the parentheses to make clear that we're dealing with a *sequence* of strings (see the table of syntax above). If we wrote `for $city in "Chicago", "New York"`, then our XQuery interpreter would assume that we were introducing a new clause in our FLWOR expression rather than a sequence of items. The parentheses definitely resolve that interpretative ambiguity.
 
 You can combine `for` and `let` clauses and also use them more than once. Let's take a look at an example of an XQuery FLWOR expression. In this case, we'll iterate over a sequence of book elements and return fiction or nonfiction elements with titles as appropriate.
 
@@ -105,14 +105,14 @@ for $book in $books/book
 return $book
 ```
 
-Try using running this expression. Note that the book names are out of order. Can you put them into alphabetical order by adding another FLWOR clause? See this [gist](https://gist.github.com/CliffordAnderson/618702a8987629476f81506912a4e258) for the solution. Can you use another clause to filter out the nonfiction books? [Here's how](https://gist.github.com/CliffordAnderson/50d512f9d03c09f389c9ffe5345a8b73).
+Try using running this expression. Note that the book names are out of order. Can you put them into alphabetical order by adding another clause to the FLWOR? See this [gist](https://gist.github.com/CliffordAnderson/618702a8987629476f81506912a4e258) for the solution. Can you use another clause to filter out the nonfiction books? [Here's how](https://gist.github.com/CliffordAnderson/50d512f9d03c09f389c9ffe5345a8b73).
 
 XQuery 3.0 introduced two new clauses to FLWOR expressions.
 
 * `group by`
 * `count`
 
-The `group by` clause organizes sequences into related buckets. Can you add a `group by` to the example below to split list into fiction and nonfiction?
+The `group by` clause organizes sequences into related buckets. Can you add a `group by` to the example below to split the list into fiction and nonfiction?
 
 ```xquery
 let $books :=
@@ -130,7 +130,7 @@ return $book
 
 Did you run into problems? If so, were you trying to add the `group by` clause along these lines: `group by $book/@class`? If so, then you will have encountered an error. The problem is that the grouping key, that is, the buckets you'd like to use to group items, must be available when you start grouping. It's easy to fix this error. You can either assign the group key in advance using a `let` clause or you can bind it in the `group by` as follows: `group by $book/@class`.
 
-The results of applying the `group by` may not look impressive at first, but consider that you can also create new elements to sort out these groups. In the example below, we'll use an [computed element constructor](https://www.w3.org/TR/xquery-31/#id-computedElements) to create parent elements for fiction and nonfiction books.
+The results of applying the `group by` may not look impressive at first, but consider that you can also create new elements to sort out these groups. In the example below, we'll use a [computed element constructor](https://www.w3.org/TR/xquery-31/#id-computedElements) to create parent elements for the groups of fiction and nonfiction books.
 
 ```xquery
 let $books :=
@@ -151,7 +151,7 @@ return element {$class} {$title}
 
 The lists of titles are still a little messy. Any thoughts about how to clean them up?
 
-The other new clause of the FLWOR expression is `count`. This is one of those features that beginning Here's an example of `count`
+The other new clause of the FLWOR expression is `count`. This is one of those features that beginning students find very useful. Here's an example of `count`:
 
 ```xquery
 let $books :=
@@ -171,7 +171,15 @@ return $num || ". " || $title
 
 Other ways exist to count in FLWOR expressions, but it's easy to get the order mixed up as you manipulate the tuple stream. Try combining `group by` with `count` to see what I mean. Can you partition books into fiction and nonfiction while also order the books sequentially in those groups? Try it out yourself, then check my [solution](https://gist.github.com/CliffordAnderson/35cde75043b55ab8a213d3e0449941c9).
 
-#### Quantified Expressions  
+> Note for eXist users: Unfortunately the `count` clause has not yet been implemented in eXist. Luckily, a workaround is available: first, use the `at` clause to bind the variable `$num` to the current position of the interation through the books and (b) use either an intermediate FLWOR to pre-sort the books or, as shown here, the `fn:sort` function:
+> 
+> ```xquery
+> for $book at $num in fn:sort($books/book)
+> let $title := $book/text()
+> return $num || ". " || $title
+> ```
+
+### Quantified Expressions  
 
 What if you want to ask whether items in a sequence meet certain criteria? For instance, we might want to ask whether any names in a list contain initials. This would be useful, for instance, if you are standardizing name authority records. Here's a FLWOR expression that uses a built-in function called `fn:contains` that checks for a period in name forms.
 
@@ -183,13 +191,13 @@ return fn:contains($name, ".")
 
 The expression returns a sequence of boolean values: `true, false, true, false`. That's good information, but we want to check whether any or all items in the list satisfy our condition. We can use quantified expressions in XQuery to ask those questions. If you have studied predicate logic, you'll already be familiar with [existential quantification](https://en.wikipedia.org/wiki/Existential_quantification) using the symbols `∃` for some and `∀` for all.) Here are examples of `some` and `every` expressions.
 
-* Some
+* *some*
 
 ```xquery
 some $num in (1,2,3) satisfies $num mod 2 = 0
 ```  
 
-* Every
+* *every*
 
 ```xquery
 every $num in (1,2,3) satisfies $num mod 2 = 0
@@ -197,31 +205,31 @@ every $num in (1,2,3) satisfies $num mod 2 = 0
 
 Now, can you apply them to solve the questions above? Give it a shot by writing a query that asks whether there are any initials in the list of names and another that checks whether none of the names have initials. When you're ready, check your answers [against my versions](https://gist.github.com/CliffordAnderson/86c9a0ec058749257a3bd6aff2897700).
 
-#### Comparisons
+### Comparisons
 
-XQuery offers three different ways of making comparisons. At first glance, you might wonder why the language designers included different options. Couldn't they have simple picked one set of comparison operators and stuck with them? In practice, experienced XQuery programmers frequently use them, at least the first two, interchangeably. As beginning XQuery programmers, it behooves you to understand the differences since mixing them up can introduce subtle bugs.
+XQuery offers three different ways of making comparisons. At first glance, you might wonder why the language designers included different options. Couldn't they have simply picked one set of comparison operators and stuck with them? In practice, experienced XQuery programmers frequently use them, at least the first two, interchangeably. As beginning XQuery programmers, it behooves you to understand the differences, since mixing them up can introduce subtle bugs.
 
 * Value Comparisons (`eq`, `ne`, `lt`, `le`, `gt`, and `ge`)
 * General Comparisons (`=`, `!=`, `<`, `<=`, `>`, and `>=`)
 * Node Comparisons (`is`, `<<`, `>>`)
 
-##### Value Comparisons
+#### Value Comparisons
 
 Value comparisons check whether two values are equal.
 
 ```xquery
-1 eq 3-2
+1 eq 3 - 2
 ```
 
-##### General Comparisons
+#### General Comparisons
 
 General comparisons check whether the value of the left is equal to *any* value on the right. In other words, a general comparison performs an implicit existential quantification.
 
 ```xquery
-1 = (1,2)
+1 = (1, 2)
 ```
 
-You could rewrite this expression with the `some` operator as `some $num in (1,2) satisfies $num = 1`. As you can see, you can rewrite a value comparison using general comparison. Let's try it on the example above: `1 = 3-2`. But the math can go haywire if you're not careful since `1 = (3-2, 2-3)` is also true.
+You could rewrite this expression with the `some` operator as `some $num in (1, 2) satisfies $num = 1`. As you can see, you can rewrite a value comparison using general comparison. Let's try it on the example above: `1 = 3 - 2`. But the math can appear to go haywire if you're not careful, since `1 = (3 - 2, 2 - 3)` is also true.
 
 A deeper difference between value and general comparisons is that the first are transitive and the second are not. As Katz and Chamberlain point out in [XQuery from the Experts](https://books.google.com/books?id=VEWRh5_On38C&pg=PA105#v=onepage&q&f=false), when you write general comparisons, you may find yourself facing non-transitive equations.
 
@@ -229,16 +237,16 @@ A deeper difference between value and general comparisons is that the first are 
 xquery version "3.1";
 
 let $first := 1
-let $second := (1,2,3)
+let $second := (1, 2, 3)
 let $third := 3
-return ($first = $second, $third = $second, $first = $third)
+return ($first = $second, $second = $third, $first = $third)
 ```
 
 If your analysis depends on the transitivity property, make sure that you stay with value comparisons rather than general comparisons.
 
-##### Node Comparisons
+#### Node Comparisons
 
-There is also a comparison that checks node identity. In the example below, we list three coffee shops in Nashville. Two of the `shop` elements are apparently identical. But your XQuery intepreter keeps track of their distinct identities so you can ask whether they're actually the same.
+There is also a comparison that checks node identity, `is`. In the example below, we list three coffee shops in Nashville. Two of the `shop` elements are apparently identical. But your XQuery intepreter keeps track of their distinct identities so you can ask whether they're actually the same.
 
 ```xquery
 xquery version "3.1";
@@ -256,7 +264,7 @@ return $first-shop is $second-shop
 
 Try using `<<` and `>>` to check whether `$first-shop` comes before or after the `$second-shop`.
 
-For practice, can you fill in the correct comparison operators in the two examples below?
+For practice, can you fill in the correct comparison operators in the two examples below (replacing `FIX ME!` with your answer)?
 
 ```xquery
 let $ids :=
@@ -276,7 +284,7 @@ let $ids :=
     <isbn num="10">0133507645</isbn>
     <isbn num="13">978-0133507645</isbn>
   </identifiers>
-where some $id in ($ids/isbn/@num) satisfies FIXE ME!
+where some $id in ($ids/isbn/@num) satisfies FIX ME!
 return $ids
 ```
 
@@ -314,7 +322,7 @@ return switch ($day)
   default return "What day again?"
 ```
 
-There is also a operator called a `typeswitch` that let's you branch on types rather than values. Here's an example of
+There is also an expression called `typeswitch` that let's you branch on types rather than values. Here's an example:
 
 ```xquery
 xquery version "3.1";
@@ -356,30 +364,30 @@ for $node in $doc//node()
 return
     typeswitch($node)
         case comment() return "A comment: " || fn:string($node)
-        case element(tei:p) return "An paragraph element: " || $node/data()
+        case element(tei:p) return "A paragraph element: " || $node/data()
         default return ()
 ```
 
-Can you expand this `typeswitch` example to return the text values of the author and the title elements?
+Can you expand this `typeswitch` example to return the text values of the author and title elements?
 
 ### Built-in Functions
 
-Functions represent the heart of functional programming but they can appear a little intimidating at first. The basic idea of a function is to break up complicated code into nice, simple, smaller units. A function also allows us to control better the information we receive and the outputs we provide.
+Functions represent the heart of functional programming, but they can appear a little intimidating at first. The basic idea of a function is to break up complicated code into nice, simple, smaller units. A function also allows us to control better the information we receive and the outputs we provide.
 
 The great thing about XQuery is that many functions already come built into the language. You can check out the [official list](https://www.w3.org/TR/xpath-functions-31/), but you will probably find Priscilla Walmsley's synopsis more helpful [list of XQuery functions](http://www.xqueryfunctions.com/). The built-in functions all come prefixed with the `fn` namespace.
 
 Want to try a few together? Let's experiment with the functions that apply to sequences. Here's the set of [General functions and operators on sequences] (minus one function) from the XQuery 3.1 Recommendation.
 
-| Function       | Meaning                                      |
-| -------------- | --------------                               |
-|fn:empty	       | Returns true if the argument is the empty sequence. |
-|fn:exists	     | Returns true if the argument is a non-empty sequence. |
-|fn:head	       | Returns the first item in a sequence. |
-|fn:tail	       | Returns all but the first item in a sequence. |
-|fn:insert-before| Returns a sequence constructed by inserting an item or a sequence of items at a given position within an existing sequence. |
-|fn:remove       | Returns a new sequence containing all the items of $target except the item at position $position. |
-|fn:reverse	     | Reverses the order of items in a sequence.
-|fn:subsequence  | Returns the contiguous sequence of items in the value of $sourceSeq beginning at the position indicated by the value of $startingLoc and continuing for the number of items indicated by the value of $length. |
+| Function         | Meaning                                      |
+| ---------------- | --------------                               |
+| fn:empty         | Returns true if the argument is the empty sequence. |
+| fn:exists        | Returns true if the argument is a non-empty sequence. |
+| fn:head          | Returns the first item in a sequence. |
+| fn:tail          | Returns all but the first item in a sequence. |
+| fn:insert-before | Returns a sequence constructed by inserting an item or a sequence of items at a given position within an existing sequence. |
+| fn:remove        | Returns a new sequence containing all the items of `$target` except the item at position `$position`. |
+| fn:reverse       | Reverses the order of items in a sequence.
+| fn:subsequence   | Returns the contiguous sequence of items in the value of `$sourceSeq` beginning at the position indicated by the value of `$startingLoc` and continuing for the number of items indicated by the value of `$length`. |
 
 Let's apply each of these functions to the sequence: `("Kraków", "Montreal", "Mexico City", "Utrecht")`. As you experiment with each of these functions, note that they take different numbers of arguments. Some take one, two, and three arguments.
 
@@ -391,13 +399,13 @@ The first is to put one function inside another. To reverse our sequence and the
 fn:head(fn:reverse(("Kraków", "Montreal", "Mexico City", "Utrecht")))
 ```
 
-Another possibility would be to pipe the result from the first function to the next function using the arrow operator: `=>`.
+Another possibility would be to pipe the result from the first function to the next function using the *arrow operator* `=>`:
 
 ```xquery
 fn:reverse(("Kraków", "Montreal", "Mexico City", "Utrecht")) => fn:head()
 ```
 
-This format is easier to read when you're working with longer functions. Remember that the argument to the function on the right side of the function is implied; you don't state it directly because it's being "piped" or "forwarded" from the previous expression.
+This format is easier to read as you add more and more functions to an operation. Remember that the first argument to the function on the right side of the arrow operator is implied; you don't state it directly because it's being "piped" or "forwarded" from the previous expression.
 
 You can also combine expressions using the simple mapping operator (`!`), which acts like a `for` in an FLWOR expression. The simple mapping operator applies the function on the right side of the operator to each item on the left hand sequence. Let's use it to create upper-case equivalents of all the items in our sequence.
 
@@ -405,9 +413,9 @@ You can also combine expressions using the simple mapping operator (`!`), which 
 ("Kraków", "Montreal", "Mexico City", "Utrecht") ! fn:upper-case(.)
 ```
 
-Note that we have to use the `.` operator to indicate where we want to substitute the items in the left-handed sequence. This actually allows greater flexibility in our expressions. For instance, can you create a version of the expression above that concatenates the phrase that "DH met in  " plus the place name? If you can do that, can you also create a version that indicates the correct year of the meeting (without using a FLWOR expression)? My [version](https://gist.github.com/CliffordAnderson/484b42eff8b4c7b8644edecaf22e6da2) could probably be improved.
+Note that we have to use the `.` operator to indicate where we want to substitute the items in the left-handed sequence. This actually allows greater flexibility in our expressions. For instance, can you create a version of the expression above that concatenates the phrase `DH met in  ` with the place name? If you can do that, can you also create a version that indicates the correct year of the meeting (without using a FLWOR expression)? My [version](https://gist.github.com/CliffordAnderson/484b42eff8b4c7b8644edecaf22e6da2) could probably be improved.
 
-### user-defined Functions
+### User-defined Functions
 
 Of course, it's also possible to write your own functions in XQuery. In fact, it's generally *necessary* to write new functions. You can do so in two ways. On the one hand, you can declare functions in the XQuery prologue. Or you can write anonymous functions. Let's take a look at both examples.
 
@@ -418,7 +426,7 @@ xquery version "3.1";
 
 declare function local:say-hello($name as xs:string) as xs:string
 {
-    "Hello, " || $name || "!"
+  "Hello, " || $name || "!"
 };
 
 local:say-hello("Dave")
@@ -429,7 +437,7 @@ Another way of writing this function is to use a FLWOR expression. In this case,
 ```xquery
 xquery version "3.1";
 
-let $say-hello := function($name as xs:string) as xs:string {"Hello, " || $name || "!" }
+let $say-hello := function($name as xs:string) as xs:string { "Hello, " || $name || "!" }
 return $say-hello("Dave")
 ```
 
@@ -440,18 +448,18 @@ xquery version "3.1";
 
 declare function local:add-salad($food, $salad)
 {
-	if ($salad = true()) then $food || " and salad"
-	else $food
+  if ($salad = true()) then $food || " and salad"
+  else $food
 };
 ```
 To call this function we need a main expression body. It's actually pretty simple.
 
 ```xquery
-local:add-salad("Steak",false())
+local:add-salad("Steak", false())
 ```
 Et voilá! You have written a function to add (or not) salads to every food order. Still, there is a problem. What if someone sends a malformed order? For example, what if patron just asked for 1 with a salad. What would happen? We'd get back the result `1 and salad`. Even stranger, what happens when someone orders "Fish" and says "No" to salad. We'd an error saying `Items of type xs:string and xs:boolean cannot be compared.` What does that mean? Isn't there a way to check for these errors before they happen?
 
-In fact, there is. In the fancy language of computer science, this is called type checking. Basically, we want to define what type of information can go into our function and also what type of information can be returned as values by our function. In XQuery, we can check the types in the so-called function signature.
+In fact, there is. In the fancy language of computer science, this is called *type checking*. Basically, we want to define what type of information can go into our function and also what type of information can be returned as values by our function. In XQuery, we can check the types in the so-called function signature.
 
 Here's how we do that.
 
@@ -460,8 +468,8 @@ xquery version "3.1";
 
 declare function local:add-salad($food as xs:string, $salad as xs:boolean) as xs:string
 {
-	if ($salad = true()) then $food || " and salad"
-	else $food
+  if ($salad = true()) then $food || " and salad"
+  else $food
 };
 
 local:add-salad("Fish", true())
@@ -543,4 +551,4 @@ Ready to check your work? [Here's how I did it...](https://gist.github.com/Cliff
 
 *Bonus Credit: Remember that recursion always requires a base case. In my example, the base case works most of the time but will not always work. Can you create an example where it will fail? Actually, don't try this in class–recursion is painful to the nth degree when it fails.*
 
-There are always lots of different ways to accomplish a task in , though some may have subtle bugs and others may be less straightforward. [Here are other attempts at a Pig Latin parser in XQuery](https://gist.github.com/CliffordAnderson/a1ac3141828b504ee756). If we have time, we might look at these. Otherwise, please try them out yourself and see if you can spot any bugs.
+There are always lots of different ways to accomplish a task in XQuery, though some may have subtle bugs and others may be less straightforward. [Here are other attempts at a Pig Latin parser in XQuery](https://gist.github.com/CliffordAnderson/a1ac3141828b504ee756). If we have time, we might look at these. Otherwise, please try them out yourself and see if you can spot any bugs.
