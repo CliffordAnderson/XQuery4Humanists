@@ -27,10 +27,10 @@ This expression evaluates to 2. Pretty simple, right? You can evaluate any funct
 fn:upper-case("hello, world!")
 ```
 
-Since all expressions evaluate to values, you can use a expression in XQuery wherever you would use a value. For example, you can pass one expression as the input to another expression. This example takes a string ```"1,2,3"```, converts it into a sequence of three strings, reverse the order, and then joins the sequence of three strings back together.
+Since all expressions evaluate to values, you can use a expression in XQuery wherever you would use a value. For example, you can pass one expression as the input to another expression. This example takes a string `"1,2,3"`, converts it into a sequence of three strings, reverse the order, and then joins the sequence of three strings back together.
 
 ```xquery
-string-join(fn:reverse(fn:tokenize("1,2,3",",")),",")
+fn:string-join(fn:reverse(fn:tokenize("1,2,3",",")),",")
 ```
 
 This ability to substitute expressions with values is called [referential transparency](https://en.wikipedia.org/wiki/Referential_transparency_(computer_science)). Your expression will always evaluate to the same value when given the same input. Programming in XQuery (and XSLT and R) is different from other kinds of programming because you're not producing 'side effects' such as updating the value of your variables.
@@ -52,13 +52,13 @@ Like any programming language, you need to memorize a bit of syntax and operator
 
 Our code is already looking a little messy, isn't it? A fundamental construct in XQuery is the FLWOR expression. While you could write XQuery expressions without FLWOR expressions, you probably wouldn't want to. FLWOR expressions introduce some key concepts, including variable binding, sorting, and filtering. FLWOR stands for "for, let, where, order by, return."
 
-* ```for``` iteratives over a sequence (technically, a "tuple stream"), binding a variable to each item in turn.
-* ```let``` binds an variable to an expression.
-* ```where``` filters the items in the sequence using a boolean test
-* ```order by``` orders the items in the sequence.
-* ```return``` gives the result of the FLWOR expression.
+* `for` iteratives over a sequence (technically, a "tuple stream"), binding a variable to each item in turn.
+* `let` binds an variable to an expression.
+* `where` filters the items in the sequence using a boolean test
+* `order by` orders the items in the sequence.
+* `return` gives the result of the FLWOR expression.
 
-If you use a ```for``` or a ```let```, you must also provide a ```return```. ```where``` and ```order by``` are optional.
+If you use a `for` or a `let`, you must also provide a `return`. `where` and `order by` are optional.
 
 Here's a simple `let` expression that binds a variable and then returns its value.
 
@@ -99,8 +99,8 @@ Try using running this expression. Note that the book names are out of order. Ca
 
 XQuery 3.0 introduced two new clauses to FLWOR expressions.
 
-* ```group by```
-* ```count```
+* `group by`
+* `count`
 
 The `group by` clause organizes sequences into related buckets. Can you add a `group by` to the example below to split list into fiction and nonfiction?
 
@@ -272,7 +272,7 @@ return $ids
 
 ### Conditional Expressions
 
-Like other programming languages, XQuery permits conditions expressions of the form ```if...then...else```. However, unlike other programming languages, the ```else``` case is always required. This is because an expression must always evaluate to a value. We'll be using ```if...then...else``` in some examples below. To make sure you understand how to use them, let's quickly code the famous (at least in programmers' circles) [fizzbuzz](http://c2.com/cgi/wiki?FizzBuzzTest) exercise in XQuery.
+Like other programming languages, XQuery permits conditions expressions of the form `if...then...else`. However, unlike other programming languages, the `else` case is always required. This is because an expression must always evaluate to a value. We'll be using `if...then...else` in some examples below. To make sure you understand how to use them, let's quickly code the famous (at least in programmers' circles) [fizzbuzz](http://c2.com/cgi/wiki?FizzBuzzTest) exercise in XQuery.
 
 ```xquery
 xquery version "3.1";
@@ -356,7 +356,7 @@ Can you expand this `typeswitch` example to return the text values of the author
 
 Functions represent the heart of functional programming but they can appear a little intimidating at first. The basic idea of a function is to break up complicated code into nice, simple, smaller units. A function also allows us to control better the information we receive and the outputs we provide.
 
-The great thing about XQuery is that many functions already come built into the language. You can check out the [official list](https://www.w3.org/TR/xpath-functions-31/), but you will probably find Priscilla Walmsley's synopsis more helpful [list of XQuery functions](http://www.xqueryfunctions.com/). The built-in functions all come prefixed with the ```fn``` namespace.
+The great thing about XQuery is that many functions already come built into the language. You can check out the [official list](https://www.w3.org/TR/xpath-functions-31/), but you will probably find Priscilla Walmsley's synopsis more helpful [list of XQuery functions](http://www.xqueryfunctions.com/). The built-in functions all come prefixed with the `fn` namespace.
 
 Want to try a few together? Let's experiment with the functions that apply to sequences. Here's the set of [General functions and operators on sequences] (minus one function) from the XQuery 3.1 Recommendation.
 
@@ -414,7 +414,7 @@ declare function local:say-hello($name as xs:string) as xs:string
 local:say-hello("Dave")
 ```
 
-Another way of writing this function is to use a FLWOR expression. In this case, we'll write an anonymous function, meaning we cannot access it by name, and bind it to a variable with a ```let``` clause. We'll then use the ```return``` clause to call and evaluate the function.
+Another way of writing this function is to use a FLWOR expression. In this case, we'll write an anonymous function, meaning we cannot access it by name, and bind it to a variable with a `let` clause. We'll then use the `return` clause to call and evaluate the function.
 
 ```xquery
 xquery version "3.1";
@@ -457,7 +457,7 @@ declare function local:add-salad($food as xs:string, $salad as xs:boolean) as xs
 local:add-salad("Fish", true())
 ```
 
-By adding the clause ```as xs:string``` and ```as xs:boolean``` you limit the range of acceptable values to strings and booleans respectively. The ```as xs:string``` after the paragraph indicates that the return value will always be a string. While it's not strictly necessary to add types to your inputs and to your return values, it's a good habit to get into. You'll find that if you cannot determine what type of information your function can accept and what type of information your function will return, you probably don't fully understand what your function is doing.
+By adding the clause `as xs:string` and `as xs:boolean` you limit the range of acceptable values to strings and booleans respectively. The `as xs:string` after the paragraph indicates that the return value will always be a string. While it's not strictly necessary to add types to your inputs and to your return values, it's a good habit to get into. You'll find that if you cannot determine what type of information your function can accept and what type of information your function will return, you probably don't fully understand what your function is doing.
 
 Whether you declare named functions in your prologue or assign anonymous functions to variables in your expression body depends on the purpose you intend to achieve.
 

@@ -114,7 +114,7 @@ To get this to work, we just have to write two functions: `local:collect-words()
 
 Give it a try yourself before [checking out what I came up with....](code/count-word-tokens.xqy)
 
-Let's write the ```local:collect-words``` function first. This function accepts a sequence of text nodes, strips away punctuation and other non-essential differences, and returns a sequence of words.
+Let's write the `local:collect-words` function first. This function accepts a sequence of text nodes, strips away punctuation and other non-essential differences, and returns a sequence of words.
 
 ```xquery
 xquery version "3.1";
@@ -137,7 +137,11 @@ declare function local:collect-words($words as xs:string*) as xs:string*
 local:collect-words("This is a test of the system.")
 ```
 
-Writing a function in this style is perfectly OK in XQuery, but it's not good style. We're rebinding `$words` three times. (Technically, this is called "shadow binding." We're actually creating different variables behind the scenes.) From a functional perspective, it gets confusing since variables are not supposed to vary. We could rewrite FLWOR expression this as a sequence of nested sub-expressions, but doing so makes our expression hard to read: ```fn:tokenize(fn:lower-case(fn:translate(fn:string-join($words, " "), "!?.',-", "")), " ")```
+Writing a function in this style is perfectly OK in XQuery, but it's not good style. We're rebinding `$words` three times. (Technically, this is called "shadow binding." We're actually creating different variables behind the scenes.) From a functional perspective, it gets confusing since variables are not supposed to vary. We could rewrite FLWOR expression this as a sequence of nested sub-expressions, but doing so makes our expression hard to read: 
+
+```xquery
+fn:tokenize(fn:lower-case(fn:translate(fn:string-join($words, " "), "!?.',-", "")), " ")
+```
 
 As we saw in the previous session, the XQuery 3.1 Recommendation introduced the 'arrow operator' to avoid writing these kinds of expressions. The arrow operator pipes the value of a previous expression as the first argument to another expression. So, for example, we could rewrite the expression above like this:
 
@@ -156,8 +160,9 @@ local:collect-words("This is a test of the system.")
 ```
 The arrow operator allows us to keep our code clean and straightforward by removing any need for rebinding variables in a FLWOR expression or writing complexly nested subexpressions. Note that you'll need to try the expression above with a processor that supports XQuery 3.1.
 
- OK, now let's write our next function: ```local:determine-frequency```. This function accepts a sequence of word tokens and then returns a sequence of ```word``` elements indicating the frequency of word types. So we need to write something like the following.
- ```xquery
+OK, now let's write our next function: `local:determine-frequency`. This function accepts a sequence of word tokens and then returns a sequence of `word` elements indicating the frequency of word types. So we need to write something like the following.
+
+```xquery
  (:~
 : This function accepts a sequence of normalized string tokens and returns a sequence of word elements in frequency order.
 : @param  $words a sequence of normalized string tokens
@@ -174,7 +179,7 @@ declare function local:determine-frequency($words as xs:string*) as element(word
     return $item
 };
 ```
-So we iterate through the distinct values of words and build word elements for each of those word types. We then count the number of times that a token of that word type appears in our original sequence, assigning that count as the ```frequency``` attribute. Finally, we sort them into descending order according to their frequency and return them.
+So we iterate through the distinct values of words and build word elements for each of those word types. We then count the number of times that a token of that word type appears in our original sequence, assigning that count as the `frequency` attribute. Finally, we sort them into descending order according to their frequency and return them.
 
 > A final note. Do you note the strange way we've formatted our XQuery comments? The use of `(:~`, `@param`, and `@return` allows us to produce documentation from our code with a tool called [XQDoc](http://xqdoc.org). If you're writing anything beyond simple, one-off XQuery expressions, you should consider writing XQDoc comments to alert others (and remind yourself) about how your code works.
 
@@ -218,7 +223,7 @@ return $play//tei:encodingDesc
 ```
 We find really valuable information about the usage of particular TEI elements, which can in turn inform the kinds of queries we will write. XQuery makes this form of exploratory analysis very easy. Just as statisticians would explore a dataset with simple queries before undertaking any complex analysis, I'd encourage you to spend time exploring your XML (or JSON) documents before diving into writing significant queries.
 
-Let's try to now to write a couple analytical queries. Here's two snippets from _Julius Caesar_. First, let's look at ```<listPerson>``` 'list of persons'. Here we see a number of persons related to Julius Caesar, including Caesar himself, his wife Calphurnia, and their servants. There are similar lists of persons for other characters and roles in the play.
+Let's try to now to write a couple analytical queries. Here's two snippets from _Julius Caesar_. First, let's look at `<listPerson>` 'list of persons'. Here we see a number of persons related to Julius Caesar, including Caesar himself, his wife Calphurnia, and their servants. There are similar lists of persons for other characters and roles in the play.
 
 ```xml
 <listPerson>
@@ -244,7 +249,7 @@ Let's try to now to write a couple analytical queries. Here's two snippets from 
     </person>
 </listPerson>
 ```
-In the body of the play, we find ```<sp>``` or speech elements, with ```who``` attributes that identify the speakers. Note also the use of ```w``` (word), ```pc``` (punctuation character), and ```<c>``` (character) elements to markup the text of the speeches.
+In the body of the play, we find `<sp>` or speech elements, with `who` attributes that identify the speakers. Note also the use of `w` (word), `pc` (punctuation character), and `<c>` (character) elements to markup the text of the speeches.
 
 ```xml
 <sp xml:id="sp-0006" who="#COMMONERS.Carpenter_JC">
@@ -290,7 +295,7 @@ return
       </directions>
 ```
 
-In this next example, let's list all characters and the scenes during which they appear on stage. This query illustrates the use of multiple ```for``` clauses in an FLWOR expression.
+In this next example, let's list all characters and the scenes during which they appear on stage. This query illustrates the use of multiple `for` clauses in an FLWOR expression.
 
 ```xquery
 xquery version "3.1";
@@ -341,7 +346,7 @@ let $appearances := element div {local:get-appearances($play)}
 return local:html($appearances)
 ```
 
-Our next function ```local:get-play()``` simply opens the play for us. Maybe we don't really even need it, but it helps to be clear about how we're accessing the play. I've put a free expression below our function just so that we can test it out.
+Our next function `local:get-play()` simply opens the play for us. Maybe we don't really even need it, but it helps to be clear about how we're accessing the play. I've put a free expression below our function just so that we can test it out.
 
 ```xquery
 
@@ -384,7 +389,7 @@ return local:get-person-ids(local:get-play($url))
 
 The combination of evaluating the two nested functions in our return clause produces a sequence of string nodes listing all the ids in the play:
 
-> ```Caesar_JC Calphurnia_JC SERVANTS.CAESAR.1_JC Brutus_JC Portia_JC Lucius_JC Cassius_JC Casca_JC Cinna_JC Decius_JC Ligarius_JC Metellus_JC Trebonius_JC Cicero_JC Publius_JC Popilius_JC Flavius_JC Marullus_JC Antony_JC Lepidus_JC Octavius_JC SERVANTS.ANTONY.1_JC SERVANTS.OCTAVIUS.1_JC SOLDIERS.BRUTUS.Lucilius_JC SOLDIERS.BRUTUS.Titinius_JC SOLDIERS.BRUTUS.Messala_JC SOLDIERS.BRUTUS.Varro_JC SOLDIERS.BRUTUS.Claudius_JC SOLDIERS.BRUTUS.Cato_JC SOLDIERS.BRUTUS.Strato_JC SOLDIERS.BRUTUS.Volumnius_JC SOLDIERS.BRUTUS.Labeo_JC SOLDIERS.BRUTUS.Flavius_JC SOLDIERS.BRUTUS.Dardanus_JC SOLDIERS.BRUTUS.Clitus_JC COMMONERS.Carpenter_JC COMMONERS.Cobbler_JC Soothsayer_JC Artemidorus_JC PLEBEIANS.0.1_JC PLEBEIANS.0.2_JC PLEBEIANS.0.3_JC PLEBEIANS.0.4_JC CinnaPoet_JC Pindarus_JC SOLDIERS.BRUTUS.0.1_JC SOLDIERS.BRUTUS.0.2_JC SOLDIERS.BRUTUS.0.3_JC Poet_JC Messenger_JC SOLDIERS.ANTONY.0.1_JC SOLDIERS.ANTONY.0.2_JC```
+> `Caesar_JC Calphurnia_JC SERVANTS.CAESAR.1_JC Brutus_JC Portia_JC Lucius_JC Cassius_JC Casca_JC Cinna_JC Decius_JC Ligarius_JC Metellus_JC Trebonius_JC Cicero_JC Publius_JC Popilius_JC Flavius_JC Marullus_JC Antony_JC Lepidus_JC Octavius_JC SERVANTS.ANTONY.1_JC SERVANTS.OCTAVIUS.1_JC SOLDIERS.BRUTUS.Lucilius_JC SOLDIERS.BRUTUS.Titinius_JC SOLDIERS.BRUTUS.Messala_JC SOLDIERS.BRUTUS.Varro_JC SOLDIERS.BRUTUS.Claudius_JC SOLDIERS.BRUTUS.Cato_JC SOLDIERS.BRUTUS.Strato_JC SOLDIERS.BRUTUS.Volumnius_JC SOLDIERS.BRUTUS.Labeo_JC SOLDIERS.BRUTUS.Flavius_JC SOLDIERS.BRUTUS.Dardanus_JC SOLDIERS.BRUTUS.Clitus_JC COMMONERS.Carpenter_JC COMMONERS.Cobbler_JC Soothsayer_JC Artemidorus_JC PLEBEIANS.0.1_JC PLEBEIANS.0.2_JC PLEBEIANS.0.3_JC PLEBEIANS.0.4_JC CinnaPoet_JC Pindarus_JC SOLDIERS.BRUTUS.0.1_JC SOLDIERS.BRUTUS.0.2_JC SOLDIERS.BRUTUS.0.3_JC Poet_JC Messenger_JC SOLDIERS.ANTONY.0.1_JC SOLDIERS.ANTONY.0.2_JC`
 
 Not much to look at right now, but it's the data we need for our next function, which returns the characters' actual names.
 
@@ -421,7 +426,7 @@ return local:get-person-ids($play) ! local:get-person-name-by-id($play , .)
 
 This function evaluates to a friendlier sequence of names, rather than ids:
 
-```Julius Caesar Calphurnia Servant to them Marcus Brutus Portia Lucius Caius Cassius Casca Cinna Decius Brutus Caius Ligarius Metellus Cimber Trebonius Cicero Publius Popilius Lena Flavius Marullus Mark Antony Lepidus Octavius Servant to Antony Servant to Octavius Lucilius Titinius Messala Varro Claudius Young Cato Strato Volumnius Labeo (nonspeaking) Flavius (nonspeaking) Dardanus Clitus A Carpenter A Cobbler A Soothsayer Artemidorus Cinna the poet Pindarus Another Poet A Messenger```
+`Julius Caesar Calphurnia Servant to them Marcus Brutus Portia Lucius Caius Cassius Casca Cinna Decius Brutus Caius Ligarius Metellus Cimber Trebonius Cicero Publius Popilius Lena Flavius Marullus Mark Antony Lepidus Octavius Servant to Antony Servant to Octavius Lucilius Titinius Messala Varro Claudius Young Cato Strato Volumnius Labeo (nonspeaking) Flavius (nonspeaking) Dardanus Clitus A Carpenter A Cobbler A Soothsayer Artemidorus Cinna the poet Pindarus Another Poet A Messenger`
 
 It would be a bit tedious, I think, to run through all the functions. But I hope you can see now how we build up our expression step-by-step from smaller sub-expressions. Putting it all together, then, we have the following:
 
@@ -432,7 +437,7 @@ declare namespace tei = "http://www.tei-c.org/ns/1.0";
 
 declare function local:get-play($url as xs:string) as document-node()
 {
-   fn:doc($url)
+  fn:doc($url)
 };
 
 declare function local:get-person-ids($play as document-node()) as xs:string*
@@ -452,7 +457,7 @@ declare function local:get-person-name-by-id($play as document-node(), $id as xs
 
 declare function local:get-scenes-by-id($play as document-node(), $id as xs:string) as xs:string*
 {
- let $scenes :=
+  let $scenes :=
     for $act in $play//tei:div1[@type="act"]
     for $scene in $act/tei:div2
     let $act-scene := fn:concat("act ", $act/@n, ", ", "scene ", $scene/@n)

@@ -52,7 +52,7 @@ Nice, right? The only problem with the output is that it's pretty generic. In pa
 </csv>
 ```
 
-Fixing the problem is also relatively straightforward, though you'll notice a new syntax. What's up with that strange ```map``` syntax?
+Fixing the problem is also relatively straightforward, though you'll notice a new syntax. What's up with that strange `map` syntax?
 
 ```xquery
 xquery version "3.1";
@@ -62,7 +62,7 @@ let $csv := fn:unparsed-text($url)
 let $books := csv:parse($csv, map {'header':'true'} )
 return $books
 ```
-The ```map {'header':'true'}``` is an [XQuery Map](http://docs.basex.org/wiki/XQuery_3.1#Maps). Maps and arrays are being introduced into XQuery primarily to handle a widely used format called JSON. (While there's more to XQuery maps than JSON compatibility, we don't need to worry about other uses here.)  JSON stands for JavaScript Object Notation. It's a lightweight format originally designed for use with JavaScript but now frequently employed to transmit information back and forth on the Internet. We'll see that kind of use in a moment. Here, however, we're using this XQuery map to provide some configuration information. The map is essentially acting like a config file for the function, telling it that the CSV has defined headers. After calling the expression with the configuration information provided by the map, we get a much more articulate result.
+The `map {'header':'true'}` is an [XQuery Map](http://docs.basex.org/wiki/XQuery_3.1#Maps). Maps and arrays are being introduced into XQuery primarily to handle a widely used format called JSON. (While there's more to XQuery maps than JSON compatibility, we don't need to worry about other uses here.)  JSON stands for JavaScript Object Notation. It's a lightweight format originally designed for use with JavaScript but now frequently employed to transmit information back and forth on the Internet. We'll see that kind of use in a moment. Here, however, we're using this XQuery map to provide some configuration information. The map is essentially acting like a config file for the function, telling it that the CSV has defined headers. After calling the expression with the configuration information provided by the map, we get a much more articulate result.
 
 ```xml
 <csv>
@@ -292,7 +292,7 @@ let $url := "http://openlibrary.org/api/volumes/brief/isbn/074324754X.json"
 let $json := fn:unparsed-text($url)
 return $json
 ```
-We can treat JSON as text but it would be easier to convert it to XML so that we can work with it in a more familiar format. XQuery 3.1 introduces a new built-in function to produce this conversion: [fn:json-to-xml](http://docs.basex.org/wiki/XQuery_3.1#fn:json-to-xml). As you see, the usage of this function is very similar to ```csv:parse```.
+We can treat JSON as text but it would be easier to convert it to XML so that we can work with it in a more familiar format. XQuery 3.1 introduces a new built-in function to produce this conversion: [fn:json-to-xml](http://docs.basex.org/wiki/XQuery_3.1#fn:json-to-xml). As you see, the usage of this function is very similar to `csv:parse`.
 
 ```xquery
 xquery version "3.1";
@@ -301,12 +301,12 @@ let $url := "http://openlibrary.org/api/volumes/brief/isbn/074324754X.json"
 let $json := fn:unparsed-text($url)
 let $book := fn:json-to-xml($json)
 return $book
-````
+```
 Our next step is to join these two sources of information together. Let's write a query that converts our CSV of book data to XML, collects all the ISBNs, queries the Open Library for the subject information, and adds that information back to the XML document . Whew! Sounds complicated, right? Let's give it a shot!
 
 We start by modifying our initial expression to get and convert the CSV of book data. But this time we won't return the data. Instead, we'll pass the ISBNs into a function that queries the Open Library for more information.
 
-Let's proceed step-by-step. We will build a function first that takes an ISBN and returns ```<subject>``` elements with the respective subjects as child text nodes.
+Let's proceed step-by-step. We will build a function first that takes an ISBN and returns `<subject>` elements with the respective subjects as child text nodes.
 
 ```xquery
 
@@ -334,7 +334,7 @@ let $records :=
   let $record := element record {($book/*, $subjects)}
 return element csv {$records}
 ```
-This expression is basically the same as our previous expression, apart from iterating through the list of books to gather the subjects for each book individually. Perhaps the only tricky thing about this expression appears in this sub-expression ```element record {($book/*, $subjects)}```. Here we are creating a new record element by combining the entry elements from the previous book element with the new subject elements we've retrieved from the Internet Archive. If you look closely at the last two lines, you'll realize that we're not actually changing the original $book document; we are just creating a copy with more information added. As we mentioned at the outset, functional languages generally avoid changing state; once you define a variable, you can't change it. Here, we get around that problem (or feature!) by generating a new CSV element combining information from both sources.
+This expression is basically the same as our previous expression, apart from iterating through the list of books to gather the subjects for each book individually. Perhaps the only tricky thing about this expression appears in this sub-expression `element record {($book/*, $subjects)}`. Here we are creating a new record element by combining the entry elements from the previous book element with the new subject elements we've retrieved from the Internet Archive. If you look closely at the last two lines, you'll realize that we're not actually changing the original $book document; we are just creating a copy with more information added. As we mentioned at the outset, functional languages generally avoid changing state; once you define a variable, you can't change it. Here, we get around that problem (or feature!) by generating a new CSV element combining information from both sources.
 
 Here's the full XQuery expression:
 
@@ -389,7 +389,7 @@ We'll also create some indexes that we'll use a bit later in this session.
 
 ![Imgur](http://i.imgur.com/leNEhKX.png)
 
-Now we just need to write some code to populate our database. Let's adapt the code from our example above. The main difference is that we'll return a bunch of ```record``` documents instead of a single ```csv``` document.
+Now we just need to write some code to populate our database. Let's adapt the code from our example above. The main difference is that we'll return a bunch of `record` documents instead of a single `csv` document.
 
 ```xquery
 xquery version "3.1";
@@ -419,7 +419,7 @@ let $record := element record {($book/*, $subjects)}
 return db:add($database, $record, $isbn || ".xml")
 ```
 
-Note that the final line does the work of adding each record to the database. The function ```db:add``` takes three arguments in this case: the name of the database, the actual XML document we want to add to the database, and a filename (or URI) for the document. We create the name of the document by concatenating the ISBN with ".xml" and hoping for the best–i.e., no collisions between ISBNs.
+Note that the final line does the work of adding each record to the database. The function `db:add` takes three arguments in this case: the name of the database, the actual XML document we want to add to the database, and a filename (or URI) for the document. We create the name of the document by concatenating the ISBN with ".xml" and hoping for the best–i.e., no collisions between ISBNs.
 
 Let's just check to make sure that we created the database properly. To bring back all the records, we can write a simple expression (assuming that we've already opened the database).
 
@@ -453,7 +453,7 @@ xquery version "3.1";
 /record[Author[fn:contains(., "Walls")]]
 ```
 
-Alternatively, we could rewrite this expression as a FLWOR expression, now iterating explicitly over all the documents in the collection by using the ```fn:collection()``` function.
+Alternatively, we could rewrite this expression as a FLWOR expression, now iterating explicitly over all the documents in the collection by using the `fn:collection()` function.
 
 ```xquery
 xquery version "3.1";
@@ -480,7 +480,7 @@ where $record//subject/text() contains text { "Austria", "Austro-Hungarian" } an
 return $record
 ```
 
-If we have more time, we can try different examples. But, to wrap up, let's also discuss how to make changes to documents. First, let's remember that XQuery does not normally allow us to update documents. To get around this problem, we can just rebuild the document, adding (or subtracting) information. For example, here's how we can add a ```cover``` element to one of our record documents using the [Internet Archive's Cover API](https://openlibrary.org/dev/docs/api/covers)
+If we have more time, we can try different examples. But, to wrap up, let's also discuss how to make changes to documents. First, let's remember that XQuery does not normally allow us to update documents. To get around this problem, we can just rebuild the document, adding (or subtracting) information. For example, here's how we can add a `cover` element to one of our record documents using the [Internet Archive's Cover API](https://openlibrary.org/dev/docs/api/covers)
 
 ```xquery
 xquery version "3.1";
