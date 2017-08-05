@@ -19,13 +19,13 @@ XQuery 3.1 introduced two new datatypes: [Maps](https://www.w3.org/TR/xquery-31/
 XQuery programmers are familiar with [sequences](https://www.w3.org/TR/xquery-31/#dt-sequence), which are "ordered collection[s] of zero or more items." We deal with sequences routinely since values are always sequences, even if they're one item. Superficially, arrays resemble sequences. Like sequences, arrays hold ordered lists of items. You can build an array of items by using square brackets to surround a list of comma-delimited values.
 
 ```xquery
-[1,2,3]
+[1, 2, 3]
 ```
 
 You can also build an array by using the keyword `array` and enclosing the comma-delimited values with curly braces.
 
 ```xquery
-array { 1,2,3 }
+array { 1, 2, 3 }
 ```
 
 Why arrays when we already have sequences? Arrays differ from sequences because they do not automatically "flatten." See what happens when you combine two sequences in XQuery.
@@ -33,8 +33,8 @@ Why arrays when we already have sequences? Arrays differ from sequences because 
 ```xquery
 xquery version "3.1";
 
-let $nums1 := (1,2,3)
-let $nums2 := (4,5,6)
+let $nums1 := (1, 2, 3)
+let $nums2 := (4, 5, 6)
 return ($nums1, $nums2)
 ```
 
@@ -43,9 +43,9 @@ This expression evaluates to the sequence: `1, 2, 3, 4, 5, 6`. The two subsequen
 ```xquery
 xquery version "3.1";
 
-let $nums1 := array {1,2,3}
-let $nums2 := array {4,5,6}
-return array {$nums1, $nums2}
+let $nums1 := array {1, 2, 3}
+let $nums2 := array {4, 5, 6}
+return array { $nums1, $nums2 }
 ```
 
 This expression produces an array with two subarrays: [[1, 2, 3], [4, 5, 6]]. This difference is crucial when working with JSON since JSON allows nested arrays.
@@ -53,33 +53,33 @@ This expression produces an array with two subarrays: [[1, 2, 3], [4, 5, 6]]. Th
 How do you access information in arrays? Here's we come across a bigger, more fundamental difference between arrays and sequences. An array is actually a function. That is, an array is a function that returns take an integer and returns the value in that position in the array (counting from one).
 
 ```xquery
-let $nums := [ 1,2,3 ]
+let $nums := [ 4, 5, 6 ]
 return $nums(3)
 ```
 
 Perhaps confusingly, XQuery 3.1 also added a different syntax called the lookup syntax, which uses a question mark `?` in place of the functional call parentheses.
 
 ```xquery
-let $nums := [ 1,2,3 ]
+let $nums := [ 4, 5, 6 ]
 return $nums?3
 ```
 
 Since functions can return functions as values (i.e. XQuery has [higher-order functions](https://www.w3.org/TR/xpath-functions-31/#higher-order-functions), you can chain these look ups. Here's two examples, one using the function call syntax and the other the lookup syntax.
 
 ```xquery
-array {array {1,2,3}, array {4,5,6}}(2)(3)
+array { array { 1, 2, 3 }, array { 4, 5, 6 } }(2)(3)
 ```
 
 ```xquery
-array {array {1,2,3}, array {4,5,6}}?2?3
+array { array { 1, 2, 3 }, array { 4, 5, 6 } }?2?3
 ```
 
 #### Maps
 
-XQuery 3.1 also added support for maps, which are other programming languages call associative arrays or dictionaries. The basic idea of a map is that you associate a key with a value. A map can have any number of these key-value pairs. You create maps with the keyword `map` and a set of curly braces surrounding any number key-value pairs (separating the keys and the values with a colon).
+XQuery 3.1 also added support for maps, which other programming languages call *associative arrays* or *dictionaries*. The basic idea of a map is that you associate a key with a value. A map can have any number of these key-value pairs. You create maps with the keyword `map` and a set of curly braces surrounding any number key-value pairs (separating the keys and the values with a colon).
 
 ```xquery
-map {"Hello":"World"}
+map { "Hello": "World" }
 ```
 
 Unlike an array, maps are not ordered–you don't need ordering because you lookup items by the key, not by their position.
@@ -87,15 +87,21 @@ Unlike an array, maps are not ordered–you don't need ordering because you look
 ```xquery
 xquery version "3.1";
 
-let $dh := map {2016: "Krakow", 2017: "Montreal", 2018: "Mexico City" }
+let $dh := map { 2016: "Krakow", 2017: "Montreal", 2018: "Mexico City" }
 return $dh(2016)
 ```
 
-This expression returns `"Krakow"`. You could also write `$dh?2016` to accomplish the same thing.
+This expression returns `"Krakow"`. You could also accomplish the same thing with `$dh?2016`.
 
-Now that you understand how to explore arrays and maps in XQuery, let's try something practical. Can you pull the lattitude and longitude from this expression? `[ map {"title":"Nashville","location_type":"City","woeid":2457170,"latt_long":"36.167839,-86.778160"} ]` Try to do so using both syntaxes.
+Now that you understand how to explore arrays and maps in XQuery, let's try something practical. Can you pull the lattitude and longitude from this expression? 
 
-Here's something a bit harder and more practical. Can you pull out the weather predication for Montreal on August 6th, 2017? (If you want to work ahead, try using the [MetaWeather API](https://www.metaweather.com/api/) to fetch the latest weather predication for [Montreal](https://www.metaweather.com/api/location/3534/).) Note that you should use an asterisk operator `*` to filter out irrelevant dates.
+```xquery
+[ map { "title": "Nashville", "location_type": "City", "woeid": 2457170, "latt_long": "36.167839,-86.778160" } ]
+``` 
+
+Try to do so using both syntaxes.
+
+Here's something a bit harder and more practical. Can you pull out the weather prediction for Montreal on August 6th, 2017? (If you want to work ahead, try using the [MetaWeather API](https://www.metaweather.com/api/) to fetch the latest weather predication for [Montreal](https://www.metaweather.com/api/location/3534/).) Note that you should use an asterisk operator `*` to filter out irrelevant dates.
 
 ```xquery
 map {
@@ -255,13 +261,15 @@ map {
 }
 ```
 
-A solution is `("consolidated_weather")?*[.("applicable_date") eq "2017-08-06"]("weather_state_name")`. The use of the lookup operator may lead you to regard the `?` operator as akin to the `/` in XPath. But be careful! The resemblance is skin deep. It's not possible to use a `??` operator, for example, to search for items at any depth in arrays. There is, however, a function call `map:find` that will find keys that match at any arbitrary position in a map/array data structure. Can you use it to rewrite the solution above?
+Assuming we've bound this map to a variable `$weather`, the solution is `$weather("consolidated_weather")?*[.("applicable_date") eq "2017-08-06"]("weather_state_name")`. The use of the lookup operator may lead you to regard the `?` operator as akin to the `/` in XPath. But be careful! The resemblance is skin deep. It's not possible to use a `??` operator, for example, to search for items at any depth in arrays (along the lines of XPath's `//` operator). There is, however, a function call `map:find()` that will find keys that match at any arbitrary position in a map/array data structure. Can you use it to rewrite the solution above?
+
+> Note for eXist users: As of eXist 3.4.0, the `map:find()` function has not yet been implemented. 
 
 ### Open Library API
 
 Let's apply these concepts by retrieving a JSON document from a web service. We'll rely on the Internet Archive's [Open Library API](https://openlibrary.org/developers/api) in the next set of expressions. The book we want to search for is Jeremias Gotthelf's *The Black Spider*. You can send the title information to the Open Library API using this HTTP GET request: `http://openlibrary.org/search.json?title=black%20spider`. Try it in your browser.
 
-Now let's get the same JSON document using XQuery. Let's try two approaches. The first uses a function called `fn:unparsed-text` to retrieve the JSON.
+Now let's get the same JSON document using XQuery. Let's try two approaches. The first is to use a function called `fn:unparsed-text()` to retrieve the JSON as plain text.
 
 ```xquery
 xquery version "3.1";
@@ -269,24 +277,27 @@ xquery version "3.1";
 fn:unparsed-text("http://openlibrary.org/search.json?title=black%20spider")
 ```
 
-The second uses a function called `fn:json-doc` to get the document.
+> Note for eXist users: As of eXist 3.4.0, the `fn:unparsed-text()` function has not yet been implemented. See [this gist](https://gist.github.com/joewiz/5c72163bf647f3fda7a945ae96a94deb) for an eXist-compatible implementation of this function and its variants, `fn:unparsed-text-lines()` and `fn:unparsed-text-available()`. Luckily, eXist 3.4.0 supports the function introduced next, which is the best way to retrieve JSON!
+
+The second approach is to use a function called `fn:json-doc()` to get the document.
 
 ```xquery
 xquery version "3.1";
 
-fn:unparsed-text("http://openlibrary.org/search.json?title=black%20spider")
+fn:json-doc("http://openlibrary.org/search.json?title=black%20spider")
 ```
 
-Try them out and take notice of the difference between the two. As you'll note, the first returns the JSON document as a text document. The second converts the JSON into XQuery maps and arrays. What if you want to convert your JSON into XML? You could write XQuery code to parse the string returned from the first expression or to convert the maps and array structure of the second expression in XML. But I'm glad to report there is an easier way: `fn:json-to-xml`. 
+Try these two approaches out and take notice of the difference between the two. As you'll note, the first returns the JSON document as a text document. The second converts the JSON into XQuery maps and arrays. What if you want to convert your JSON into XML? You could write XQuery code to parse the string returned from the first expression or to convert the maps and array structure of the second expression in XML. But I'm glad to report there is an easier way: `fn:json-to-xml()`. 
 
 ```xquery
 version "3.1";
 
 fn:unparsed-text("http://openlibrary.org/search.json?title=black%20spider") => fn:json-to-xml()
-
 ```
 
-If you need to serialize JSON to XML, there's a function for that too: `fn:xml-to-json`. Howevever, you cannot simply pass along XML as such. Try applying that function to any arbitrary XML document and you'll receive an error.
+> Note for eXist users: As of eXist 3.4.0, this function and its close cousin `fn:xml-to-json()` have not yet been implemented. See [this gist](https://gist.github.com/joewiz/d986da715facaad633db) for an eXist-compatible implementation of these functions.
+
+If you need to serialize JSON to XML, there's a function for that too: `fn:xml-to-json()`. Howevever, you cannot pass arbitrary XML to this function; doing so would return an error:
 
 ```xquery
 xquery version "3.1";
@@ -303,25 +314,27 @@ return fn:xml-to-json($doc)
 
 To convert this document into JSON, you'll need to apply the [template rules](https://www.w3.org/TR/xslt-30/#json-to-xml-mapping) for writing convertible XML. As an exercise, try writing an XQuery to convert the XML document above to JSON. Here's [my answer](https://gist.github.com/CliffordAnderson/c174928e43e7d4ab9115a4dadd68c74e) when you're ready to check.
 
-If you want to convert maps/arrays to JSON, then you'll need to wrote a more complex query. Happily, we can rely on the [utility function that Joe's written for this purpose](https://gist.github.com/joewiz/d986da715facaad633db).
-
+If you want to convert maps/arrays to JSON, then you'll need to wrote a more complex query. For an example of a function that does this, see [this gist](https://gist.github.com/joewiz/d986da715facaad633db) by Joe.
 
 ### Oxford English Dictionary API
 
-Our final project today will be to read an entry from the [Oxford English Dictionary API](https://developer.oxforddictionaries.com/) and convert it from JSON to XML. To try out these exercises, you'll need to sign up for an API ID & Key. Register for the [Free](https://developer.oxforddictionaries.com/) plan, click on "Credentials," and create a new app. Copy the Application ID and the Application Key for use in the examples below. 
+Our final project today will be to read an entry from the [Oxford English Dictionary API](https://developer.oxforddictionaries.com/) and convert it from JSON to XML. To try out these exercises, you'll need to sign up for an account to get an API ID & Key. Register for the free plan via the URL above, click on "Credentials," and create a new app. Make a note of the "Application ID" and the "Application Key" for use in the examples below. 
 
-We're going to need a different technique to access this API because we need to authenticate our requests. We'll be using Florent George's [HTTP Client Module](http://expath.org/spec/http-client), which is one of the ExPath standards that should work across implementations. A simple demonstration of the HTTP Client Module sends our key and id with a request for a word (in this case "person").
+We're going to need a different technique to access this API, because we need to authenticate our requests. Specifically, we need a way to supply authentication "headers" with each request we make to the API. To do this we'll be using the [EXPath HTTP Client Module](http://expath.org/spec/http-client), one of the many modules created by the EXPath community to supplement the built-in functions in the XQuery (and XPath) specification and foster cross-implementation-compatible code. (Most XQuery implementations, including BaseX and eXist, have their own native modules for making HTTP requests, but the code for one wouldn't work in the other without modifications. The EXPath HTTP Client module makes your code compatible in both.) 
+
+The following simple demonstration of the HTTP Client Module sends our application key and ID along with a request for a word (in this case, "person").
 
 ```xquery
 xquery version "3.1";
 
-declare namespace http = "http://expath.org/ns/http-client";
+import module namespace http = "http://expath.org/ns/http-client";
 
 let $word := "person"
+let $url := "https://od-api.oxforddictionaries.com/api/v1/entries/en/" || $word
 let $request :=
-  <http:request href="https://od-api.oxforddictionaries.com/api/v1/entries/en/{$word}"  override-media-type="text/plain" method="get" >
-    <http:header name="app_key" value="####"/>
+  <http:request href="{$url}" override-media-type="text/plain" method="get">
     <http:header name="app_id" value="####"/>
+    <http:header name="app_key" value="####"/>
   </http:request>
 return http:send-request($request)
 ```
@@ -417,7 +430,7 @@ We get back a JSON document in textual form.
 }
 ```
 
-As an exercise, can you parse the result of this API call into XQuery maps and arrays and then return only the part of the data structure containing the senses? Check your work [against my expression](code/senses.xqy). Let's build on this example to produce a formated list of definitions. In this case, we'll find all the values of "definition" keys and then iterate through the resulting array to format the result. 
+As an exercise, can you parse the result of this API call into XQuery maps and arrays and then return only the part of the data structure containing the senses? Check your work [against my expression](code/senses.xqy). Let's build on this example to produce a formatted list of definitions. In this case, we'll find all the values of "definition" keys and then iterate through the resulting array to format the result. 
 
 ```xquery
 xquery version "3.1";
@@ -425,10 +438,11 @@ xquery version "3.1";
 declare namespace http = "http://expath.org/ns/http-client";
 
 declare function local:lookup-word($word as xs:string, $id as xs:string, $key as xs:string) as map(*) {
+  let $url := "https://od-api.oxforddictionaries.com/api/v1/entries/en/" || $word
   let $request :=
-    <http:request href="https://od-api.oxforddictionaries.com/api/v1/entries/en/{$word}" override-media-type="text/plain" method="get">
-      <http:header name="app_key" value="{$key}"/>
+    <http:request href="{$url}" override-media-type="text/plain" method="get">
       <http:header name="app_id" value="{$id}"/>
+      <http:header name="app_key" value="{$key}"/>
     </http:request>
   return http:send-request($request)[2] => fn:parse-json()
 };
@@ -457,7 +471,7 @@ This expression produces a nice list of definitions of "person".
 
 The extra work of finding the size of the array and iterating through its members is actually not necessary when we use the alternative lookup syntax. Can you rewrite this example with the lookup syntax?
 
-In this final set of examples, we will find synonyms for every word in a sentence. We'll make the result into an XML document with the original sentence plus the converted sentence. First, let's call the OED API for synonyms. We'll then use `map:find` to drill down to the synonyms and a lookup expression to pull out the values of the `text` map.
+In this final set of examples, we will find synonyms for every word in a sentence. We'll make the result into an XML document with the original sentence plus the converted sentence. First, let's call the OED API for synonyms. We'll then use `map:find()` to drill down to the synonyms and a lookup expression to pull out the values of the `text` map.
 
 ```xquery
 xquery version "3.1";
@@ -493,7 +507,9 @@ creature
 fellow
 ```
 
-Now we'll use a random number generator (`fn:random-number-generator`) to generate a random number. We should pause here to look at this function carefully since it's a higher-order function, meaning in this case that it returns a function that returns a function that then returns a value: `fn:head(fn:random-number-generator()("permute")(1 to $count))`. Got it? We also need to check the HTTP headers to see whether we receive a 404 or a 200. If we receive a 404, we'll return the original word. If not, we'll return a random synonym.
+Now we'll use a random number generator (`fn:random-number-generator()`) to generate a random number. We should pause here to look at this function carefully since it's a higher-order function, meaning in this case that it returns a function that returns a function that then returns a value: `fn:head(fn:random-number-generator()("permute")(1 to $count))`. Got it? We also need to check the HTTP headers to see whether we receive a 404 or a 200. If we receive a 404, we'll return the original word. If not, we'll return a random synonym.
+
+> Note for eXist users: As of version 3.4.0, the `fn:random-number-generator()` function is not yet implemented. eXist's native `util:random()` can serve a similar purpose.
 
 ```xquery
 xquery version "3.1";
@@ -527,7 +543,7 @@ let $new-words :=
 return fn:string-join($new-words, " ") || "."
 ```
 
-Try it out! I generated `I quaver of armaments in addition to the male` but you'll receive a different random sentence every time.
+Try it out! I generated `I quaver of armaments in addition to the male`, but you'll receive a different random sentence every time.
 
 Now let's just present the sentences together as an XML document. This is the easy part. We'll use direct element constructors to package up our results. Assuming the function remains the same, our free expression now reads:
 
