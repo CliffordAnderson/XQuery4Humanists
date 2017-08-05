@@ -137,9 +137,9 @@ declare function local:collect-words($words as xs:string*) as xs:string*
 local:collect-words("This is a test of the system.")
 ```
 
-Writing a function in this style is perfectly OK in XQuery, but it's not good style. We're rebinding `$words` three times. (Technically, this is called "shadow binding." We're actually creating different variables behind the scenes.) From a functional perspective, it gets confusing since variables are not supposed to vary. We could rewrite FLWOR expression this as a sequence of nested sub-expressions, but doing so makes our expression hard to read: ```fn:tokenize(fn:lower-case(fn:replace(fn:string-join($words, " "), "[!?.',-]", "")), " ")```
+Writing a function in this style is perfectly OK in XQuery, but it's not good style. We're rebinding `$words` three times. (Technically, this is called "shadow binding." We're actually creating different variables behind the scenes.) From a functional perspective, it gets confusing since variables are not supposed to vary. We could rewrite FLWOR expression this as a sequence of nested sub-expressions, but doing so makes our expression hard to read: ```fn:tokenize(fn:lower-case(fn:translate(fn:string-join($words, " "), "!?.',-", "")), " ")```
 
-The XQuery 3.1 Recommendation introduces the 'arrow operator' to avoid writing these kinds of expressions. The arrow operator pipes the value of a previous expression as the first argument to another expression. So, for example, we could rewrite the expression above like this:
+As we saw in the previous session, the XQuery 3.1 Recommendation introduced the 'arrow operator' to avoid writing these kinds of expressions. The arrow operator pipes the value of a previous expression as the first argument to another expression. So, for example, we could rewrite the expression above like this:
 
 ```xquery
 xquery version "3.1";
@@ -147,7 +147,7 @@ xquery version "3.1";
 declare function local:collect-words($words as xs:string*) as xs:string*
 {
     fn:string-join($words, " ")
-    => fn:replace("[!?.',]", "")
+    => fn:translate("!?.',-", "")
     => fn:lower-case()
     => fn:tokenize (" ")
 };
@@ -187,7 +187,7 @@ Let's tackle a few more complicated XQuery expressions using the [Folger Digital
 For instance, let's grab a whole document first and see what's there. I've put the edition of Julius Caesar up at an ungainly [url](https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml"), which we will assign to a variable for easier use.
 
 ```xquery
-xquery version "3.0";
+xquery version "3.1";
 
 let $url := "https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml"
 return fn:doc($url)
@@ -196,7 +196,7 @@ return fn:doc($url)
 OK, now let's take a look at some of its constituent parts. What's in the header, for instance? *Don't forget to add the TEI namespace!*
 
 ```xquery
-xquery version "3.0";
+xquery version "3.1";
 
 declare namespace tei = "http://www.tei-c.org/ns/1.0";
 
@@ -208,7 +208,7 @@ return $play/tei:TEI/tei:teiHeader
 As far as TEI documents go, there's a lot information here! So perhaps we ought to drill down to the encoding description. Let's do that.
 
 ```xquery
-xquery version "3.0";
+xquery version "3.1";
 
 declare namespace tei = "http://www.tei-c.org/ns/1.0";
 
@@ -271,7 +271,7 @@ In the body of the play, we find ```<sp>``` or speech elements, with ```who``` a
 Our first expression will find all the stage directions associated with characters in *Julius Caesar*.
 
 ```xquery
-xquery version "3.0";
+xquery version "3.1";
 
 declare default element namespace "http://www.tei-c.org/ns/1.0";
 
@@ -293,7 +293,7 @@ return
 In this next example, let's list all characters and the scenes during which they appear on stage. This query illustrates the use of multiple ```for``` clauses in an FLWOR expression.
 
 ```xquery
-xquery version "3.0";
+xquery version "3.1";
 
 declare namespace tei = "http://www.tei-c.org/ns/1.0";
 
@@ -333,7 +333,7 @@ So a problem with the XQuery expression above is that it's a little hard to foll
 Let's start out with our main expression body, which we'll keep as simple as possible.
 
 ```xquery
-xquery version "3.0";
+xquery version "3.1";
 
 let $url := "https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml"
 let $play := local:get-play($url)
@@ -358,7 +358,7 @@ return local:get-play($url)
 OK, now we've got the play. Let's get all the ids of the actors in the play.
 
 ```xquery
-xquery version "3.0";
+xquery version "3.1";
 
 declare namespace tei = "http://www.tei-c.org/ns/1.0";
 
@@ -389,7 +389,7 @@ The combination of evaluating the two nested functions in our return clause prod
 Not much to look at right now, but it's the data we need for our next function, which returns the characters' actual names.
 
 ```xquery
-xquery version "3.0";
+xquery version "3.1";
 
 declare namespace tei = "http://www.tei-c.org/ns/1.0";
 
@@ -426,7 +426,7 @@ This function evaluates to a friendlier sequence of names, rather than ids:
 It would be a bit tedious, I think, to run through all the functions. But I hope you can see now how we build up our expression step-by-step from smaller sub-expressions. Putting it all together, then, we have the following:
 
 ```xquery
-xquery version "3.0";
+xquery version "3.1";
 
 declare namespace tei = "http://www.tei-c.org/ns/1.0";
 
