@@ -514,7 +514,9 @@ let $appearances := element div { local:get-appearances($play) }
 return local:html($appearances)
 ```
 
-Try running the whole XQuery expression with BaseX or eXist.
+Try running the whole XQuery expression with BaseX or eXist. Your query should produce a simple web page like the following:
+
+![Characters' appearances in Julius Caesar](http://i.imgur.com/cparMLW.png)
 
 ### Graphing TEI
 
