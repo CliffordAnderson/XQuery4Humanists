@@ -481,8 +481,8 @@ declare namespace http = "http://expath.org/ns/http-client";
 let $word := "person"
 let $request :=
   <http:request href="https://od-api.oxforddictionaries.com/api/v1/entries/en/{$word}/synonyms" override-media-type="text/plain" method="get">
-    <http:header name="app_key" value="####"/>
     <http:header name="app_id" value="####"/>
+    <http:header name="app_key" value="####"/>
   </http:request>
 let $synonyms := 
    http:send-request($request)[2]
@@ -520,8 +520,8 @@ declare function local:get-synonym($word as xs:string) as xs:string?
 {
 let $request :=
   <http:request href="https://od-api.oxforddictionaries.com/api/v1/entries/en/{$word}/synonyms" override-media-type="text/plain" method="get">
-    <http:header name="app_key" value="####"/>
     <http:header name="app_id" value="####"/>
+    <http:header name="app_key" value="####"/>
   </http:request>
 return
   if (http:send-request($request)[1]/@status/fn:data() = "404") then $word
