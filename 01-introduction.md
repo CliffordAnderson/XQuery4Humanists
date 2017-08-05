@@ -171,7 +171,7 @@ return $num || ". " || $title
 
 Other ways exist to count in FLWOR expressions, but it's easy to get the order mixed up as you manipulate the tuple stream. Try combining `group by` with `count` to see what I mean. Can you partition books into fiction and nonfiction while also order the books sequentially in those groups? Try it out yourself, then check my [solution](https://gist.github.com/CliffordAnderson/35cde75043b55ab8a213d3e0449941c9).
 
-> Note for eXist users: Unfortunately the `count` clause has not yet been implemented in eXist. Luckily, a workaround is available: first, use the `at` clause to bind the variable `$num` to the current position of the interation through the books and (b) use either an intermediate FLWOR to pre-sort the books or, as shown here, the `fn:sort` function:
+> Note for eXist users: Unfortunately the `count` clause has not yet been implemented in eXist. Luckily, a workaround is available: first, use the `at` clause to bind the variable `$num` to the current position of the interation through the books and (b) use either an intermediate FLWOR to pre-sort the books or, as shown here, the `fn:sort()` function:
 > 
 > ```xquery
 > for $book at $num in fn:sort($books/book)
@@ -181,7 +181,7 @@ Other ways exist to count in FLWOR expressions, but it's easy to get the order m
 
 ### Quantified Expressions  
 
-What if you want to ask whether items in a sequence meet certain criteria? For instance, we might want to ask whether any names in a list contain initials. This would be useful, for instance, if you are standardizing name authority records. Here's a FLWOR expression that uses a built-in function called `fn:contains` that checks for a period in name forms.
+What if you want to ask whether items in a sequence meet certain criteria? For instance, we might want to ask whether any names in a list contain initials. This would be useful, for instance, if you are standardizing name authority records. Here's a FLWOR expression that uses a built-in function called `fn:contains()` that checks for a period in name forms.
 
 ```xquery
 let $names := ("G. G. Ashwood", "Patricia Conley", "S. Dole Melipone", "Ella Runciter")
@@ -511,7 +511,7 @@ The rules for [Pig Latin](https://en.wikipedia.org/wiki/Pig_Latin) are simple th
 
 For our first exercise, let's write a basic XQuery expression that takes a word and returns its equivalent this dialect of Pig Latin.
 
-*Hint: If you need help getting started, try using this function: [fn:substring](http://www.xqueryfunctions.com/xq/fn_substring.html)*
+*Hint: If you need help getting started, try using this function: [`fn:substring()`](http://www.xqueryfunctions.com/xq/fn_substring.html)*
 
 Ready to compare your expression? [Here's what I came up with...](https://gist.github.com/CliffordAnderson/076b5e82f1d7e22e05ca)
 
@@ -519,7 +519,7 @@ Ready to compare your expression? [Here's what I came up with...](https://gist.g
 
 Now that we can convert individual words to Pig Latin, let's move on to sentences. Try to write an expression to convert sentences to Pig Latin. It's OK if you strip away punctuation to do so, though you get extra credit if you retain it. Write an expression to convert, e.g., "I speak Pig Latin" to "Iay peaksay igpay atinlay".
 
-*Hint: You'll probably want to use the functions [fn:tokenize](http://www.xqueryfunctions.com/xq/fn_tokenize.html) to split up your sentence into words and [fn:string-join](http://www.xqueryfunctions.com/xq/fn_string-join.html) to recompose your words into a sentence.*
+*Hint: You'll probably want to use the functions [`fn:tokenize()`](http://www.xqueryfunctions.com/xq/fn_tokenize.html) to split up your sentence into words and [`fn:string-join()`](http://www.xqueryfunctions.com/xq/fn_string-join.html) to recompose your words into a sentence.*
 
 Ready to compare your expression? [Here's my go at it...](https://gist.github.com/CliffordAnderson/e75fd3e4e3e569a661cf)
 
