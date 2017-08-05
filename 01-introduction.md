@@ -45,8 +45,18 @@ Like any programming language, you need to memorize a bit of syntax and operator
 | `:=`          | assignment, binds a variable to a value     |
 | `(:  :)`      | XQuery comment, not interpreted             |
 | `&#124;&#124;`| concatenation, joins together two strings   |
-| `!`           | simple mapping operator, applies a function on right to value on the right                    |
-| `=>`          | arrow operator, pipes the value on the left to the function on the right |
+| `!`           | simple mapping operator, applies a function on right to value on the right |
+| `=>`          | arrow operator, pipes the value on the left to the function on the right   |
+
+If you have used XPath to work with XML documents, you will also recognize these operators and path expressions, since XPath is actually a subset of XQuery (and in fact all of the entries above are part of XPath):
+
+| Syntax        | Meaning                                          |
+| ------------- | -------------                                    |
+| `/`           | path operator                                    |
+| `//`          | compact syntax for descendant-or-self::node()/   |
+| `*`           | compact syntax for child::element() or wildcard  |
+| `.`           | compact syntax for self::node()                  |
+
 
 ### FLWOR Expressions
 
