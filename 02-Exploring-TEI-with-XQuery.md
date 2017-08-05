@@ -642,126 +642,593 @@ return local:make-graphml(($play, $persons, $acts-scenes, $play-to-acts, $acts-t
 ```
 
 ```xml
-xquery version "3.1";
-
-(: Converts TEI texts in the Folger Shakespeare Edition into graphml :)
-
-declare namespace graphml = "http://graphml.graphdrawing.org/xmlns";
-
-declare namespace tei = "http://www.tei-c.org/ns/1.0";
-
-import module namespace functx = 'http://www.functx.com';
-
-declare function local:title-node($doc as document-node()?) as element(graphml:node)*
-{
-  let $idno := $doc//tei:idno/text()
-  let $title := $doc/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/text()
-  let $author := $doc/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:author/text()
-  return 
-    <graphml:node id="{$idno}" labels=":Work">
-      <graphml:data key="title">{$title}</graphml:data>
-      <graphml:data key="author">{$author}</graphml:data>
+<graphml:graphml xmlns:graphml="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:grapml="http://graphml.graphdrawing.org/xmlns" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <graphml:graph id="G" edgedefault="directed">
+    <graphml:node id="act1" labels=":Act">
+      <graphml:data key="act">Act 1</graphml:data>
     </graphml:node>
-};
-
-declare function local:person-nodes($doc as document-node()?) as element(graphml:node)*
-{ 
-  for $person in $doc//tei:person
-  let $person-id := $person/@xml:id/fn:data()
-  let $person-name := $person/tei:persName/tei:name/text()
-  where $person-name
-  order by $person-name
-  return
-    <graphml:node id="{$person-id => translate('._','')}" labels=":Character">
-      <graphml:data key="name">{$person-name}</graphml:data>
+    <graphml:node id="act2" labels=":Act">
+      <graphml:data key="act">Act 2</graphml:data>
     </graphml:node>
-};
-
-declare function local:act-scene-nodes($doc as document-node()?) as element(graphml:node)*
-{
-  let $acts := fn:count($doc//tei:div1[@type="act"])
-  let $act-nodes := (1 to $acts) !
-      <graphml:node id="{'act' || . }" labels=":Act">
-        <graphml:data key="act">{'Act ' || . }</graphml:data>
-     </graphml:node>
-  let $scene-nodes :=
-    for $act in 1 to $acts
-    for $scene in 1 to fn:count($doc//tei:div1[@n=$act]//tei:div2[@type="scene"])
-    return
-     <graphml:node id="{'act' || $act || 'scene' || $scene }" labels=":Scene">
-        <graphml:data key="scene">{'Scene ' || $scene }</graphml:data>
-     </graphml:node>
-  return ($act-nodes, $scene-nodes)
-};
-
-declare function local:make-graphml($data as element()* ) as element(graphml:graphml)? {
-  <graphml:graphml
-    xmlns:grapml="http://graphml.graphdrawing.org/xmlns"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
-    <graphml:graph id="G" edgedefault="directed">
-      {
-        functx:distinct-deep(
-          for $node in $data
-          order by xs:string($node/fn:node-name()) descending, $node/@labels, ($node/graphml:data/text())[1]
-          return $node)
-      }
-    </graphml:graph>
-  </graphml:graphml>
-};
-
-declare function local:play-to-acts($play as element(graphml:node)*, $acts-scenes as element(graphml:node)*) as element(graphml:edge)*
-{
-  for $node in $acts-scenes
-  where $node/@labels eq ":Act"
-  return
-  <graphml:edge
-     source="{$play/@id}"
-     target="{$node/@id}"
-     labels=":Contains">
-       <graphml:data key="label">contains</graphml:data>
-  </graphml:edge>
-};
-
-declare function local:acts-to-scenes($acts-scenes as element(graphml:node)*) as element(graphml:edge)*
-{
-  for $node in $acts-scenes[@labels eq ":Act"]
-  for $scene in $acts-scenes[@labels eq ":Scene"]
-  where fn:contains($scene/@id, $node/@id)
-  return
-  <graphml:edge
-     source="{$node/@id}"
-     target="{$scene/@id}"
-     label=":Contains">
-       <graphml:data key="label">contains</graphml:data>
-  </graphml:edge>
-};
-
-declare function local:persons-to-scenes($persons as element(graphml:node)*, $acts-scenes as element(graphml:node)*, $doc as document-node()) as element(graphml:edge)*
-{
-  for $act in 1 to fn:count($acts-scenes[@labels eq ":Act"])
-  for $scene in $doc//tei:div1[@n=$act]//tei:div2
-  let $characters := $scene//tei:stage/@who ! fn:tokenize(., " ") ! translate(., "#._", "")
-  return
-    for $character in $characters
-    where some $person in $persons/@id satisfies $character eq $person  
-    return
-  <graphml:edge
-     source="{$character}"
-     target="{'act' || $act || 'scene' || $scene/@n}"
-     label=":Appears">
-       <graphml:data key="label">appears</graphml:data>
-  </graphml:edge>
-};
-
-let $doc := fn:doc("https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml")
-let $play := local:title-node($doc)
-let $acts-scenes := local:act-scene-nodes($doc)
-let $play-to-acts := local:play-to-acts($play, $acts-scenes)
-let $acts-to-scenes := local:acts-to-scenes($acts-scenes)
-let $persons := local:person-nodes($doc)
-let $persons-to-scenes := local:persons-to-scenes($persons, $acts-scenes, $doc)
-return local:make-graphml(($play, $persons, $acts-scenes, $play-to-acts, $acts-to-scenes, $persons-to-scenes))
+    <graphml:node id="act3" labels=":Act">
+      <graphml:data key="act">Act 3</graphml:data>
+    </graphml:node>
+    <graphml:node id="act4" labels=":Act">
+      <graphml:data key="act">Act 4</graphml:data>
+    </graphml:node>
+    <graphml:node id="act5" labels=":Act">
+      <graphml:data key="act">Act 5</graphml:data>
+    </graphml:node>
+    <graphml:node id="ArtemidorusJC" labels=":Character">
+      <graphml:data key="name">Artemidorus</graphml:data>
+    </graphml:node>
+    <graphml:node id="CassiusJC" labels=":Character">
+      <graphml:data key="name">Caius Cassius</graphml:data>
+    </graphml:node>
+    <graphml:node id="LigariusJC" labels=":Character">
+      <graphml:data key="name">Caius Ligarius</graphml:data>
+    </graphml:node>
+    <graphml:node id="CalphurniaJC" labels=":Character">
+      <graphml:data key="name">Calphurnia</graphml:data>
+    </graphml:node>
+    <graphml:node id="CascaJC" labels=":Character">
+      <graphml:data key="name">Casca</graphml:data>
+    </graphml:node>
+    <graphml:node id="CiceroJC" labels=":Character">
+      <graphml:data key="name">Cicero</graphml:data>
+    </graphml:node>
+    <graphml:node id="CinnaJC" labels=":Character">
+      <graphml:data key="name">Cinna</graphml:data>
+    </graphml:node>
+    <graphml:node id="CinnaPoetJC" labels=":Character">
+      <graphml:data key="name">Cinna</graphml:data>
+    </graphml:node>
+    <graphml:node id="SOLDIERSBRUTUSClaudiusJC" labels=":Character">
+      <graphml:data key="name">Claudius</graphml:data>
+    </graphml:node>
+    <graphml:node id="SOLDIERSBRUTUSClitusJC" labels=":Character">
+      <graphml:data key="name">Clitus</graphml:data>
+    </graphml:node>
+    <graphml:node id="SOLDIERSBRUTUSDardanusJC" labels=":Character">
+      <graphml:data key="name">Dardanus</graphml:data>
+    </graphml:node>
+    <graphml:node id="DeciusJC" labels=":Character">
+      <graphml:data key="name">Decius Brutus</graphml:data>
+    </graphml:node>
+    <graphml:node id="FlaviusJC" labels=":Character">
+      <graphml:data key="name">Flavius</graphml:data>
+    </graphml:node>
+    <graphml:node id="SOLDIERSBRUTUSFlaviusJC" labels=":Character">
+      <graphml:data key="name">Flavius</graphml:data>
+    </graphml:node>
+    <graphml:node id="CaesarJC" labels=":Character">
+      <graphml:data key="name">Julius Caesar</graphml:data>
+    </graphml:node>
+    <graphml:node id="SOLDIERSBRUTUSLabeoJC" labels=":Character">
+      <graphml:data key="name">Labeo</graphml:data>
+    </graphml:node>
+    <graphml:node id="LepidusJC" labels=":Character">
+      <graphml:data key="name">Lepidus</graphml:data>
+    </graphml:node>
+    <graphml:node id="SOLDIERSBRUTUSLuciliusJC" labels=":Character">
+      <graphml:data key="name">Lucilius</graphml:data>
+    </graphml:node>
+    <graphml:node id="LuciusJC" labels=":Character">
+      <graphml:data key="name">Lucius</graphml:data>
+    </graphml:node>
+    <graphml:node id="BrutusJC" labels=":Character">
+      <graphml:data key="name">Marcus Brutus</graphml:data>
+    </graphml:node>
+    <graphml:node id="AntonyJC" labels=":Character">
+      <graphml:data key="name">Mark Antony</graphml:data>
+    </graphml:node>
+    <graphml:node id="MarullusJC" labels=":Character">
+      <graphml:data key="name">Marullus</graphml:data>
+    </graphml:node>
+    <graphml:node id="SOLDIERSBRUTUSMessalaJC" labels=":Character">
+      <graphml:data key="name">Messala</graphml:data>
+    </graphml:node>
+    <graphml:node id="MetellusJC" labels=":Character">
+      <graphml:data key="name">Metellus Cimber</graphml:data>
+    </graphml:node>
+    <graphml:node id="OctaviusJC" labels=":Character">
+      <graphml:data key="name">Octavius</graphml:data>
+    </graphml:node>
+    <graphml:node id="PindarusJC" labels=":Character">
+      <graphml:data key="name">Pindarus</graphml:data>
+    </graphml:node>
+    <graphml:node id="PopiliusJC" labels=":Character">
+      <graphml:data key="name">Popilius Lena</graphml:data>
+    </graphml:node>
+    <graphml:node id="PortiaJC" labels=":Character">
+      <graphml:data key="name">Portia</graphml:data>
+    </graphml:node>
+    <graphml:node id="PubliusJC" labels=":Character">
+      <graphml:data key="name">Publius</graphml:data>
+    </graphml:node>
+    <graphml:node id="SOLDIERSBRUTUSStratoJC" labels=":Character">
+      <graphml:data key="name">Strato</graphml:data>
+    </graphml:node>
+    <graphml:node id="SOLDIERSBRUTUSTitiniusJC" labels=":Character">
+      <graphml:data key="name">Titinius</graphml:data>
+    </graphml:node>
+    <graphml:node id="TreboniusJC" labels=":Character">
+      <graphml:data key="name">Trebonius</graphml:data>
+    </graphml:node>
+    <graphml:node id="SOLDIERSBRUTUSVarroJC" labels=":Character">
+      <graphml:data key="name">Varro</graphml:data>
+    </graphml:node>
+    <graphml:node id="SOLDIERSBRUTUSVolumniusJC" labels=":Character">
+      <graphml:data key="name">Volumnius</graphml:data>
+    </graphml:node>
+    <graphml:node id="SOLDIERSBRUTUSCatoJC" labels=":Character">
+      <graphml:data key="name">Young Cato</graphml:data>
+    </graphml:node>
+    <graphml:node id="act1scene1" labels=":Scene">
+      <graphml:data key="scene">Scene 1</graphml:data>
+    </graphml:node>
+    <graphml:node id="act2scene1" labels=":Scene">
+      <graphml:data key="scene">Scene 1</graphml:data>
+    </graphml:node>
+    <graphml:node id="act3scene1" labels=":Scene">
+      <graphml:data key="scene">Scene 1</graphml:data>
+    </graphml:node>
+    <graphml:node id="act4scene1" labels=":Scene">
+      <graphml:data key="scene">Scene 1</graphml:data>
+    </graphml:node>
+    <graphml:node id="act5scene1" labels=":Scene">
+      <graphml:data key="scene">Scene 1</graphml:data>
+    </graphml:node>
+    <graphml:node id="act1scene2" labels=":Scene">
+      <graphml:data key="scene">Scene 2</graphml:data>
+    </graphml:node>
+    <graphml:node id="act2scene2" labels=":Scene">
+      <graphml:data key="scene">Scene 2</graphml:data>
+    </graphml:node>
+    <graphml:node id="act3scene2" labels=":Scene">
+      <graphml:data key="scene">Scene 2</graphml:data>
+    </graphml:node>
+    <graphml:node id="act4scene2" labels=":Scene">
+      <graphml:data key="scene">Scene 2</graphml:data>
+    </graphml:node>
+    <graphml:node id="act5scene2" labels=":Scene">
+      <graphml:data key="scene">Scene 2</graphml:data>
+    </graphml:node>
+    <graphml:node id="act1scene3" labels=":Scene">
+      <graphml:data key="scene">Scene 3</graphml:data>
+    </graphml:node>
+    <graphml:node id="act2scene3" labels=":Scene">
+      <graphml:data key="scene">Scene 3</graphml:data>
+    </graphml:node>
+    <graphml:node id="act3scene3" labels=":Scene">
+      <graphml:data key="scene">Scene 3</graphml:data>
+    </graphml:node>
+    <graphml:node id="act4scene3" labels=":Scene">
+      <graphml:data key="scene">Scene 3</graphml:data>
+    </graphml:node>
+    <graphml:node id="act5scene3" labels=":Scene">
+      <graphml:data key="scene">Scene 3</graphml:data>
+    </graphml:node>
+    <graphml:node id="act2scene4" labels=":Scene">
+      <graphml:data key="scene">Scene 4</graphml:data>
+    </graphml:node>
+    <graphml:node id="act5scene4" labels=":Scene">
+      <graphml:data key="scene">Scene 4</graphml:data>
+    </graphml:node>
+    <graphml:node id="act5scene5" labels=":Scene">
+      <graphml:data key="scene">Scene 5</graphml:data>
+    </graphml:node>
+    <graphml:node id="JC" labels=":Work">
+      <graphml:data key="title">Julius Caesar</graphml:data>
+      <graphml:data key="author">William Shakespeare</graphml:data>
+    </graphml:node>
+    <graphml:edge source="FlaviusJC" target="act1scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="MarullusJC" target="act1scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CaesarJC" target="act1scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="AntonyJC" target="act1scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CalphurniaJC" target="act1scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="PortiaJC" target="act1scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="DeciusJC" target="act1scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CiceroJC" target="act1scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="BrutusJC" target="act1scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CassiusJC" target="act1scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CascaJC" target="act1scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="MarullusJC" target="act1scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="FlaviusJC" target="act1scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CascaJC" target="act1scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CiceroJC" target="act1scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CassiusJC" target="act1scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CinnaJC" target="act1scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="BrutusJC" target="act2scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="LuciusJC" target="act2scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CassiusJC" target="act2scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CascaJC" target="act2scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="DeciusJC" target="act2scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CinnaJC" target="act2scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="MetellusJC" target="act2scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="TreboniusJC" target="act2scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="PortiaJC" target="act2scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="LigariusJC" target="act2scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CaesarJC" target="act2scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CalphurniaJC" target="act2scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="DeciusJC" target="act2scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="BrutusJC" target="act2scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="LigariusJC" target="act2scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="MetellusJC" target="act2scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CascaJC" target="act2scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="TreboniusJC" target="act2scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CinnaJC" target="act2scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="PubliusJC" target="act2scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="AntonyJC" target="act2scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="ArtemidorusJC" target="act2scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="PortiaJC" target="act2scene4" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="LuciusJC" target="act2scene4" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CaesarJC" target="act3scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="AntonyJC" target="act3scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="LepidusJC" target="act3scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="BrutusJC" target="act3scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CassiusJC" target="act3scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CascaJC" target="act3scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="DeciusJC" target="act3scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="MetellusJC" target="act3scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="TreboniusJC" target="act3scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CinnaJC" target="act3scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="PubliusJC" target="act3scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="PopiliusJC" target="act3scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="ArtemidorusJC" target="act3scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="BrutusJC" target="act3scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CassiusJC" target="act3scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="AntonyJC" target="act3scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CaesarJC" target="act3scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CinnaPoetJC" target="act3scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="AntonyJC" target="act4scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="OctaviusJC" target="act4scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="LepidusJC" target="act4scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="BrutusJC" target="act4scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSLuciliusJC" target="act4scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="LuciusJC" target="act4scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSTitiniusJC" target="act4scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="PindarusJC" target="act4scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CassiusJC" target="act4scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CassiusJC" target="act4scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="BrutusJC" target="act4scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSLuciliusJC" target="act4scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSTitiniusJC" target="act4scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="LuciusJC" target="act4scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSMessalaJC" target="act4scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSVarroJC" target="act4scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSClaudiusJC" target="act4scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CaesarJC" target="act4scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="OctaviusJC" target="act5scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="AntonyJC" target="act5scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="BrutusJC" target="act5scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CassiusJC" target="act5scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSLuciliusJC" target="act5scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSTitiniusJC" target="act5scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSMessalaJC" target="act5scene1" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="BrutusJC" target="act5scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSMessalaJC" target="act5scene2" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="CassiusJC" target="act5scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSTitiniusJC" target="act5scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="PindarusJC" target="act5scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSMessalaJC" target="act5scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="BrutusJC" target="act5scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSCatoJC" target="act5scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSStratoJC" target="act5scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSVolumniusJC" target="act5scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSLuciliusJC" target="act5scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSLabeoJC" target="act5scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSFlaviusJC" target="act5scene3" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="BrutusJC" target="act5scene4" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSMessalaJC" target="act5scene4" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSCatoJC" target="act5scene4" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSLuciliusJC" target="act5scene4" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSFlaviusJC" target="act5scene4" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="AntonyJC" target="act5scene4" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="BrutusJC" target="act5scene5" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSDardanusJC" target="act5scene5" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSClitusJC" target="act5scene5" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSStratoJC" target="act5scene5" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSVolumniusJC" target="act5scene5" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="AntonyJC" target="act5scene5" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="OctaviusJC" target="act5scene5" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSMessalaJC" target="act5scene5" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="SOLDIERSBRUTUSLuciliusJC" target="act5scene5" label=":Appears">
+      <graphml:data key="label">appears</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="act1" target="act1scene1" label=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="act1" target="act1scene2" label=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="act1" target="act1scene3" label=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="act2" target="act2scene1" label=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="act2" target="act2scene2" label=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="act2" target="act2scene3" label=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="act2" target="act2scene4" label=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="act3" target="act3scene1" label=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="act3" target="act3scene2" label=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="act3" target="act3scene3" label=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="act4" target="act4scene1" label=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="act4" target="act4scene2" label=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="act4" target="act4scene3" label=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="act5" target="act5scene1" label=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="act5" target="act5scene2" label=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="act5" target="act5scene3" label=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="act5" target="act5scene4" label=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="act5" target="act5scene5" label=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="JC" target="act1" labels=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="JC" target="act2" labels=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="JC" target="act3" labels=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="JC" target="act4" labels=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+    <graphml:edge source="JC" target="act5" labels=":Contains">
+      <graphml:data key="label">contains</graphml:data>
+    </graphml:edge>
+  </graphml:graph>
+</graphml:graphml>
 ```
 
 ![Julius Caesar Graph in Neo4j](http://i.imgur.com/gai55cE.png)
