@@ -1,10 +1,10 @@
 ## Session Two
 
-Today, we are going to tackle some textual analysis with XQuery. When you are working with real world data like documents encoded according to the [TEI](http://www.tei-c.org/index.xml), your query expressions will frequently become more complicated. In this session, we'll try to apply what we've learned and use our new-found knowledge of XQuery to explore literary documents.
+In this session, we are going to tackle some textual analysis with XQuery. When you are working with real world data like documents encoded according to the [TEI Guidelines](http://www.tei-c.org/index.xml), your query expressions will tend to become more complicated than the simple examples we saw in the first session. We'll apply what we've learned and use our new-found knowledge of XQuery to explore literary documents.
 
 ### Word Frequencies in XQuery
 
-A good use case for XQuery is developing word frequency lists for digital texts. Among the first poems I learned as a child was "Eldorado" by Edgar Allen Poe. I recall being struck by the repetition of the word "shadow" in the poem. Why did Poe repeat the word so many times in so few lines? While this month's XQuery exercise won't sort out the answer to that question, it will help us find out how many times he used that and other words.
+A good use case for XQuery is developing word frequency lists for digital texts. Among the first poems I learned as a child was "Eldorado" by Edgar Allen Poe. I recall being struck by the repetition of the word "shadow" in the poem. Why did Poe repeat the word so many times in so few lines? While this session's XQuery exercise won't sort out the answer to that question, it will help us find out how many times he used that and other words.
 
 Let's start with a TEI edition of the poem:
 
@@ -95,7 +95,7 @@ The output should look like this:
 </dictionary>
 ```
 
-To get you started, let's assume the expression body looks something like this
+To get you started, let's assume the query body looks something like this:
 
 ```xquery
 xquery version "3.1";
@@ -114,7 +114,7 @@ To get this to work, we just have to write two functions: `local:collect-words()
 
 Give it a try yourself before [checking out what I came up with....](code/count-word-tokens.xqy)
 
-Let's write the `local:collect-words` function first. This function accepts a sequence of text nodes, strips away punctuation and other non-essential differences, and returns a sequence of words.
+Let's write the `local:collect-words()` function first. This function accepts a sequence of text nodes, strips away punctuation and other non-essential differences, and returns a sequence of words.
 
 ```xquery
 xquery version "3.1";
@@ -143,7 +143,7 @@ Writing a function in this style is perfectly OK in XQuery, but it's not good st
 fn:tokenize(fn:lower-case(fn:translate(fn:string-join($words, " "), "!?.',-", "")), " ")
 ```
 
-As we saw in the previous session, the XQuery 3.1 Recommendation introduced the 'arrow operator' to avoid writing these kinds of expressions. The arrow operator pipes the value of a previous expression as the first argument to another expression. So, for example, we could rewrite the expression above like this:
+As we saw in the previous session, the XQuery 3.1 Recommendation introduced the *arrow operator* to avoid writing these kinds of expressions. The arrow operator pipes the value of a previous expression as the first argument to another function. So, for example, we could rewrite the expression above like this:
 
 ```xquery
 xquery version "3.1";
@@ -160,7 +160,7 @@ local:collect-words("This is a test of the system.")
 ```
 The arrow operator allows us to keep our code clean and straightforward by removing any need for rebinding variables in a FLWOR expression or writing complexly nested subexpressions. Note that you'll need to try the expression above with a processor that supports XQuery 3.1.
 
-OK, now let's write our next function: `local:determine-frequency`. This function accepts a sequence of word tokens and then returns a sequence of `word` elements indicating the frequency of word types. So we need to write something like the following.
+OK, now let's write our next function: `local:determine-frequency()`. This function accepts a sequence of word tokens and then returns a sequence of `word` elements indicating the frequency of word types. So we need to write something like the following.
 
 ```xquery
  (:~
@@ -173,8 +173,9 @@ declare function local:determine-frequency($words as xs:string*) as element(word
     for $word in fn:distinct-values($words)
     let $item :=
         element word {
-        attribute frequency {fn:count($words[. = $word])},
-        $word}
+            attribute frequency { fn:count($words[. = $word]) },
+            $word
+        }
     order by $item/@frequency descending
     return $item
 };
@@ -223,7 +224,7 @@ return $play//tei:encodingDesc
 ```
 We find really valuable information about the usage of particular TEI elements, which can in turn inform the kinds of queries we will write. XQuery makes this form of exploratory analysis very easy. Just as statisticians would explore a dataset with simple queries before undertaking any complex analysis, I'd encourage you to spend time exploring your XML (or JSON) documents before diving into writing significant queries.
 
-Let's try to now to write a couple analytical queries. Here's two snippets from _Julius Caesar_. First, let's look at `<listPerson>` 'list of persons'. Here we see a number of persons related to Julius Caesar, including Caesar himself, his wife Calphurnia, and their servants. There are similar lists of persons for other characters and roles in the play.
+Let's try to now to write a couple analytical queries. Here's two snippets from _Julius Caesar_. First, let's look at `<listPerson>`, a TEI element that houses a list of persons. Here we see a number of persons related to Julius Caesar, including Caesar himself, his wife Calphurnia, and their servants. There are similar lists of persons for other characters and roles in the play.
 
 ```xml
 <listPerson>
@@ -249,7 +250,7 @@ Let's try to now to write a couple analytical queries. Here's two snippets from 
     </person>
 </listPerson>
 ```
-In the body of the play, we find `<sp>` or speech elements, with `who` attributes that identify the speakers. Note also the use of `w` (word), `pc` (punctuation character), and `<c>` (character) elements to markup the text of the speeches.
+In the body of the play, we find `<sp>` or speech elements, with `who` attributes that identify the speakers. Note also the use of `<w>` (word), `<pc>` (punctuation character), and `<c>` (character) elements to markup the text of the speeches.
 
 ```xml
 <sp xml:id="sp-0006" who="#COMMONERS.Carpenter_JC">
@@ -278,21 +279,21 @@ Our first expression will find all the stage directions associated with characte
 ```xquery
 xquery version "3.1";
 
-declare default element namespace "http://www.tei-c.org/ns/1.0";
+declare namespace tei="http://www.tei-c.org/ns/1.0";
 
 let $doc := fn:doc("https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml")
-for $person in $doc//person
+for $person in $doc//tei:person
 return
-      <directions>
+    <directions>
         <person>{$person}</person>
         <direction>
-            {
-                for $stage in $doc//stage
-                where $person/@xml:id = fn:tokenize($stage/@who, "#| #")
-                return $stage
-            }
+        {
+            for $stage in $doc//tei:stage
+            where $person/@xml:id = fn:tokenize($stage/@who, "#| #")
+            return $stage
+        }
         </direction>
-      </directions>
+    </directions>
 ```
 
 In this next example, let's list all characters and the scenes during which they appear on stage. This query illustrates the use of multiple `for` clauses in an FLWOR expression.
@@ -313,7 +314,7 @@ return element appearances
       where $person = $scene//tei:stage/@who ! fn:tokenize(., " ")
       group by $person
       order by $person
-      return <actor id="{$person}"  act-scene=" {$act-scene}" />
+      return <actor id="{$person}" act-scene="{$act-scene}" />
   }
 ```
 Let's give this expression a whirl. Here is what the results look like.
@@ -333,7 +334,7 @@ We've got the information we want but it's not a very attractive display. Can we
 
 ### Formatting XQuery Results
 
-So a problem with the XQuery expression above is that it's a little hard to follow. How exactly are we matching names with scenes? I wrote the expression but, returning to it several days later, it find it hard to parse out. So, realistically, we cannot expect to add more complexity and hope to understand what we're doing. So let's [refactor](https://en.wikipedia.org/wiki/Code_refactoring) our expression into several sub-expressions (or functions) to maintain readability and comprehensibility.
+So a problem with the XQuery expression above is that it's a little hard to follow. How exactly are we matching names with scenes? I wrote the expression, but, returning to it several days later, I find it hard to parse out. So, realistically, we cannot expect to add more complexity and hope to understand what we're doing. So let's [refactor](https://en.wikipedia.org/wiki/Code_refactoring) our expression into several sub-expressions (or functions) to maintain readability and comprehensibility.
 
 Let's start out with our main expression body, which we'll keep as simple as possible.
 
@@ -342,14 +343,13 @@ xquery version "3.1";
 
 let $url := "https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml"
 let $play := local:get-play($url)
-let $appearances := element div {local:get-appearances($play)}
+let $appearances := element div { local:get-appearances($play) }
 return local:html($appearances)
 ```
 
 Our next function `local:get-play()` simply opens the play for us. Maybe we don't really even need it, but it helps to be clear about how we're accessing the play. I've put a free expression below our function just so that we can test it out.
 
 ```xquery
-
 declare function local:get-play($url as xs:string) as document-node()
 {
    fn:doc($url)
@@ -357,7 +357,6 @@ declare function local:get-play($url as xs:string) as document-node()
 
 let $url := "https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml"
 return local:get-play($url)
-
 ```
 
 OK, now we've got the play. Let's get all the ids of the actors in the play.
@@ -375,7 +374,6 @@ declare function local:get-person-ids($play as document-node()) as xs:string*
   return $id
 
 };
-
 
 declare function local:get-play($url as xs:string) as document-node()
 {
@@ -415,18 +413,17 @@ declare function local:get-person-ids($play as document-node()) as xs:string*
 
 declare function local:get-play($url as xs:string) as document-node()
 {
-   fn:doc($url)
+  fn:doc($url)
 };
 
 let $url := "https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml"
 let $play := local:get-play($url)
 return local:get-person-ids($play) ! local:get-person-name-by-id($play , .)
-
 ```
 
 This function evaluates to a friendlier sequence of names, rather than ids:
 
-`Julius Caesar Calphurnia Servant to them Marcus Brutus Portia Lucius Caius Cassius Casca Cinna Decius Brutus Caius Ligarius Metellus Cimber Trebonius Cicero Publius Popilius Lena Flavius Marullus Mark Antony Lepidus Octavius Servant to Antony Servant to Octavius Lucilius Titinius Messala Varro Claudius Young Cato Strato Volumnius Labeo (nonspeaking) Flavius (nonspeaking) Dardanus Clitus A Carpenter A Cobbler A Soothsayer Artemidorus Cinna the poet Pindarus Another Poet A Messenger`
+> `Julius Caesar Calphurnia Servant to them Marcus Brutus Portia Lucius Caius Cassius Casca Cinna Decius Brutus Caius Ligarius Metellus Cimber Trebonius Cicero Publius Popilius Lena Flavius Marullus Mark Antony Lepidus Octavius Servant to Antony Servant to Octavius Lucilius Titinius Messala Varro Claudius Young Cato Strato Volumnius Labeo (nonspeaking) Flavius (nonspeaking) Dardanus Clitus A Carpenter A Cobbler A Soothsayer Artemidorus Cinna the poet Pindarus Another Poet A Messenger`
 
 It would be a bit tedious, I think, to run through all the functions. But I hope you can see now how we build up our expression step-by-step from smaller sub-expressions. Putting it all together, then, we have the following:
 
@@ -461,7 +458,7 @@ declare function local:get-scenes-by-id($play as document-node(), $id as xs:stri
     for $act in $play//tei:div1[@type="act"]
     for $scene in $act/tei:div2
     let $act-scene := fn:concat("act ", $act/@n, ", ", "scene ", $scene/@n)
-    where $id = $scene//tei:stage/@who ! fn:tokenize(., " ") ! fn:replace(., "#","")
+    where $id = $scene//tei:stage/@who ! fn:tokenize(., " ") ! fn:replace(., "#", "")
     return $act-scene
   return fn:string-join($scenes, "; ")
 };
@@ -513,7 +510,7 @@ declare function local:get-appearances($play as document-node()) as element(p)*
 
 let $url := "https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml"
 let $play := local:get-play($url)
-let $appearances := element div {local:get-appearances($play)}
+let $appearances := element div { local:get-appearances($play) }
 return local:html($appearances)
 ```
 
