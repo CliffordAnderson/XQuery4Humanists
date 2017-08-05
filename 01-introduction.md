@@ -172,7 +172,7 @@ return $num || ". " || $title
 Other ways exist to count in FLWOR expressions, but it's easy to get the order mixed up as you manipulate the tuple stream. Try combining `group by` with `count` to see what I mean. Can you partition books into fiction and nonfiction while also order the books sequentially in those groups? Try it out yourself, then check my [solution](https://gist.github.com/CliffordAnderson/35cde75043b55ab8a213d3e0449941c9).
 
 > Note for eXist users: Unfortunately the `count` clause has not yet been implemented in eXist. Luckily, a workaround is available: first, use the `at` clause to bind the variable `$num` to the current position of the interation through the books and (b) use either an intermediate FLWOR to pre-sort the books or, as shown here, the `fn:sort()` function:
-> 
+>
 > ```xquery
 > for $book at $num in fn:sort($books/book)
 > let $title := $book/text()
@@ -264,7 +264,7 @@ return $first-shop is $second-shop
 
 Try using `<<` and `>>` to check whether `$first-shop` comes before or after the `$second-shop`.
 
-For practice, can you fill in the correct comparison operators in the two examples below (replacing `FIX ME!` with your answer)?
+For practice, can you fill in the correct comparison operators in the two examples below? With your alterations, the first query should return the <identifiers> element if any of the num attributes equals 13. If you get no results or an error, then keep trying. (Hint: Should you replace FIX ME! with `eq` or `=`?)
 
 ```xquery
 let $ids :=
@@ -276,6 +276,7 @@ let $ids :=
 where $ids/isbn/@num FIX ME! "13"
 return $ids
 ```
+The second query should return the <identifiers> element. (Hint: Should you replace FIX ME! with `$id eq 13` or `$id = 13?` Does it matter?)
 
 ```xquery
 let $ids :=
