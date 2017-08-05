@@ -137,7 +137,7 @@ declare function local:collect-words($words as xs:string*) as xs:string*
 local:collect-words("This is a test of the system.")
 ```
 
-Writing a function in this style is perfectly OK in XQuery, but it's not good style. We're rebinding `$words` three times. (Technically, this is called "shadow binding." We're actually creating different variables behind the scenes.) From a functional perspective, it gets confusing since variables are not supposed to vary. We could rewrite FLWOR expression this as a sequence of nested sub-expressions, but doing so makes our expression hard to read: 
+Writing a function in this style is perfectly OK in XQuery, but it's not good style. We're rebinding `$words` three times. (Technically, this is called "shadow binding." We're actually creating different variables behind the scenes.) From a functional perspective, it gets confusing since variables are not supposed to vary. We could rewrite FLWOR expression this as a sequence of nested sub-expressions, but doing so makes our expression hard to read:
 
 ```xquery
 fn:tokenize(fn:lower-case(fn:translate(fn:string-join($words, " "), "!?.',-", "")), " ")
@@ -520,6 +520,8 @@ Try running the whole XQuery expression with BaseX or eXist. Your query should p
 
 ### Graphing TEI
 
+The final example in this section is more advanced. We will draw out the implicit graph of relationships between characters in *Julius Caesar*. We will do this by identifying relationships in the TEI document and converting them into [GraphML](http://graphml.graphdrawing.org/), a standard for encoding graphs as XML.
+
 ```xquery
 xquery version "3.1";
 
@@ -536,7 +538,7 @@ declare function local:title-node($doc as document-node()?) as element(graphml:n
   let $idno := $doc//tei:idno/text()
   let $title := $doc/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/text()
   let $author := $doc/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:author/text()
-  return 
+  return
     <graphml:node id="{$idno}" labels=":Work">
       <graphml:data key="title">{$title}</graphml:data>
       <graphml:data key="author">{$author}</graphml:data>
@@ -544,7 +546,7 @@ declare function local:title-node($doc as document-node()?) as element(graphml:n
 };
 
 declare function local:person-nodes($doc as document-node()?) as element(graphml:node)*
-{ 
+{
   for $person in $doc//tei:person
   let $person-id := $person/@xml:id/fn:data()
   let $person-name := $person/tei:persName/tei:name/text()
@@ -642,6 +644,8 @@ let $persons := local:person-nodes($doc)
 let $persons-to-scenes := local:persons-to-scenes($persons, $acts-scenes, $doc)
 return local:make-graphml(($play, $persons, $acts-scenes, $play-to-acts, $acts-to-scenes, $persons-to-scenes))
 ```
+
+This XQuery expression takes one of the Folger plays (e.g. *Julius Caesar*) as input and produces graphML as output. While graphML does not impose any constraint on the order of edges and nodes, our query lines up nodes and edges.
 
 ```xml
 <graphml:graphml xmlns:graphml="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:grapml="http://graphml.graphdrawing.org/xmlns" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
@@ -1232,5 +1236,7 @@ return local:make-graphml(($play, $persons, $acts-scenes, $play-to-acts, $acts-t
   </graphml:graph>
 </graphml:graphml>
 ```
+
+The graphML document can now be loaded into a graph visualization tool like [Gephi](https://gephi.org/) or a graph database like [Neo4j](https://neo4j.com/) for analysis. Here's an example of a few nodes and edges of our *Julius Caesar* graph in Neo4j.
 
 ![Julius Caesar Graph in Neo4j](http://i.imgur.com/gai55cE.png)
