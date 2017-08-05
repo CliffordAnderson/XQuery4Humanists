@@ -264,7 +264,7 @@ return $first-shop is $second-shop
 
 Try using `<<` and `>>` to check whether `$first-shop` comes before or after the `$second-shop`.
 
-For practice, can you fill in the correct comparison operators in the two examples below? With your alterations, the first query should return the <identifiers> element if any of the num attributes equals 13. If you get no results or an error, then keep trying. (Hint: Should you replace FIX ME! with `eq` or `=`?)
+For practice, can you fill in the correct comparison operators in the two examples below? With your alterations, the first query should return the `<identifiers>` element if any of the `num` attributes equals 13. If you get no results or an error, then keep trying. (Hint: Should you replace `FIX ME!` with `eq` or `=`?)
 
 ```xquery
 let $ids :=
@@ -276,7 +276,7 @@ let $ids :=
 where $ids/isbn/@num FIX ME! "13"
 return $ids
 ```
-The second query should return the <identifiers> element. (Hint: Should you replace FIX ME! with `$id eq 13` or `$id = 13?` Does it matter?)
+The second query should return the `<identifiers>` element. (Hint: Should you replace `FIX ME!` with `$id eq 13` or `$id = 13`? Does it matter?)
 
 ```xquery
 let $ids :=
