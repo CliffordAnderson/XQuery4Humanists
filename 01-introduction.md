@@ -44,7 +44,7 @@ Like any programming language, you need to memorize a bit of syntax and operator
 | `( )`         | sequence constructor                        |
 | `:=`          | assignment, binds a variable to a value     |
 | `(:  :)`      | XQuery comment, not interpreted             |
-| `&#124;&#124;`| concatenation, joins together two strings   |
+| <code>&#124;&#124;</code>| concatenation, joins together two strings   |
 | `!`           | simple mapping operator, applies a function on right to value on the right |
 | `=>`          | arrow operator, pipes the value on the left to the function on the right   |
 
