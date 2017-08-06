@@ -2,6 +2,13 @@
 
 In this session, we are going to tackle some textual analysis with XQuery. When you are working with real world data like documents encoded according to the [TEI Guidelines](http://www.tei-c.org/index.xml), your query expressions will tend to become more complicated than the simple examples we saw in the first session. We'll apply what we've learned and use our new-found knowledge of XQuery to explore literary documents.
 
+### Learning Outcomes
+
+* Apply XQuery to TEI documents to study word frequency;
+* Use XQuery to carry out exploratory analysis of TEI documents;
+* Learn to create web pages from TEI documents with XQuery;
+* Transform a TEI document into GraphML for network analysis.
+
 ### Word Frequencies in XQuery
 
 A good use case for XQuery is developing word frequency lists for digital texts. Among the first poems I learned as a child was "Eldorado" by Edgar Allen Poe. I recall being struck by the repetition of the word "shadow" in the poem. Why did Poe repeat the word in these lines? While this session's XQuery exercise won't sort out the answer to that question, it will help us find out how frequently he used that and other words.
@@ -745,3 +752,5 @@ You can now load The graphML document into a graph visualization tool like [Geph
 > To load this example into Neo4j, you'll need to install Neo4j as well as the [APOC](https://github.com/neo4j-contrib/neo4j-apoc-procedures) procedures. After you have both set up, you can load this graph with the following Cypher command: `call apoc.import.graphml("https://github.com/CliffordAnderson/XQuery4Humanists/edit/master/data/jc-graph.xml, {batchSize: 10000, readLabels: true, storeNodeIds: false, defaultRelationshipType:"RELATED"})`
 
 ![Julius Caesar Graph in Neo4j](http://i.imgur.com/gai55cE.png)
+
+In this session, we've scratched the surface of the possibilities of using XQuery to explore TEI documents. There is no more suitable tool for analyzing and interpreting TEI. The power of XQuery grows as you move from querying individual TEI documents to examining entire TEI corpora. As a challenge, can you create a graphML document, for instance, of the entire Folger Shakespeare TEI corpus, demonstrating the linkages among characters between plays?
