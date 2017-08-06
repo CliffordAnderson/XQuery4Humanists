@@ -4,7 +4,7 @@ In this session, we are going to tackle some textual analysis with XQuery. When 
 
 ### Word Frequencies in XQuery
 
-A good use case for XQuery is developing word frequency lists for digital texts. Among the first poems I learned as a child was "Eldorado" by Edgar Allen Poe. I recall being struck by the repetition of the word "shadow" in the poem. Why did Poe repeat the word in these lines? While this session's XQuery exercise won't sort out the answer to that question, it will help us find out how many times he used that and other words.
+A good use case for XQuery is developing word frequency lists for digital texts. Among the first poems I learned as a child was "Eldorado" by Edgar Allen Poe. I recall being struck by the repetition of the word "shadow" in the poem. Why did Poe repeat the word in these lines? While this session's XQuery exercise won't sort out the answer to that question, it will help us find out how frequently he used that and other words.
 
 Let's start with a TEI edition of the poem:
 
@@ -108,7 +108,7 @@ let $word-elements := local:determine-frequency($words)
 return element dictionary {$word-elements}
 ```
 
-To get this to work, we just have to write two functions: `local:collect-words()`, which we will use to clean up the words by getting rid of capitalization, punctuation, and the like, and `local:determine-frequency()`, which we will use to get the frequency of the various words.
+To get this to work, we have to write two functions: `local:collect-words()`, which we will use to clean up the words by getting rid of capitalization, punctuation, and the like, and `local:determine-frequency()`, which we will use to get the frequency of the words.
 
 > Hint: You'll need clean up the punctuation in `local:collect-words()` to get an accurate count of word tokens. The [`fn:translate` function](http://www.xqueryfunctions.com/xq/fn_translate.html) should do the trick nicely.
 
@@ -347,7 +347,7 @@ let $appearances := element div { local:get-appearances($play) }
 return local:html($appearances)
 ```
 
-Our next function `local:get-play()` simply opens the play for us. Maybe we don't really even need it, but it helps to be clear about how we're accessing the play. I've put a free expression below our function just so that we can test it out.
+Our next function `local:get-play()` opens the play for us. Maybe we don't even need it, but it helps to be clear about how we're accessing the play. I've put a free expression below our function so that we can test it out.
 
 ```xquery
 declare function local:get-play($url as xs:string) as document-node()
@@ -520,24 +520,48 @@ Try running the whole XQuery expression with BaseX or eXist. Your query should p
 
 ### Graphing TEI
 
-The final example in this section is more advanced. We will draw out the implicit graph of relationships between characters in *Julius Caesar*. We will do this by identifying relationships in the TEI document and converting them into [GraphML](http://graphml.graphdrawing.org/), a standard for encoding graphs as XML.
+The final example in this section is more advanced. We will draw out the implicit graph of relationships between characters in *Julius Caesar*. We will do this by identifying relationships in the TEI document and converting them into [GraphML](http://graphml.graphdrawing.org/), a standard for encoding graphs as XML. We will write a query that takes a Folger play (e.g. *Julius Caesar*) as input and produces graphML as its output.
 
-First, we need to figure out our graph model, that is, what our nodes and edges should be.
+First, we need to figure out our graph model, that is, what our nodes and edges should be. To keep matters simple, we will create four node kinds (`Work`, `Act`, `Scene`, and `Character`) and two kinds of relationships (`Appears` and `Contains`). The illustration below indicates our model.
 
 ![Graph Model](http://i.imgur.com/AGcJaez.png)
+
+To generate graphML nodes and edges from our TEI document, we need to identify the corresponding elements and then link them together with edges using ids. The expression body collects nodes and links them with edges.
 
 ```xquery
 xquery version "3.1";
 
-(: Converts TEI texts in the Folger Shakespeare Edition into graphml :)
+(: Converts TEI texts in the Folger Shakespeare Edition into graphML :)
 
 declare namespace graphml = "http://graphml.graphdrawing.org/xmlns";
 
 declare namespace tei = "http://www.tei-c.org/ns/1.0";
 
-import module namespace functx = 'http://www.functx.com';
+(: retrieves the TEI edition :)
+let $doc := fn:doc("JC.xml")
+(: creates the work node :)
+let $play := local:title-node($doc)
+(: creates the act and scene nodes :)
+let $acts-scenes := local:act-scene-nodes($doc)
+(: creates the edges between the work node to the act nodes :)
+let $play-to-acts := local:play-to-acts($play, $acts-scenes)
+(: creates the edges between the act nodes and the scenes nodes :)
+let $acts-to-scenes := local:acts-to-scenes($acts-scenes)
+(: creates the character nodes :)
+let $persons := local:person-nodes($doc)
+(: creates the edges between the character nodes and the scene nodes :)
+let $persons-to-scenes := local:persons-to-scenes($persons, $acts-scenes, $doc)
+(: create the graphML document of all the edges and nodes :)
+return local:make-graphml(($play, $persons, $acts-scenes, $play-to-acts, $acts-to-scenes, $persons-to-scenes))
 
-declare function local:title-node($doc as document-node()?) as element(graphml:node)*
+```
+
+As you see, this query consists of a single FLWOR expression that loads the TEI document, assigns the values of a series of function calls to variables, and then returns a function that packages up all those values into a graphML document.
+
+The hard part is writing the functions. Let's look at how to write the first function: `local:title-node()`. As always, I recommend starting by writing the function signature. While it's tempting to delay defining the types until you've composed the function (or to put off annotating the types altogether), getting in the habit of indicating the types of your inputs and output will prevent frustrating bugs down the line. In this case, we will accept a document-node (possibly empty) as our input and return a graphML node as our output. The function retrieves the `tei:idno` along with the `tei:title` and `tei:author` from the `tei:fileDesc` and creates a graphML node with an `id` attribute, a predefined `labels` attribute and a two data elements.
+
+```xquery
+declare function local:title-node($doc as document-node()?) as element(graphml:node)
 {
   let $idno := $doc//tei:idno/text()
   let $title := $doc/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/text()
@@ -548,20 +572,13 @@ declare function local:title-node($doc as document-node()?) as element(graphml:n
       <graphml:data key="author">{$author}</graphml:data>
     </graphml:node>
 };
+```
 
-declare function local:person-nodes($doc as document-node()?) as element(graphml:node)*
-{
-  for $person in $doc//tei:person
-  let $person-id := $person/@xml:id/fn:data()
-  let $person-name := $person/tei:persName/tei:name/text()
-  where $person-name
-  order by $person-name
-  return
-    <graphml:node id="{$person-id => translate('._','')}" labels=":Character">
-      <graphml:data key="name">{$person-name}</graphml:data>
-    </graphml:node>
-};
+A potentially tricky thing in this function is the shift from the TEI to the graphML namespace. You need to declare both namespaces in your XQuery prolog for this function to work.
 
+Next let's create the nodes for the acts and the scenes. We are going to create both using a single function, though you might also want to break this function apart for the sake of clarity. The function signature is nearly identical to the previous function except that we will be returning a series of graphML nodes. Note the strategy below of assigning the count of the `tei:div1` and `tei:div2` elements rather than the elements themselves. Also, note that we create unique identifiers for both acts and scenes since these elements do not have ids in the Folger texts. We will use those ids to link acts and scenes together in a another function.
+
+```xquery
 declare function local:act-scene-nodes($doc as document-node()?) as element(graphml:node)*
 {
   let $acts := fn:count($doc//tei:div1[@type="act"])
@@ -579,22 +596,30 @@ declare function local:act-scene-nodes($doc as document-node()?) as element(grap
   return ($act-nodes, $scene-nodes)
 };
 
-declare function local:make-graphml($data as element()* ) as element(graphml:graphml)? {
-  <graphml:graphml
-    xmlns:grapml="http://graphml.graphdrawing.org/xmlns"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
-    <graphml:graph id="G" edgedefault="directed">
-      {
-        functx:distinct-deep(
-          for $node in $data
-          order by xs:string($node/fn:node-name()) descending, $node/@labels, ($node/graphml:data/text())[1]
-          return $node)
-      }
-    </graphml:graph>
-  </graphml:graphml>
-};
+```
 
+Now we gather together the character nodes. The function signature is what we expected. Notice that we are limiting our characters to those who have names. The eliminates some minor characters along with anonymous soldiers who move on and off stage. This editorial decision makes our graph cleaner. We also clean up the `ids`, removing `.` and `_` characters. The reason for trimming these characters is that their presence might trip up our graphing software. In other scenarios, it might be important to maintain the correspondence between the TEI ids and the graphML ideas–for instance, if you want people to click from the graph to the TEI edition of the text.
+
+```xquery
+declare function local:person-nodes($doc as document-node()?) as element(graphml:node)*
+{
+  for $person in $doc//tei:person
+  let $person-id := $person/@xml:id/fn:data()
+  let $person-name := $person/tei:persName/tei:name/text()
+  where $person-name
+  order by $person-name
+  return
+    <graphml:node id="{$person-id => translate('._','')}" labels=":Character">
+      <graphml:data key="name">{$person-name}</graphml:data>
+    </graphml:node>
+};
+```
+
+We've now established all the nodes we need for our graph. With *Julius Caesar* as our input, we produce one `work` node, five `act` nodes, eighteen `scene` nodes, and twenty-five `character` nodes. How now to relate them with edges?
+
+The first function is straightforward. We take our `work` node and link it to all the `act` nodes. We return a series of edges between these nodes.
+
+```xquery
 declare function local:play-to-acts($play as element(graphml:node)*, $acts-scenes as element(graphml:node)*) as element(graphml:edge)*
 {
   for $node in $acts-scenes
@@ -607,7 +632,11 @@ declare function local:play-to-acts($play as element(graphml:node)*, $acts-scene
        <graphml:data key="label">contains</graphml:data>
   </graphml:edge>
 };
+```
 
+The next function connects the acts to the scenes. Here we iterate through our act nodes and look scenes they contain. We do this by checking for the id of the act within the id of the scenes. As before, we return a sequence of edges.
+
+```xquery
 declare function local:acts-to-scenes($acts-scenes as element(graphml:node)*) as element(graphml:edge)*
 {
   for $node in $acts-scenes[@labels eq ":Act"]
@@ -621,7 +650,11 @@ declare function local:acts-to-scenes($acts-scenes as element(graphml:node)*) as
        <graphml:data key="label">contains</graphml:data>
   </graphml:edge>
 };
+```
 
+The final set of edges we need to establish relate characters to scenes. We do not need to connect characters to acts or works since we've already made those edges to our scenes and they'll transitively connect the characters to those nodes. This query requires that we pass in our TEI document-node again because we need to look up information we haven't captured in our nodes, namely, the scenes in which these characters appear. Note how the clean up the ids to make sure that they correspond to the ids in our character nodes. Also note the use of existential quantification to match characters with our list of named characters. We want to filter out the anonymous players again to avoid generating edges that lack corresponding nodes.
+
+```xquery
 declare function local:persons-to-scenes($persons as element(graphml:node)*, $acts-scenes as element(graphml:node)*, $doc as document-node()) as element(graphml:edge)*
 {
   for $act in 1 to fn:count($acts-scenes[@labels eq ":Act"])
@@ -639,17 +672,34 @@ declare function local:persons-to-scenes($persons as element(graphml:node)*, $ac
   </graphml:edge>
 };
 
-let $doc := fn:doc("https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml")
-let $play := local:title-node($doc)
-let $acts-scenes := local:act-scene-nodes($doc)
-let $play-to-acts := local:play-to-acts($play, $acts-scenes)
-let $acts-to-scenes := local:acts-to-scenes($acts-scenes)
-let $persons := local:person-nodes($doc)
-let $persons-to-scenes := local:persons-to-scenes($persons, $acts-scenes, $doc)
-return local:make-graphml(($play, $persons, $acts-scenes, $play-to-acts, $acts-to-scenes, $persons-to-scenes))
 ```
 
-This XQuery expression takes one of the Folger plays (e.g. *Julius Caesar*) as input and produces graphML as output. While graphML does not impose any constraint on the order of edges and nodes, our query lines up nodes and edges. We show only a snippet below; you can check out the [full XML document in our data folder](data/jc-graph.xml).
+After creating the requisite edges and nodes, our last task is to package both together as graphML. We'll opt for a directed property graph, reflecting our model above. This function may look intimidating, but it's primarily boilerplate. We are adding the namespace and schema reference we need to create a valid graphML document.
+
+> Note that graphML does not allow `label` or `labels` attributes on edges and nodes. We're adding them because we want to add these features to our Neo4j representation of this graph.
+
+We borrow a function from Priscilla Walmsley's `functx` library. While graphML does not impose any constraint on the order of edges and nodes, this function orders our nodes and edges.
+
+```xquery
+declare function local:make-graphml($data as element()* ) as element(graphml:graphml)? {
+  <graphml:graphml
+    xmlns:grapml="http://graphml.graphdrawing.org/xmlns"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+    <graphml:graph id="G" edgedefault="directed">
+      {
+        functx:distinct-deep(
+          for $node in $data
+          order by xs:string($node/fn:node-name()) descending, $node/@labels, ($node/graphml:data/text())[1]
+          return $node)
+      }
+    </graphml:graph>
+  </graphml:graphml>
+};
+
+```
+
+The final result is a graphML document with our nodes and edges. We show a snippet below; you can check out the [full XML document in our data folder](data/jc-graph.xml). You can also check out the [complete query expression in the code folder](code/graph-tei.xqy). 
 
 ```xml
 <graphml:graphml xmlns:graphml="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:grapml="http://graphml.graphdrawing.org/xmlns" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
@@ -690,8 +740,8 @@ This XQuery expression takes one of the Folger plays (e.g. *Julius Caesar*) as i
 </graphml:graphml>
 ```
 
-The graphML document can now be loaded into a graph visualization tool like [Gephi](https://gephi.org/) or a graph database like [Neo4j](https://neo4j.com/) for analysis. Here's an example of a few nodes and edges of our *Julius Caesar* graph in Neo4j.
+You can now load The graphML document into a graph visualization tool like [Gephi](https://gephi.org/) or a graph database like [Neo4j](https://neo4j.com/) for analysis. Here's visualization of nodes and edges of our *Julius Caesar* graph in Neo4j.
 
-> To load this example into Neo4j, you'll need to install Neo4j as well as the [APOC](https://github.com/neo4j-contrib/neo4j-apoc-procedures) procedures. After you have both set up, you can load this graph with the following Cypher command: `call apoc.import.graphml("https://github.com/CliffordAnderson/XQuery4Humanists/edit/master/data/jc-graph.xml, {batchSize: 10000, readLabels: true, storeNodeIds: false, defaultRelationshipType:"RELATED"})` 
+> To load this example into Neo4j, you'll need to install Neo4j as well as the [APOC](https://github.com/neo4j-contrib/neo4j-apoc-procedures) procedures. After you have both set up, you can load this graph with the following Cypher command: `call apoc.import.graphml("https://github.com/CliffordAnderson/XQuery4Humanists/edit/master/data/jc-graph.xml, {batchSize: 10000, readLabels: true, storeNodeIds: false, defaultRelationshipType:"RELATED"})`
 
 ![Julius Caesar Graph in Neo4j](http://i.imgur.com/gai55cE.png)
