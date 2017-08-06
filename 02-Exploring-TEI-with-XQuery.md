@@ -197,7 +197,7 @@ Extra Credit: Add an expression to the query to eliminate common stop-words—i.
 
 Let's tackle a few more complicated XQuery expressions using the [Folger Digital Texts](http://www.folgerdigitaltexts.org/) of William Shakespeare. To understand these expressions, you'll need to acquaint yourself a bit with the TEI markup used in this digital edition. The best way to do that with XQuery is just to write some simple exploratory expressions.
 
-For instance, let's grab a whole document first and see what's there. I've put the edition of Julius Caesar up at an ungainly [url](https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml"), which we will assign to a variable for easier use.
+For instance, let's grab a whole document first and see what's there. I've put the edition of _Julius Caesar_ up at an ungainly [url](https://raw.githubusercontent.com/XQueryInstitute/Course-Materials/master/folger%20shakespeare%20texts/JC.xml"), which we will assign to a variable for easier use.
 
 ```xquery
 xquery version "3.1";
@@ -502,7 +502,6 @@ declare function local:html($div as element(div)) as element(html)
     </div>
   </body>
 </html>
-
 };
 
 declare function local:get-appearances($play as document-node()) as element(p)*
@@ -560,7 +559,6 @@ let $persons := local:person-nodes($doc)
 let $persons-to-scenes := local:persons-to-scenes($persons, $acts-scenes, $doc)
 (: create the graphML document of all the edges and nodes :)
 return local:make-graphml(($play, $persons, $acts-scenes, $play-to-acts, $acts-to-scenes, $persons-to-scenes))
-
 ```
 
 As you see, this query consists of a single FLWOR expression that loads the TEI document, assigns the values of a series of function calls to variables, and then returns a function that packages up all those values into a graphML document.
@@ -602,7 +600,6 @@ declare function local:act-scene-nodes($doc as document-node()?) as element(grap
      </graphml:node>
   return ($act-nodes, $scene-nodes)
 };
-
 ```
 
 Now we gather together the character nodes. The function signature is what we expected. Notice that we are limiting our characters to those who have names. The eliminates some minor characters along with anonymous soldiers who move on and off stage. This editorial decision makes our graph cleaner. We also clean up the `ids`, removing `.` and `_` characters. The reason for trimming these characters is that their presence might trip up our graphing software. In other scenarios, it might be important to maintain the correspondence between the TEI ids and the graphML ideas–for instance, if you want people to click from the graph to the TEI edition of the text.
@@ -678,7 +675,6 @@ declare function local:persons-to-scenes($persons as element(graphml:node)*, $ac
        <graphml:data key="label">appears</graphml:data>
   </graphml:edge>
 };
-
 ```
 
 After creating the requisite edges and nodes, our last task is to package both together as graphML. We'll opt for a directed property graph, reflecting our model above. This function may look intimidating, but it's primarily boilerplate. We are adding the namespace and schema reference we need to create a valid graphML document.
@@ -703,7 +699,6 @@ declare function local:make-graphml($data as element()* ) as element(graphml:gra
     </graphml:graph>
   </graphml:graphml>
 };
-
 ```
 
 The final result is a graphML document with our nodes and edges. We show a snippet below; you can check out the [full XML document in our data folder](data/jc-graph.xml). You can also check out the [complete query expression in the code folder](code/graph-tei.xqy). 
