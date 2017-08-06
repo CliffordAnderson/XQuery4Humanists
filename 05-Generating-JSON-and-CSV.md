@@ -445,6 +445,6 @@ return
 
 Exercise: Add a parameter to your `prepare-csv()` function to take a different cell separator character, such as a tab character (`&#10`). Unlike commas, tabs are rarely used in the body of cells, so tab-separated value (TSV) files often cause less headaches than CSV files.
 
-Exercise: Create a new function that can take a `$format` parameter that is either `csv` or `json` and serializes the results of the report accordingly.
+Exercise: Create a new function that can take a `$format` parameter that is either `csv`, `json`, or `xml` and serializes the results of the report accordingly.
 
 Exercise: Add an `$author` parameter to the function that filters the books to return just those that contain the value passed to it.
