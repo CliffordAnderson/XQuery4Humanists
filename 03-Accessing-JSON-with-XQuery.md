@@ -263,7 +263,7 @@ map {
 
 Assuming we've bound this map to a variable `$weather`, the solution is `$weather("consolidated_weather")?*[.("applicable_date") eq "2017-08-06"]("weather_state_name")`. The use of the lookup operator may lead you to regard the `?` operator as akin to the `/` in XPath. But be careful! The resemblance is skin deep. It's not possible to use a `??` operator, for example, to search for items at any depth in arrays (along the lines of XPath's `//` operator). There is, however, a function call `map:find()` that will find keys that match at any arbitrary position in a map/array data structure. Can you use it to rewrite the solution above?
 
-> Note for eXist users: As of eXist 3.4.0, the `map:find()` function has not yet been implemented. 
+> Note for eXist users: As of eXist 3.4.0, the `map:find()` function has not yet been implemented. See [this gist](https://gist.github.com/joewiz/906c7d3248c09a07407d91b73dfd7fe0) for an eXist-compatible implementation of this function.
 
 ### Open Library API
 
