@@ -13,7 +13,7 @@ You've got several options for an XQuery processor.
 
 ### BaseX
 
-[BaseX](http://basex.org/) is an open source XML database. I recommend using the [Windows installer](http://files.basex.org/releases/8.3/BaseX83.exe) if you're using Windows and using [Homebrew](http://brew.sh/) if you're on a Mac. The installation command is ```brew install basex```.
+[BaseX](http://basex.org/) is an open source XML database. I recommend downloading the [Windows installer](http://basex.org/products/download/all-downloads/) if you're using Windows and using [Homebrew](http://brew.sh/) if you're on a Mac. The installation command is ```brew install basex```.
 
 > Note: Installing BaseX may require that you update to Java 7. If so, install the [Java Runtime Environment (JRE)](https://java.com/en/download/) and try again.
 
