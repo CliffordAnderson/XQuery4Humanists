@@ -6,6 +6,8 @@ We're going to explore some fundamental concepts of XQuery and then try out some
 * [02-Exploring-TEI-with-XQuery](02-Exploring-TEI-with-XQuery.md) applies what we've learned about XQuery so far to the analysis of poetry and drama.
 * [03-Accessing-JSON-with-XQuery](03-Accessing-JSON-with-XQuery.md) illustrates the basics of accessing JSON with XQuery maps and arrays.
 * [04-Integrating-CSV-and-JSON](04-Integrating-CSV-and-JSON.md) demonstrates how to convert between different formats like CSV, JSON, and XML.
+* [05-Generating-JSON-and-CSV](05-Generating-JSON-and-CSV.md) demonstrates how to generate formats like CSV and JSON from XML.
+* [06-OPDS-OpenRefine-and-IIIF](06-OPDS-OpenRefine-and-IIIF.md) demonstrates opportunities for serving data into OPDS, OpenRefine, and IIIF.
 
 ## Installation Instructions
 

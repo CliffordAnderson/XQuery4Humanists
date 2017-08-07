@@ -8,7 +8,7 @@ Having just learned how to convert JSON and CSV into formats that you can manipu
 
 ### Learning Outcomes
 
-* Learn about applications for generating data in JSON and CSV;
+* Learn about motivations for generating data in JSON and CSV;
 * Use XQuery to generate JSON and CSV;
 * Learn techniques for representing nested data in JSON and CSV;
 * Learn to create queries for mock up web services that respond to requests for these formats and filter queries.
