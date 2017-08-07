@@ -323,7 +323,7 @@ return switch ($day)
   default return "What day again?"
 ```
 
-There is also an expression called `typeswitch` that let's you branch on types rather than values. Here's an example:
+There is also an expression called `typeswitch` that lets you branch on types rather than values. Here's an example:
 
 ```xquery
 xquery version "3.1";
