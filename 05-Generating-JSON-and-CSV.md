@@ -105,7 +105,7 @@ return
 This returns the desired result:
 
 ```xquery
-{
+map {
     "Author": "Janna Levin",
     "Title": "A Madman Dreams of Turing Machines",
     "ISBN": "1400040302",
