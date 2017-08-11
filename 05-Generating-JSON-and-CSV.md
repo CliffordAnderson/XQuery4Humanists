@@ -53,8 +53,8 @@ let $record :=
         <Year_Published>2006</Year_Published>
     </record>
 for $element in $record/*
-let $name := $element/name()
-let $value := $element/string()
+let $name := $element/fn:name()
+let $value := $element/fn:string()
 return
     map { $name: $value }
 ```
@@ -95,8 +95,8 @@ let $record :=
 return
     map:merge(
         for $element in $record/*
-        let $name := $element/name()
-        let $value := $element/string()
+        let $name := $element/fn:name()
+        let $value := $element/fn:string()
         return
             map { $name: $value }
     )
@@ -131,23 +131,23 @@ let $record :=
         <Binding>Hardcover</Binding>
         <Year_Published>2006</Year_Published>
     </record>
-let $pre-json
+let $pre-json :=
     map:merge(
         for $element in $record/*
-        let $name := $element/name()
-        let $value := $element/string()
+        let $name := $element/fn:name()
+        let $value := $element/fn:string()
         return
             map { $name: $value }
     )
 let $serialization-parameters :=
     <output:serialization-parameters>
-        <output:media-type>json</output:media-type>
+        <output:method>json</output:method>
     </output:serialization-parameters>
 return
     fn:serialize($pre-json, $serialization-parameters)
 ```
 
-This should return the desired JSON string, but depending on your XQuery implementation's serialization defaults, you may see a scrunched result:
+This should return the desired JSON string, but depending on your XQuery implementation's serialization defaults, you may see a compressed result:
 
 ```json
 {"Binding":"Hardcover","Author":"Janna Levin","Year_Published":"2006","ISBN":"1400040302","Title":"A Madman Dreams of Turing Machines"}
@@ -181,14 +181,16 @@ let $record :=
 return
     map:merge(
         for $element in $record/*
-        let $name := $element/name()
-        let $value := $element/string()
+        let $name := $element/fn:name()
+        let $value := $element/fn:string()
         return
             map { $name: $value }
     )
 ```
 
-By declaring our serialization options in the prolog, as this version does, our query can now directly return the `map`. This feels more elegant and can make your code easier to read. But it also has an added benefit in the context of XQuery implementations that can perform the functions of a web server, as BaseX and eXist can do, serving their content to browsers and clients over the web: When you use `fn:serialize()`, your XQuery implementation has already applied a default media-type to the results of your query, typically `application/xml`. This means that even if your query generates JSON, your XQuery processor may be telling remote clients to expect something else, typically XML. (This is a natural default for an XQuery implementation the `output:media-type` declaration can tell browsers fetching this page to treat the your server's response as JSON, rather than simply text (or XML, since in the absence of such a declaration, many XQuery implementations default to emitting a media-type of `application/xml`—which can throw off clients that are looking for an indication that they are loading JSON). In other words, using this prolog-based approach to serialization is good when you begin to expose your data as a web service. 
+By declaring our serialization options in the prolog, as this version does, our query can now directly return the `map`. This feels more elegant and can make your code easier to read. But the two approaches are functionally identical.
+
+Note also the addition of the `media-type` parameter. For XQuery implementations that can perform the functions of a web server, as BaseX and eXist can do, the addition of the this parameter overrides your XQuery implementation's default media-type, typically the media-type for XML, `application/xml`. (This is a natural default for an XQuery implementation.) Setting the `media-type` parameter to `application/xml` will cause your XQuery implementation's web server to tell browsers fetching this page to treat the your server's response as JSON. In other words, it's best to specify your `media-type` when you expose your data as a web service. 
 
 As one last improvement to our query, let's add handling for the `<subject>` elements that we enriched our book data with in the last lesson:
 
@@ -278,7 +280,7 @@ This returns the desired record we're after:
 
 Exercise: Strip the underscores back out of the entry names, replacing them with the original spaces.
 
-Exercise: Using `let $books := collection("books")/record`, extend this query to generate an array of all book records.
+Exercise: Using `let $books := fn:collection("books")/record`, extend this query to generate an array of all book records.
 
 #### Generating CSV
 
@@ -287,7 +289,7 @@ Now that we have learned about generating maps and arrays and serializing them a
 Let's start by gathering our header rows. Assuming we've already defined our `$records` variable as the collection of books, we can derive the headers from the first book as follows:
 
 ```xquery
-let $books := collection("books")/record
+let $books := fn:collection("books")/record
 let $header-row := array { $books[1]/*/fn:name() => fn:distinct-values() }
 return
     $header-row
@@ -304,8 +306,8 @@ Our `$header-row` variable returns the following array:
 To generate our body rows, we need to slot the data from our records into the correct slot:
 
 ```xquery
-let $books := collection("books")/record
-let $headers-row := array { $books[1]/*/name() => fn:distinct-values() }
+let $books := fn:collection("books")/record
+let $headers-row := array { $books[1]/*/fn:name() => fn:distinct-values() }
 let $body-rows := 
     for $book in $books
     return
@@ -314,9 +316,9 @@ let $body-rows :=
             let $values := $book/*[fn:name() = $header]
             return
                 if (count($values) gt 1) then 
-                    array { $values ! ./string() }
+                    array { $values ! ./fn:string() }
                 else
-                    $values/string()
+                    $values/fn:string()
         }
 return
     $body-rows
@@ -332,7 +334,7 @@ The row for Levin's book should appear in the same order as the header rows abov
     "Hardcover", 
     "2006", 
     [
-        "Gödel, Kurt.", 
+        "Gödel, Kurt.", 
         "Turing, Alan Mathison, 1912-1954.", 
         "Mathematicians -- Great Britain -- Biography.", 
         "Mathematicians -- Austria -- Biography."
@@ -357,7 +359,7 @@ declare function local:prepare-csv($rows as array(*)*) as xs:string {
     let $intra-cell-separator := ";"  (: we'll separate multi-valued cells :)
     let $quote-cells-containing-separator := 
         function($cell) { 
-            if (fn:contains($cell, $intra-cell-separator)) then 
+            if (fn:contains($cell, $cell-separator)) then 
                 fn:concat('"', $cell, '"') 
             else 
                 $cell
@@ -394,13 +396,21 @@ Or you may prefer to read this in reverse order, from cell to cells to row to ro
 Finally, we need to think about how to declare our serialization options: Instead of the `json` method, we'll use the `text` method. With the `text` method, the `indent` option has no effect, but the `media-type` option will inform browsers to expect a CSV file instead of an XML, JSON, or other file. Placing these options in our prolog, our query will look like this:
 
 ```xquery
+xquery version "3.1";
+
+declare namespace output=
+    "http://www.w3.org/2010/xslt-xquery-serialization";
+
+declare option output:method "text";
+declare option output:media-type "text/plain";
+
 declare function local:prepare-csv($rows as array(*)*) as xs:string {
     let $row-separator := "&#10;"     (: we'll put each row on a new line :)
     let $cell-separator := ","        (: we'll separate our values into cells :)
     let $intra-cell-separator := ";"  (: we'll separate multi-valued cells :)
     let $quote-cells-containing-separator := 
         function($cell) { 
-            if (fn:contains($cell, $intra-cell-separator)) then 
+            if (fn:contains($cell, $cell-separator)) then 
                 fn:concat('"', $cell, '"') 
             else 
                 $cell
@@ -424,7 +434,8 @@ declare function local:prepare-csv($rows as array(*)*) as xs:string {
         fn:string-join($csv-rows, $row-separator)
 };
 
-let $books := collection("books")/record
+let $books := fn:collection("books")/record
+
 let $headers-row := array { $books[1]/*/name() => fn:distinct-values() }
 let $body-rows := 
     for $book in $books
@@ -433,10 +444,10 @@ let $body-rows :=
             for $header in $headers-row?*
             let $values := $book/*[fn:name() = $header]
             return
-                if (count($values) gt 1) then 
-                    array { $values ! ./string() }
+                if (fn:count($values) gt 1) then 
+                    array { $values ! ./fn:string() }
                 else
-                    $values/string()
+                    $values/fn:string()
         }
 let $all-rows := ($headers-row, $body-rows)
 return
@@ -444,6 +455,8 @@ return
 ```
 
 Exercise: Add a parameter to your `prepare-csv()` function to take a different cell separator character, such as a tab character (`&#10`). Unlike commas, tabs are rarely used in the body of cells, so tab-separated value (TSV) files often cause less headaches than CSV files.
+
+Exercise: The `prepare-csv()` function already handles cases of cells that contain commas by surrounding these cells in quotation marks. Can you extend the function to account for the possibility of cells that contain both commas and quotation marks? Consider extending the function to conform to the W3C guidelines for [CSV on the Web](https://www.w3.org/TR/tabular-data-primer/).
 
 Exercise: Create a new function that can take a `$format` parameter that is either `csv`, `json`, or `xml` and serializes the results of the report accordingly.
 
