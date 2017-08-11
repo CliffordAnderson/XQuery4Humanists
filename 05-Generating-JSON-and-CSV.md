@@ -131,7 +131,7 @@ let $record :=
         <Binding>Hardcover</Binding>
         <Year_Published>2006</Year_Published>
     </record>
-let $pre-json
+let $pre-json :=
     map:merge(
         for $element in $record/*
         let $name := $element/name()
