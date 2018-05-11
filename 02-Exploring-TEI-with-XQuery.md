@@ -744,7 +744,11 @@ The final result is a graphML document with our nodes and edges. We show a snipp
 
 You can now load The graphML document into a graph visualization tool like [Gephi](https://gephi.org/) or a graph database like [Neo4j](https://neo4j.com/) for analysis. Here's visualization of nodes and edges of our *Julius Caesar* graph in Neo4j.
 
-> To load this example into Neo4j, you'll need to install Neo4j as well as the [APOC](https://github.com/neo4j-contrib/neo4j-apoc-procedures) procedures. After you have both set up, you can load this graph with the following Cypher command: `call apoc.import.graphml("https://github.com/CliffordAnderson/XQuery4Humanists/edit/master/data/jc-graph.xml, {batchSize: 10000, readLabels: true, storeNodeIds: false, defaultRelationshipType:"RELATED"})`
+> To load this example into Neo4j, you'll need to install Neo4j as well as the [APOC](https://github.com/neo4j-contrib/neo4j-apoc-procedures) procedures. After you have both set up, you can load this graph with the following Cypher command: 
+
+```cypher
+call apoc.import.graphml("https://raw.githubusercontent.com/CliffordAnderson/XQuery4Humanists/master/data/jc-graph.xml", {batchSize: 10000, readLabels: true, storeNodeIds: false, defaultRelationshipType:'RELATED'})
+```
 
 ![Julius Caesar Graph in Neo4j](http://i.imgur.com/gai55cE.png)
 
